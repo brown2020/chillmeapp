@@ -34,7 +34,7 @@ export default function Footer({ showChat, setShowChat }: FooterProps) {
   );
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 flex justify-between items-center m-3">
+    <div className="flex justify-between items-center m-3">
       <form onSubmit={handleMessage} className="flex">
         <input
           type="text"

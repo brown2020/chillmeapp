@@ -12,8 +12,9 @@ import dynamic from "next/dynamic";
 import Footer from "./Footer";
 import Header from "./Header";
 import PeerDisplay from "./PeerDisplay";
+import ChatView from "./ChatView";
 
-const ChatView = dynamic(() => import("./ChatView"), { ssr: false });
+// const ChatView = dynamic(() => import("./ChatView"), { ssr: false });
 
 export default function Livestream() {
   const [showChat, setShowChat] = useState(true);
@@ -48,12 +49,12 @@ export default function Livestream() {
           </div>
         )}
       </div>
-    ));
+    )); // No extra semicolon here
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-black">
+    <div className="relative flex flex-col w-full h-container-custom">
       {/* Background Video */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 flex flex-col h-full">
         <video
           ref={videoRef}
           autoPlay
@@ -62,27 +63,20 @@ export default function Livestream() {
           className="w-full h-full object-cover"
         />
       </div>
-
       {/* Foreground Content */}
       <div className="relative flex flex-col h-full">
         {/* Header */}
         {activeSpeaker && <Header peer={activeSpeaker} />}
-
         {/* Main Content */}
         <div className="flex flex-row h-full overflow-hidden">
           {/* Chat View */}
-          {showChat && (
-            <div className="flex-grow overflow-y-auto">
-              <ChatView />
-            </div>
-          )}
+          {showChat && <ChatView />}
 
           {/* Peer Displays */}
           <div className="flex flex-col max-h-[80%] overflow-y-scroll fixed right-0 top-[70px] mt-[70px] mr-[10px] mb-[70px]">
             {renderPeers()}
           </div>
         </div>
-
         {/* Footer */}
         <Footer showChat={showChat} setShowChat={setShowChat} />
       </div>

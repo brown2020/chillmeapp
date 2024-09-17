@@ -33,12 +33,11 @@ export default function ChatView() {
   );
 
   return (
-    <div className="flex flex-col justify-end h-full overflow-y-auto p-2 mb-16">
-      <div className="flex-grow" />
+    <div className="flex flex-col h-full w-full justify-end overflow-y-auto p-2 max-w-[200px]">
       {messages.map((message, index) => (
         <div key={index} className="mb-2">
           <div className="flex items-start">
-            <div className="bg-black bg-opacity-50 p-2 rounded-lg text-white text-xs max-w-[200px] break-words">
+            <div className="bg-black bg-opacity-50 p-2 rounded-lg text-white text-xs w-full break-words">
               {message.message}
             </div>
           </div>
