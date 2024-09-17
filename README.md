@@ -1,7 +1,5 @@
 # Chill.me - Video Chat Platform
 
-![Chill.me Logo](https://your-image-link.com) _(Optional: Add a link to your logo or a representative image)_
-
 **Chill.me** is a real-time video chat platform powered by the **100ms Video SDK**. The application enables users to create rooms, invite guests via URLs, and enjoy a seamless video chat experience. The app is designed with a dark mode interface and allows for easy guest invitations, making it perfect for meetings, live streams, or casual hangouts.
 
 ## Table of Contents
