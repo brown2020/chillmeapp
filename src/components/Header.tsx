@@ -12,6 +12,7 @@ import {
 } from "@100mslive/react-sdk";
 import Image from "next/image";
 import logo from "@/app/assets/logo.png";
+import { Share2Icon } from "lucide-react";
 
 // Extract reusable constants
 const INVITATION_BASE_URL = "https://chill.me/";
@@ -43,7 +44,10 @@ export default function Header({ peer }: HeaderProps) {
         className="bg-transparent"
         onClick={handleModalOpen}
       >
-        <Image src={logo} alt="logo" width={30} height={30} priority />
+        <div className="flex gap-1 justify-center items-center rounded-md border-2 py-1 px-2 hover:bg-slate-100 hover:text-black">
+          <Share2Icon size={32} />
+          Invite
+        </div>
       </button>
 
       <button className="bg-black bg-opacity-30 text-white rounded px-4 py-2">

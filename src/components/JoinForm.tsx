@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from "react";
 import { useHMSActions } from "@100mslive/react-sdk";
-import { createRoom, getAppToken } from "@/serverActions/100msLiveActions";
+import { createRoom, getAppToken } from "@/serverActions/liveActions";
 
 interface JoinFormProps {
   role: string;
