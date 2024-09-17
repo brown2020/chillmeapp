@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import {
   selectIsConnectedToRoom,
   useHMSActions,
@@ -23,26 +23,27 @@ export default function HomePage({ searchParams }: HomePageProps) {
   const hmsActions = useHMSActions();
   const room = (searchParams.room as string) || ""; // Extract 'room' from searchParams
 
-  // Set the log level and handle leaving the room on component unmount
+  // Memoized cleanup function
+  const handleUnload = useCallback(() => {
+    if (isConnected) {
+      hmsActions.leave();
+    }
+  }, [hmsActions, isConnected]);
+
+  // Set log level and handle leaving the room on component unmount
   useEffect(() => {
     hmsActions.setLogLevel(4);
 
-    // Cleanup function to leave the room when the component unmounts
-    const handleUnload = () => {
-      if (isConnected) {
-        hmsActions.leave();
-      }
-    };
-
+    // Add event listener for window unload
     window.addEventListener("beforeunload", handleUnload);
 
     return () => {
       window.removeEventListener("beforeunload", handleUnload);
-      handleUnload(); // Ensure room is left even when the component unmounts
+      handleUnload(); // Ensure room is left on component unmount
     };
-  }, [hmsActions, isConnected]);
+  }, [hmsActions, handleUnload]);
 
-  // Show Livestream if connected, otherwise show JoinForm with initial room value
+  // Render Livestream if connected, otherwise render JoinForm
   return isConnected ? (
     <Livestream />
   ) : (

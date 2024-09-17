@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { selectHMSMessages, useHMSStore } from "@100mslive/react-sdk";
 
 // Define the type for HMSMessage based on SDK's type definition
@@ -15,26 +15,26 @@ export default function ChatView() {
 
   // Scroll to the bottom of the chat whenever new messages arrive
   useEffect(() => {
-    // Scroll to the bottom of the chat
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages.length]); // Only run this effect when the number of messages changes
+  }, [messages.length]);
 
-  // Format the time to a readable format
-  const formatTime = (date: Date): string => {
-    if (!(date instanceof Date)) {
-      return "";
-    }
-    const hours = date.getHours().toString().padStart(2, "0");
-    const mins = date.getMinutes().toString().padStart(2, "0");
-    return `${hours}:${mins}`;
-  };
+  // Memoized time formatting function for better performance
+  const formatTime = useMemo(
+    () =>
+      (date: Date): string => {
+        if (!(date instanceof Date)) return "";
+        const hours = date.getHours().toString().padStart(2, "0");
+        const mins = date.getMinutes().toString().padStart(2, "0");
+        return `${hours}:${mins}`;
+      },
+    []
+  );
 
   return (
     <div className="flex flex-col justify-end h-full overflow-y-auto p-2 mb-16">
-      <div className="flex-grow"></div>{" "}
-      {/* This will push content to the bottom */}
+      <div className="flex-grow" />
       {messages.map((message, index) => (
         <div key={index} className="mb-2">
           <div className="flex items-start">
@@ -48,7 +48,6 @@ export default function ChatView() {
           </div>
         </div>
       ))}
-      {/* Reference for scrolling to the bottom */}
       <div ref={chatEndRef} />
     </div>
   );

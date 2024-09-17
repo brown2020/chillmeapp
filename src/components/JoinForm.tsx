@@ -1,7 +1,6 @@
-// app/components/JoinForm.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useHMSActions } from "@100mslive/react-sdk";
 import { createRoom, getAppToken } from "@/serverActions/100msLiveActions";
 
@@ -9,61 +8,6 @@ interface JoinFormProps {
   role: string;
   initialRoom: string;
 }
-
-// Adjust the interface to directly use string for roomId
-interface CreateRoomResponse {
-  roomId?: string; // Changed to string to match the expected return type
-  error?: string;
-}
-
-interface ManagementToken {
-  token: string;
-}
-
-interface TokenResponse {
-  appToken?: ManagementToken;
-  error?: string;
-}
-
-const createNewRoom = async (roomName: string): Promise<string | undefined> => {
-  console.log(`Attempting to create a new room with name: ${roomName}`);
-  try {
-    const response: CreateRoomResponse = await createRoom(roomName);
-    if (response.roomId) {
-      console.log(`Room created successfully with ID: ${response.roomId}`);
-      return response.roomId;
-    } else {
-      console.error(`Error creating room: ${response.error}`);
-      return undefined;
-    }
-  } catch (error) {
-    console.error("Unexpected error while creating room:", error);
-    return undefined;
-  }
-};
-
-const getNewAppToken = async (
-  roomId: string,
-  userId: string,
-  role: string
-): Promise<string | undefined> => {
-  console.log(
-    `Attempting to get an app token for Room ID: ${roomId}, User ID: ${userId}, Role: ${role}`
-  );
-  try {
-    const response: TokenResponse = await getAppToken(roomId, userId, role);
-    if (response.appToken) {
-      console.log("App token generated successfully:", response.appToken.token);
-      return response.appToken.token;
-    } else {
-      console.error(`Error getting app token: ${response.error}`);
-      return undefined;
-    }
-  } catch (error) {
-    console.error("Unexpected error while getting app token:", error);
-    return undefined;
-  }
-};
 
 const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
   const hmsActions = useHMSActions();
@@ -75,41 +19,64 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
     room: initialRoom || "",
   });
   const [error, setError] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValues((prevValues) => ({
-      ...prevValues,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setInputValues((prevValues) => ({
+        ...prevValues,
+        [e.target.name]: e.target.value,
+      }));
+    },
+    []
+  );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form submitted with values:", inputValues);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsLoading(true);
+      setError(undefined); // Reset any previous error
 
-    const roomId = await createNewRoom(inputValues.room);
-
-    if (roomId) {
-      console.log(
-        `Room ID received: ${roomId}, attempting to get app token...`
-      );
-      const appToken = await getNewAppToken(roomId, "user", role);
-
-      if (appToken) {
-        console.log("App token received, joining room...");
-        hmsActions.join({
-          userName: inputValues.name,
-          authToken: appToken,
-        });
-      } else {
-        console.error("Problem joining room: Failed to get app token.");
-        setError("Problem joining room");
+      // Step 1: Create a new room
+      const roomResponse = await createRoom(inputValues.room);
+      if (roomResponse.error) {
+        setError(`Problem creating room: ${roomResponse.error}`);
+        setIsLoading(false);
+        return;
       }
-    } else {
-      console.error("Problem creating room: Failed to get room ID.");
-      setError("Problem creating room");
-    }
-  };
+
+      const roomId = roomResponse.roomId; // Get the roomId from the response
+
+      if (!roomId) {
+        setError("Problem creating room: Room ID is undefined.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Step 2: Get app token
+      const tokenResponse = await getAppToken(roomId, "user", role);
+      if (tokenResponse.error) {
+        setError(`Problem joining room: ${tokenResponse.error}`);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!tokenResponse.appToken) {
+        setError("Problem joining room: App token is undefined.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Step 3: Join the room
+      hmsActions.join({
+        userName: inputValues.name,
+        authToken: tokenResponse.appToken.token,
+      });
+
+      setIsLoading(false);
+    },
+    [inputValues, role, hmsActions]
+  );
 
   return (
     <form
@@ -141,11 +108,21 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
           className="mb-3 p-2 border border-gray-600 rounded w-full bg-black text-white placeholder-gray-400"
         />
       )}
-      <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-        Join
+
+      <button
+        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+        disabled={isLoading}
+      >
+        {isLoading ? "Joining..." : "Join"}
       </button>
+
       {error && (
-        <p className="bg-red-500 text-white p-2 mt-2 rounded">{error}</p>
+        <p
+          className="bg-red-500 text-white p-2 mt-2 rounded"
+          aria-live="assertive"
+        >
+          {error}
+        </p>
       )}
     </form>
   );

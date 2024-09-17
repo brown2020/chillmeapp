@@ -1,7 +1,6 @@
-// app/components/Footer.tsx
 "use client";
 
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useCallback } from "react";
 import { useAVToggle, useHMSActions } from "@100mslive/react-sdk";
 import {
   Mic,
@@ -23,17 +22,16 @@ export default function Footer({ showChat, setShowChat }: FooterProps) {
   const { isLocalAudioEnabled, isLocalVideoEnabled, toggleAudio, toggleVideo } =
     useAVToggle();
 
-  const handleMessage = async (e: FormEvent) => {
-    e.preventDefault();
-    if (messageDraft) {
-      await hmsActions.sendBroadcastMessage(messageDraft);
-      setMessageDraft("");
-    }
-  };
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setMessageDraft(e.target.value);
-  };
+  const handleMessage = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
+      if (messageDraft) {
+        await hmsActions.sendBroadcastMessage(messageDraft);
+        setMessageDraft("");
+      }
+    },
+    [messageDraft, hmsActions]
+  );
 
   return (
     <div className="fixed bottom-0 left-0 right-0 flex justify-between items-center m-3">
@@ -42,23 +40,35 @@ export default function Footer({ showChat, setShowChat }: FooterProps) {
           type="text"
           value={messageDraft}
           placeholder="Type comment here"
-          onChange={handleInputChange}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setMessageDraft(e.target.value)
+          }
           className={`bg-black bg-opacity-40 text-white p-2 rounded ${
             showChat ? "block" : "hidden"
           }`}
+          aria-label="Chat input"
         />
       </form>
       <div className="flex items-center">
         <button
           className="p-2 mx-1 bg-transparent"
           onClick={() => setShowChat(!showChat)}
+          aria-pressed={showChat}
         >
           {showChat ? <MessageCircle /> : <MessageCircleOff />}
         </button>
-        <button className="p-2 mx-1 bg-transparent" onClick={toggleAudio}>
+        <button
+          className="p-2 mx-1 bg-transparent"
+          onClick={toggleAudio}
+          aria-pressed={isLocalAudioEnabled}
+        >
           {isLocalAudioEnabled ? <Mic /> : <MicOff />}
         </button>
-        <button className="p-2 mx-1 bg-transparent" onClick={toggleVideo}>
+        <button
+          className="p-2 mx-1 bg-transparent"
+          onClick={toggleVideo}
+          aria-pressed={isLocalVideoEnabled}
+        >
           {isLocalVideoEnabled ? <Video /> : <VideoOff />}
         </button>
       </div>

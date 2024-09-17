@@ -1,4 +1,3 @@
-// app/serverActions/100msLiveActions.ts
 "use server";
 import * as dotenv from "dotenv";
 import * as HMS from "@100mslive/server-sdk"; // Correct wildcard import
@@ -14,14 +13,13 @@ console.log("APP_SECRET:", app_secret ? "Loaded" : "Missing");
 console.log("APP_ACCESS_KEY:", app_access_key ? "Loaded" : "Missing");
 
 // Initialize the SDK with credentials
-
 const hms = new HMS.SDK(app_access_key, app_secret);
 
 export async function createRoom(roomName: string) {
   console.log("Attempting to create a room with name:", roomName);
   try {
     const room = await hms.rooms.create({ name: roomName });
-    console.log("Room created successfully:", room);
+    console.log("Room created successfully:", { roomId: room.id });
     return { roomId: room.id }; // Ensure you return the room ID correctly
   } catch (error: unknown) {
     console.error("Error creating room:", error);
@@ -46,7 +44,7 @@ export async function getAppToken(
   });
   try {
     const appToken = await hms.auth.getAuthToken({ roomId, role, userId });
-    console.log("App token generated successfully:", appToken);
+    console.log("App token generated successfully"); // Remove sensitive token from the log
     return { appToken };
   } catch (error: unknown) {
     console.error("Error getting app token:", error);
