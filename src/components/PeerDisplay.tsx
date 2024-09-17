@@ -1,4 +1,3 @@
-// app/components/PeerDisplay.tsx
 "use client";
 
 import React from "react";
@@ -8,6 +7,7 @@ interface PeerDisplayProps {
   peer: HMSPeer; // Use the HMSPeer type from @100mslive/react-sdk for the peer prop
 }
 
+// Define the component normally
 const PeerDisplay: React.FC<PeerDisplayProps> = ({ peer }) => {
   const { videoRef } = useVideo({
     trackId: peer.videoTrack ?? "", // Ensure trackId is a string
@@ -21,6 +21,7 @@ const PeerDisplay: React.FC<PeerDisplayProps> = ({ peer }) => {
         muted
         playsInline
         className="w-[150px] h-[150px] object-cover rounded-[20px]"
+        aria-label={`Video feed of ${peer.name}`}
       />
       <div className="text-center">
         {peer.name} {peer.isLocal ? "(You)" : ""}
@@ -29,4 +30,10 @@ const PeerDisplay: React.FC<PeerDisplayProps> = ({ peer }) => {
   );
 };
 
-export default PeerDisplay;
+// Apply React.memo correctly to optimize the component
+const MemoizedPeerDisplay = React.memo(PeerDisplay);
+
+// Set the display name for debugging purposes
+MemoizedPeerDisplay.displayName = "PeerDisplay";
+
+export default MemoizedPeerDisplay;

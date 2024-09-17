@@ -1,7 +1,6 @@
-// app/components/Livestream.tsx
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import {
   selectPeers,
   useHMSStore,
@@ -14,7 +13,6 @@ import Footer from "./Footer";
 import Header from "./Header";
 import PeerDisplay from "./PeerDisplay";
 
-// Dynamically import ChatView to ensure it's only loaded on the client side
 const ChatView = dynamic(() => import("./ChatView"), { ssr: false });
 
 export default function Livestream() {
@@ -24,21 +22,33 @@ export default function Livestream() {
   const dominantSpeaker = useHMSStore(selectDominantSpeaker);
   const latestDominantSpeakerRef = useRef(dominantSpeaker);
 
+  // Memoize the active speaker value
+  const activeSpeaker = useMemo(() => {
+    return latestDominantSpeakerRef.current || localPeer;
+  }, [localPeer]);
+
   // Track changes in the dominant speaker
   useEffect(() => {
-    // Ensure browser-specific logic is only executed on the client side
-    if (typeof window !== "undefined" && "IntersectionObserver" in window) {
-      if (dominantSpeaker && dominantSpeaker !== localPeer) {
-        latestDominantSpeakerRef.current = dominantSpeaker;
-      }
+    if (dominantSpeaker && dominantSpeaker !== localPeer) {
+      latestDominantSpeakerRef.current = dominantSpeaker;
     }
   }, [dominantSpeaker, localPeer]);
 
-  const activeSpeaker = latestDominantSpeakerRef.current || localPeer;
-
   const { videoRef } = useVideo({
-    trackId: activeSpeaker?.videoTrack ?? "", // Safely access videoTrack
+    trackId: activeSpeaker?.videoTrack ?? "",
   });
+
+  // Extracted function to render peers
+  const renderPeers = () =>
+    peers.map((peer) => (
+      <div key={peer.id}>
+        {peer.id !== activeSpeaker?.id && (
+          <div className="flex flex-col">
+            <PeerDisplay peer={peer} />
+          </div>
+        )}
+      </div>
+    ));
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-black">
@@ -69,15 +79,7 @@ export default function Livestream() {
 
           {/* Peer Displays */}
           <div className="flex flex-col max-h-[80%] overflow-y-scroll fixed right-0 top-[70px] mt-[70px] mr-[10px] mb-[70px]">
-            {peers.map((peer) => (
-              <div key={peer.id}>
-                {peer.id !== activeSpeaker?.id && (
-                  <div className="flex flex-col">
-                    <PeerDisplay peer={peer} />
-                  </div>
-                )}
-              </div>
-            ))}
+            {renderPeers()}
           </div>
         </div>
 

@@ -6,10 +6,12 @@
 
 - [Features](#features)
 - [Demo](#demo)
+- [Technologies Used](#technologies-used)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
 - [Server Actions](#server-actions)
 - [Usage](#usage)
+- [Deployment](#deployment)
 - [Contributing](#contributing)
 - [Support](#support)
 - [License](#license)
@@ -26,6 +28,14 @@
 ## Demo
 
 Check out the live demo [here](https://chill.me).
+
+## Technologies Used
+
+- **Next.js 14**: Framework for server-rendered React applications.
+- **100ms Video SDK**: Provides the core functionality for real-time video communication.
+- **React**: JavaScript library for building user interfaces.
+- **Tailwind CSS**: Utility-first CSS framework for styling.
+- **TypeScript**: Superset of JavaScript that adds static types.
 
 ## Installation
 
@@ -103,55 +113,9 @@ This file contains the actions that interact with the 100ms server SDK to create
 
   The `createRoom` function initializes the SDK and attempts to create a room using the provided room name. If successful, it returns the room ID; otherwise, it logs an error.
 
-  ```typescript
-  export async function createRoom(roomName: string) {
-    console.log("Attempting to create a room with name:", roomName);
-    try {
-      const room = await hms.rooms.create({ name: roomName });
-      console.log("Room created successfully:", room);
-      return { roomId: room.id }; // Return the room ID
-    } catch (error: unknown) {
-      console.error("Error creating room:", error);
-      return {
-        error:
-          error instanceof Error
-            ? error.message
-            : "An error occurred while creating the room",
-      };
-    }
-  }
-  ```
-
 - **Generate an App Token:**
 
   The `getAppToken` function generates an authentication token for the client SDKs to join a room. It accepts the room ID, user ID, and role, and returns the generated token.
-
-  ```typescript
-  export async function getAppToken(
-    roomId: string,
-    userId: string,
-    role: string
-  ) {
-    console.log("Attempting to get app token with parameters:", {
-      roomId,
-      userId,
-      role,
-    });
-    try {
-      const appToken = await hms.auth.getAuthToken({ roomId, role, userId });
-      console.log("App token generated successfully:", appToken);
-      return { appToken };
-    } catch (error: unknown) {
-      console.error("Error getting app token:", error);
-      return {
-        error:
-          error instanceof Error
-            ? error.message
-            : "An error occurred while getting the app token",
-      };
-    }
-  }
-  ```
 
 These server actions ensure secure communication with the 100ms API, providing a robust backend for the application.
 
@@ -168,6 +132,23 @@ These server actions ensure secure communication with the 100ms API, providing a
 ### Invite Guests
 
 Guests can be invited by sharing the room URL, which is generated dynamically when a room is created. They can join by simply clicking the link and entering their name.
+
+## Deployment
+
+To deploy the application:
+
+1. Build the project for production:
+
+   ```sh
+   npm run build
+   ```
+
+2. Start the production server:
+   ```sh
+   npm start
+   ```
+
+Alternatively, you can deploy the application to a hosting service like Vercel, Netlify, or any other platform that supports Node.js applications.
 
 ## Contributing
 
@@ -186,3 +167,14 @@ For questions or support, please contact [info@ignitechannel.com](mailto:info@ig
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Security Recommendations
+
+- Do not expose your environment variables publicly. Use a secure environment management tool like `.env` files, environment variables, or services like AWS Secrets Manager, Google Secret Manager, or HashiCorp Vault.
+
+## Additional Resources
+
+- [100ms SDK Documentation](https://docs.100ms.live/)
+- [Next.js 14 Documentation](https://nextjs.org/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [React Documentation](https://reactjs.org/docs/getting-started.html)
