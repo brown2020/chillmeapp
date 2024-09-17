@@ -8,7 +8,7 @@ import {
   selectLocalPeer,
   useVideo,
 } from "@100mslive/react-sdk";
-import dynamic from "next/dynamic";
+
 import Footer from "./Footer";
 import Header from "./Header";
 import PeerDisplay from "./PeerDisplay";

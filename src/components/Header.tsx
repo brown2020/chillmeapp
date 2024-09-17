@@ -10,8 +10,6 @@ import {
   HMSPeer,
   HMSRoom,
 } from "@100mslive/react-sdk";
-import Image from "next/image";
-import logo from "@/app/assets/logo.png";
 import { Share2Icon } from "lucide-react";
 
 // Extract reusable constants

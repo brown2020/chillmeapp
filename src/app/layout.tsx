@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { ClientProvider } from "@/components/ClientProvider";
-import AboutHeader from "@/components/AboutHeader";
 
 export const metadata: Metadata = {
   title: "Chill.me",

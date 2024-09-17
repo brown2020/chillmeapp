@@ -6,7 +6,7 @@ import {
   useHMSActions,
   useHMSStore,
 } from "@100mslive/react-sdk";
-import dynamic from "next/dynamic";
+
 import Livestream from "@/components/Livestream";
 import JoinForm from "@/components/JoinForm";
 
