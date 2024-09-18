@@ -14,8 +14,6 @@ import Header from "./Header";
 import PeerDisplay from "./PeerDisplay";
 import ChatView from "./ChatView";
 
-// const ChatView = dynamic(() => import("./ChatView"), { ssr: false });
-
 export default function Livestream() {
   const [showChat, setShowChat] = useState(true);
   const peers = useHMSStore(selectPeers);

@@ -11,7 +11,7 @@ export default function RoomPage({ params }: { params: { room: string } }) {
   const isConnected = useHMSStore(selectIsConnectedToRoom);
 
   if (isConnected) {
-    router.push("/");
+    router.push("/live");
     return null;
   }
 
