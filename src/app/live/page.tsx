@@ -14,12 +14,6 @@ interface HomePageProps {
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
-// // Dynamically import the JoinForm and Livestream components
-// const JoinForm = dynamic(() => import("@/components/JoinForm"), { ssr: false });
-// const Livestream = dynamic(() => import("@/components/Livestream"), {
-//   ssr: false,
-// });
-
 export default function LiveMain({ searchParams }: HomePageProps) {
   const isConnected = useHMSStore(selectIsConnectedToRoom);
   const hmsActions = useHMSActions();
