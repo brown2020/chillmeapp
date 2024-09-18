@@ -11,9 +11,7 @@ import {
   HMSRoom,
 } from "@100mslive/react-sdk";
 import { Share2Icon } from "lucide-react";
-
-// Extract reusable constants
-const INVITATION_BASE_URL = "https://chill.me/";
+import Modal from "./Modal";
 
 interface HeaderProps {
   peer: HMSPeer;
@@ -70,43 +68,6 @@ export default function Header({ peer }: HeaderProps) {
     </header>
   );
 }
-
-// Modal component with improved styling for text visibility
-const Modal: React.FC<{ roomName?: string; onClose: () => void }> = ({
-  roomName,
-  onClose,
-}) => (
-  <div
-    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
-    id="exampleModal"
-    tabIndex={-1}
-    aria-labelledby="exampleModalLabel"
-    aria-hidden="true"
-  >
-    <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-      <div className="border-b p-4 flex justify-between items-center">
-        <h5 className="text-lg font-semibold text-black" id="exampleModalLabel">
-          Livestream: {roomName}
-        </h5>
-        <button
-          type="button"
-          className="text-black"
-          onClick={onClose}
-          aria-label="Close"
-        >
-          ✕
-        </button>
-      </div>
-      <div className="p-4 text-black">
-        <p>Invitation Link</p>
-        <p>
-          {INVITATION_BASE_URL}
-          {roomName}
-        </p>
-      </div>
-    </div>
-  </div>
-);
 
 // Error message component for reuse
 const ErrorMessage: React.FC<{ onAllowAudio: () => void }> = ({
