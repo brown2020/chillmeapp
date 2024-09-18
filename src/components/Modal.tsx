@@ -53,7 +53,7 @@ const Modal: React.FC<ModalProps> = ({ roomName, onClose }) => {
         <div className="p-4 text-black">
           <p>Invitation Link</p>
           {roomName ? (
-            <p>{`${baseUrl}/${roomName}`}</p>
+            <p>{`${baseUrl}/live/${roomName}`}</p>
           ) : (
             <p>No room name provided.</p>
           )}
