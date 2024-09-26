@@ -22,7 +22,7 @@ export default function PaymentSuccessPage({ payment_intent }: Props) {
 
   const addPayment = usePaymentsStore((state) => state.addPayment);
   const checkIfPaymentProcessed = usePaymentsStore(
-    (state) => state.checkIfPaymentProcessed
+    (state) => state.checkIfPaymentProcessed,
   );
   const addCredits = useProfileStore((state) => state.addCredits);
 

@@ -15,7 +15,7 @@ const useAuthToken = (cookieName = "authToken") => {
   const lastTokenRefresh = `lastTokenRefresh_${cookieName}`;
 
   const [activityTimeout, setActivityTimeout] = useState<NodeJS.Timeout | null>(
-    null
+    null,
   );
 
   const refreshAuthToken = async () => {

@@ -11,7 +11,7 @@ declare module "cookies-next" {
   export function setCookie(
     key: string,
     value: string,
-    options?: CookieOptions
+    options?: CookieOptions,
   ): void;
 
   export function deleteCookie(key: string): void;
