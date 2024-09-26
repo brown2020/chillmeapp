@@ -3,8 +3,8 @@ const path = require("path");
 
 function checkEnvVars() {
   const requiredVars = [
-    "100MS_APP_SECRET",
-    "100MS_APP_ACCESS_KEY",
+    "LIVE100MS_APP_SECRET",
+    "LIVE100MS_APP_ACCESS_KEY",
     "NEXT_PUBLIC_FIREBASE_APIKEY",
     "NEXT_PUBLIC_FIREBASE_AUTHDOMAIN",
     "NEXT_PUBLIC_FIREBASE_PROJECTID",
