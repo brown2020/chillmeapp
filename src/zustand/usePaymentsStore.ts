@@ -9,7 +9,7 @@ import {
 } from "firebase/firestore";
 import { useAuthStore } from "./useAuthStore";
 import toast from "react-hot-toast";
-import { db } from "@/firebase/firebaseClient";
+import { db } from "@/config/firebase/firebaseClient";
 
 export type PaymentType = {
   id: string;
@@ -102,11 +102,11 @@ async function fetchUserPayments(uid: string): Promise<PaymentType[]> {
 // Helper function to check if payment exists
 async function checkPaymentExists(
   uid: string,
-  paymentId: string
+  paymentId: string,
 ): Promise<boolean> {
   const q = query(
     collection(db, "users", uid, "payments"),
-    where("id", "==", paymentId)
+    where("id", "==", paymentId),
   );
   const querySnapshot = await getDocs(q);
   return !querySnapshot.empty;
@@ -115,7 +115,7 @@ async function checkPaymentExists(
 // Helper function to create a new payment
 async function createPayment(
   uid: string,
-  payment: Omit<PaymentType, "createdAt">
+  payment: Omit<PaymentType, "createdAt">,
 ): Promise<PaymentType> {
   const newPaymentDoc = await addDoc(collection(db, "users", uid, "payments"), {
     id: payment.id,
@@ -135,13 +135,13 @@ async function createPayment(
 // Helper function to find a processed payment
 async function findProcessedPayment(
   uid: string,
-  paymentId: string
+  paymentId: string,
 ): Promise<PaymentType | null> {
   const paymentsRef = collection(db, "users", uid, "payments");
   const q = query(
     paymentsRef,
     where("id", "==", paymentId),
-    where("status", "==", "succeeded")
+    where("status", "==", "succeeded"),
   );
   const querySnapshot = await getDocs(q);
 
@@ -155,7 +155,7 @@ async function findProcessedPayment(
 // Helper function to sort payments by createdAt
 function sortPayments(payments: PaymentType[]): PaymentType[] {
   return payments.sort(
-    (a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)
+    (a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0),
   );
 }
 

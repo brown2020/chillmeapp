@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { useAuthStore } from "./useAuthStore";
-import { db } from "@/firebase/firebaseClient";
+import { db } from "@/config/firebase/firebaseClient";
 
 export interface ProfileType {
   email: string;
@@ -51,7 +51,7 @@ const mergeProfileWithDefaults = (
     authEmail?: string;
     authDisplayName?: string;
     authPhotoUrl?: string;
-  }
+  },
 ): ProfileType => ({
   ...defaultProfile,
   ...profile,
@@ -84,14 +84,14 @@ const useProfileStore = create<ProfileState>((set, get) => ({
             authEmail,
             authDisplayName,
             authPhotoUrl,
-            authEmailVerified
+            authEmailVerified,
           );
 
       console.log(
         docSnap.exists()
           ? "Profile found:"
           : "No profile found. Creating new profile document.",
-        newProfile
+        newProfile,
       );
 
       await setDoc(userRef, newProfile);
@@ -156,7 +156,7 @@ function createNewProfile(
   authEmail?: string,
   authDisplayName?: string,
   authPhotoUrl?: string,
-  authEmailVerified?: boolean
+  authEmailVerified?: boolean,
 ): ProfileType {
   return {
     email: authEmail || "",
