@@ -1,7 +1,7 @@
 {
     "*.{js, jsx,ts,tsx}": [
-        "npm run eslint",
-        "npm run eslint:fix"
+        "npm run eslint:fix",
+        "npm run eslint"
     ],
     "*.{json,js,ts,jsx,tsx,html}": [
         "prettier --write --ignore-unknown"
