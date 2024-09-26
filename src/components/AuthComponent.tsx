@@ -14,7 +14,7 @@ import Link from "next/link";
 import { MailIcon, XIcon } from "lucide-react";
 import { PulseLoader } from "react-spinners";
 import { useAuthStore } from "@/zustand/useAuthStore";
-import { auth } from "@/firebase/firebaseClient";
+import { auth } from "@/config/firebase/firebaseClient";
 
 export default function AuthComponent() {
   const setAuthDetails = useAuthStore((s) => s.setAuthDetails);
