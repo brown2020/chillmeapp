@@ -10,7 +10,7 @@ export default function ProfileComponent() {
 
   // State for API keys
   const [liveAppAccessKey, setLiveAppAccessKey] = useState(
-    profile.live_app_access_key
+    profile.live_app_access_key,
   );
   const [liveAppSecret, setLiveAppSecret] = useState(profile.live_app_secret);
   const [useCredits, setUseCredits] = useState(profile.useCredits);
@@ -39,7 +39,7 @@ export default function ProfileComponent() {
   };
 
   const handleCreditsChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>
+    e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const useCreditsValue = e.target.value === "credits";
     setUseCredits(useCreditsValue);

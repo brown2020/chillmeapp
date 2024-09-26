@@ -30,7 +30,7 @@ export default function Footer({ showChat, setShowChat }: FooterProps) {
         setMessageDraft("");
       }
     },
-    [messageDraft, hmsActions]
+    [messageDraft, hmsActions],
   );
 
   return (

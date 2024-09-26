@@ -5,7 +5,7 @@ import { usePaymentsStore } from "@/zustand/usePaymentsStore";
 import useProfileStore from "@/zustand/useProfileStore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { validatePaymentIntent } from "@/serverActions/paymentActions";
+import { validatePaymentIntent } from "@/frontend/services/payment";
 
 type Props = {
   payment_intent: string;
@@ -22,7 +22,7 @@ export default function PaymentSuccessPage({ payment_intent }: Props) {
 
   const addPayment = usePaymentsStore((state) => state.addPayment);
   const checkIfPaymentProcessed = usePaymentsStore(
-    (state) => state.checkIfPaymentProcessed
+    (state) => state.checkIfPaymentProcessed,
   );
   const addCredits = useProfileStore((state) => state.addCredits);
 

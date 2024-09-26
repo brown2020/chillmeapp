@@ -29,7 +29,7 @@ export default function ChatView() {
         const mins = date.getMinutes().toString().padStart(2, "0");
         return `${hours}:${mins}`;
       },
-    []
+    [],
   );
 
   return (
