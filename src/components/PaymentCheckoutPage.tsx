@@ -7,7 +7,7 @@ import {
 } from "@stripe/react-stripe-js";
 
 import { useEffect, useState } from "react";
-import { createPaymentIntent } from "@/serverActions/paymentActions";
+import { createPaymentIntent } from "@/frontend/services/payment";
 import convertToSubcurrency from "@/utils/convertToSubcurrency";
 import { ClipLoader } from "react-spinners";
 

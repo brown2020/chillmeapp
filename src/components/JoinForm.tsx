@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useHMSActions } from "@100mslive/react-sdk";
-import { createRoom, getAppToken } from "@/serverActions/liveActions";
+import { createRoom, getAppToken } from "@/frontend/services/broadcasting";
 
 interface JoinFormProps {
   role: string;
@@ -20,6 +20,7 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
   });
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const checkBoxRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,8 +38,10 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
       setIsLoading(true);
       setError(undefined); // Reset any previous error
 
+      const shouldRecord = checkBoxRef.current?.checked || false;
+
       // Step 1: Create a new room
-      const roomResponse = await createRoom(inputValues.room);
+      const roomResponse = await createRoom(inputValues.room, shouldRecord);
       if (roomResponse.error) {
         setError(`Problem creating room: ${roomResponse.error}`);
         setIsLoading(false);
@@ -108,6 +111,16 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
           className="mb-3 p-2 border border-gray-600 rounded w-full bg-black text-white placeholder-gray-400"
         />
       )}
+
+      <div className="self-start">
+        <input
+          type="checkbox"
+          id="record-session"
+          value="true"
+          ref={checkBoxRef}
+        />
+        <label htmlFor="record-session"> Record Session</label>
+      </div>
 
       <button
         className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
