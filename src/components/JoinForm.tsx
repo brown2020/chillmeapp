@@ -28,7 +28,7 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
         [e.target.name]: e.target.value,
       }));
     },
-    []
+    [],
   );
 
   const handleSubmit = useCallback(
@@ -75,7 +75,7 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
 
       setIsLoading(false);
     },
-    [inputValues, role, hmsActions]
+    [inputValues, role, hmsActions],
   );
 
   return (

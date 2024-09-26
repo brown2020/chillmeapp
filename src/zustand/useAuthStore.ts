@@ -58,7 +58,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
 async function updateUserDetailsInFirestore(
   details: Partial<AuthState>,
-  uid: string
+  uid: string,
 ) {
   if (uid) {
     const userRef = doc(db, `users/${uid}`);
@@ -78,7 +78,7 @@ async function updateUserDetailsInFirestore(
       await setDoc(
         userRef,
         { ...sanitizedDetails, lastSignIn: serverTimestamp() },
-        { merge: true }
+        { merge: true },
       );
       console.log("Auth details updated successfully in Firestore.");
     } catch (error) {

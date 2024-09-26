@@ -34,7 +34,7 @@ export default function LoginFinishPage() {
         const userCredential = await signInWithEmailLink(
           auth,
           email,
-          window.location.href
+          window.location.href,
         );
 
         const user = userCredential.user;
@@ -52,7 +52,7 @@ export default function LoginFinishPage() {
           "User signed in successfully:",
           authEmail,
           uid,
-          selectedName
+          selectedName,
         );
 
         setAuthDetails({

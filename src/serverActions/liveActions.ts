@@ -35,7 +35,7 @@ export async function createRoom(roomName: string) {
 export async function getAppToken(
   roomId: string,
   userId: string,
-  role: string
+  role: string,
 ) {
   console.log("Attempting to get app token with parameters:", {
     roomId,
