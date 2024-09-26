@@ -5,8 +5,8 @@ import config from "@/config";
 
 // dotenv.config();
 
-const app_secret = process.env["100MS_APP_SECRET"]!;
-const app_access_key = process.env["100MS_APP_ACCESS_KEY"]!;
+const app_secret = process.env["LIVE100MS_APP_SECRET"]!;
+const app_access_key = process.env["LIVE100MS_APP_ACCESS_KEY"]!;
 
 // Log environment variables to ensure they are loaded correctly
 console.log("Environment variables loaded:");
