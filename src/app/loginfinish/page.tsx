@@ -74,7 +74,7 @@ export default function LoginFinishPage() {
       } finally {
         window.localStorage.removeItem("generateEmail");
         window.localStorage.removeItem("generateName");
-        router.replace("/generate");
+        router.replace("/live");
       }
     }
 
