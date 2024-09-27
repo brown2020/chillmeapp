@@ -14,7 +14,7 @@ import Link from "next/link";
 import { MailIcon, XIcon } from "lucide-react";
 import { PulseLoader } from "react-spinners";
 import { useAuthStore } from "@/zustand/useAuthStore";
-import { auth } from "@/firebase/firebaseClient";
+import { auth } from "@/config/firebase/firebaseClient";
 
 export default function AuthComponent() {
   const setAuthDetails = useAuthStore((s) => s.setAuthDetails);
@@ -71,8 +71,8 @@ export default function AuthComponent() {
 
     try {
       await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-      window.localStorage.setItem("generateEmail", email);
-      window.localStorage.setItem("generateName", name);
+      window.localStorage.setItem("chillmeEmail", email);
+      window.localStorage.setItem("chillmeName", name);
       setAuthDetails({ authPending: true });
     } catch (error) {
       console.error("Error sending sign-in link:", error);
