@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useHMSActions } from "@100mslive/react-sdk";
-import { createRoom, getAppToken } from "@/serverActions/liveActions";
+import { createRoom, getAppToken } from "@/frontend/services/broadcasting";
+import { saveMeeting } from "@/frontend/services/meeting";
+import { useAuthStore } from "@/zustand/useAuthStore";
 
 interface JoinFormProps {
   role: string;
@@ -20,6 +22,8 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
   });
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const checkBoxRef = useRef<HTMLInputElement>(null);
+  const authStore = useAuthStore();
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,15 +41,17 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
       setIsLoading(true);
       setError(undefined); // Reset any previous error
 
+      const shouldRecord = checkBoxRef.current?.checked || false;
+
       // Step 1: Create a new room
-      const roomResponse = await createRoom(inputValues.room);
-      if (roomResponse.error) {
+      const roomResponse = await createRoom(inputValues.room, shouldRecord);
+      if (!roomResponse.room || roomResponse.error) {
         setError(`Problem creating room: ${roomResponse.error}`);
         setIsLoading(false);
         return;
       }
 
-      const roomId = roomResponse.roomId; // Get the roomId from the response
+      const roomId = roomResponse.room?.id; // Get the roomId from the response
 
       if (!roomId) {
         setError("Problem creating room: Room ID is undefined.");
@@ -67,6 +73,8 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
         return;
       }
 
+      saveMeeting(authStore.uid, roomResponse.room);
+
       // Step 3: Join the room
       hmsActions.join({
         userName: inputValues.name,
@@ -75,14 +83,11 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
 
       setIsLoading(false);
     },
-    [inputValues, role, hmsActions],
+    [inputValues, role, hmsActions, authStore.uid],
   );
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col items-center mx-auto mt-20 w-1/2 bg-black text-white p-6 rounded-lg"
-    >
+    <form onSubmit={handleSubmit} className="w-full flex gap-y-3 flex-col">
       <h2 className="text-2xl mb-4 text-white">Stream</h2>
 
       <input
@@ -108,6 +113,16 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
           className="mb-3 p-2 border border-gray-600 rounded w-full bg-black text-white placeholder-gray-400"
         />
       )}
+
+      <div className="self-start">
+        <input
+          type="checkbox"
+          id="record-session"
+          value="true"
+          ref={checkBoxRef}
+        />
+        <label htmlFor="record-session"> Record Session</label>
+      </div>
 
       <button
         className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"

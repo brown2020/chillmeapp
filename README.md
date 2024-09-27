@@ -150,8 +150,8 @@ Powered by **100ms**, the following actions manage room creation and authenticat
 
 Server action logic is contained within:
 
-- `app/serverActions/paymentActions.ts`
-- `app/serverActions/100msLiveActions.ts`
+- `app/services/payment.ts`
+- `app/services/broadcasting.ts`
 
 ## Profile Management
 
