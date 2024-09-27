@@ -37,8 +37,8 @@ export async function createRoom(roomName: string, shouldRecord: boolean) {
         }, */
       },
     });
-    console.log("Room created successfully:", { roomId: room.id });
-    return { roomId: room.id }; // Ensure you return the room ID correctly
+    console.log("Room created successfully:", { room });
+    return { room }; // Ensure you return the room ID correctly
   } catch (err: unknown) {
     const error = err as Error;
     console.error("Error creating room:", error);

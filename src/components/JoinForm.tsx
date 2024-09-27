@@ -3,6 +3,8 @@
 import React, { useState, useCallback, useRef } from "react";
 import { useHMSActions } from "@100mslive/react-sdk";
 import { createRoom, getAppToken } from "@/frontend/services/broadcasting";
+import { saveMeeting } from "@/frontend/services/meeting";
+import { useAuthStore } from "@/zustand/useAuthStore";
 
 interface JoinFormProps {
   role: string;
@@ -21,6 +23,7 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const checkBoxRef = useRef<HTMLInputElement>(null);
+  const authStore = useAuthStore();
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,13 +45,13 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
 
       // Step 1: Create a new room
       const roomResponse = await createRoom(inputValues.room, shouldRecord);
-      if (roomResponse.error) {
+      if (!roomResponse.room || roomResponse.error) {
         setError(`Problem creating room: ${roomResponse.error}`);
         setIsLoading(false);
         return;
       }
 
-      const roomId = roomResponse.roomId; // Get the roomId from the response
+      const roomId = roomResponse.room?.id; // Get the roomId from the response
 
       if (!roomId) {
         setError("Problem creating room: Room ID is undefined.");
@@ -70,6 +73,8 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
         return;
       }
 
+      saveMeeting(authStore.uid, roomResponse.room);
+
       // Step 3: Join the room
       hmsActions.join({
         userName: inputValues.name,
@@ -78,14 +83,11 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
 
       setIsLoading(false);
     },
-    [inputValues, role, hmsActions],
+    [inputValues, role, hmsActions, authStore.uid],
   );
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col items-center mx-auto mt-20 w-1/2 bg-black text-white p-6 rounded-lg"
-    >
+    <form onSubmit={handleSubmit} className="w-full flex gap-y-3 flex-col">
       <h2 className="text-2xl mb-4 text-white">Stream</h2>
 
       <input
