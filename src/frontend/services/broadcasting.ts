@@ -24,17 +24,6 @@ export async function createRoom(roomName: string, shouldRecord: boolean) {
       name: roomName,
       recording_info: {
         enabled: shouldRecord,
-        /*   upload_info: {
-          type: "gs",
-          location: config.firebaseConfig.storageBucket as string,
-          options: {
-            region: "asia-south1",
-          },
-          credentials: {
-            key: config.firebaseConfig.storageBucket as string,
-            secret: config.firebaseConfig.appId as string,
-          },
-        }, */
       },
     });
     console.log("Room created successfully:", { room });

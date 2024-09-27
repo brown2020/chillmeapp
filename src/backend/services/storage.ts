@@ -2,11 +2,12 @@ import axios from "axios";
 import stream from "stream";
 import { adminBucket } from "@/config/firebase/firebaseAdmin";
 import { v4 } from "uuid";
+import { File } from "@google-cloud/storage";
 
 function uploadRecordingToStorage(
   fileUrl: string,
   destinationFolder: string,
-): Promise<boolean> {
+): Promise<File> {
   const result = new Promise(async (resolve, reject) => {
     // Get the file as a stream
     const response = await axios({
@@ -32,15 +33,16 @@ function uploadRecordingToStorage(
     });
 
     passThroughStream.pipe(uploadStream);
+
     uploadStream.on("finish", () => {
-      resolve(true);
+      resolve(file);
     });
 
     uploadStream.on("error", (error) => {
       reject(error);
     });
   });
-  return result as Promise<boolean>;
+  return result as Promise<File>;
 }
 
 export { uploadRecordingToStorage };

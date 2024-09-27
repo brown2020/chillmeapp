@@ -1,18 +1,27 @@
 import { MeetingSnapShot } from "@/types/entities";
 import { findUserById } from "@/frontend/services/user";
 import { useEffect, useState } from "react";
+import { formatSeconds } from "@/utils/dateUtils";
+import { fetchRecording } from "@/frontend/services/meeting";
 
 type Props = {
   data: MeetingSnapShot;
 };
 
 const MeetingCard = ({ data }: Props) => {
-  const [hostDisplayName, setHostDisplayName] = useState("");
+  const [hostDisplayName, setHostDisplayName] = useState<string>("");
+  const [recordingUrl, setRecordingUrl] = useState<string>("");
 
   useEffect(() => {
     (async () => {
       const result = await findUserById(data.broadcaster);
       setHostDisplayName(result.authDisplayName);
+      if (data.recording_info?.is_recording_ready) {
+        const recordingFileUrl = await fetchRecording(
+          data.recording_info.recording_storage_path,
+        );
+        setRecordingUrl(recordingFileUrl);
+      }
     })();
   }, []);
 
@@ -31,10 +40,14 @@ const MeetingCard = ({ data }: Props) => {
           </p>
         </div>
         <div>
-          {data.recording_info?.enabled && (
-            <p className="mt-1 text-sm font-medium text-gray-600">
-              View Recordings
-            </p>
+          {recordingUrl && (
+            <a
+              href={recordingUrl}
+              target="_blnk"
+              className="mt-1 text-sm font-medium text-gray-600"
+            >
+              Watch Recording
+            </a>
           )}
         </div>
       </div>
@@ -48,8 +61,12 @@ const MeetingCard = ({ data }: Props) => {
         </div>
 
         <div className="flex flex-col-reverse">
-          <dt className="text-sm font-medium text-gray-600">Reading time</dt>
-          <dd className="text-xs text-gray-500">3 minute</dd>
+          <dt className="text-sm font-medium text-gray-600">
+            Meeting Duration
+          </dt>
+          <dd className="text-xs text-gray-500">
+            {formatSeconds(data.session_duration)}
+          </dd>
         </div>
       </dl>
     </div>
