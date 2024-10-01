@@ -3,6 +3,7 @@
     "next/core-web-vitals",
     "next/typescript",
     "plugin:prettier/recommended"
-  ],
-  "ignorePatterns": ["serverPreStart.js"]
+  ]
+  // ,
+  // "ignorePatterns": ["serverPreStart.mjs"]
 }

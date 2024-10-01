@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-import "./serverPreStart.js";
+import "./serverPreStart.mjs";
 const nextConfig = {};
 
 export default nextConfig;
