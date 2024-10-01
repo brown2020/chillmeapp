@@ -23,8 +23,7 @@ const listUserMeetings = async (uid: string) => {
       if (data?.session_duration) return data;
     })
     .filter(Boolean);
-  console.log(results);
-  return results;
+  return results as MeetingSnapShot[];
 };
 
 const fetchRecording = async (storagePath: string) => {
