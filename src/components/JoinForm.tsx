@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback, useRef } from "react";
-import React, { useState, useCallback, useRef } from "react";
 import { useHMSActions } from "@100mslive/react-sdk";
 import { createRoom, getAppToken } from "@/frontend/services/broadcasting";
 import { saveMeeting } from "@/frontend/services/meeting";
@@ -41,8 +40,6 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
       e.preventDefault();
       setIsLoading(true);
       setError(undefined); // Reset any previous error
-
-      const shouldRecord = checkBoxRef.current?.checked || false;
 
       const shouldRecord = checkBoxRef.current?.checked || false;
 
@@ -116,16 +113,6 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
           className="mb-3 p-2 border border-gray-600 rounded w-full bg-black text-white placeholder-gray-400"
         />
       )}
-
-      <div className="self-start">
-        <input
-          type="checkbox"
-          id="record-session"
-          value="true"
-          ref={checkBoxRef}
-        />
-        <label htmlFor="record-session"> Record Session</label>
-      </div>
 
       <div className="self-start">
         <input
