@@ -35,7 +35,9 @@ export default function AuthComponent() {
 
   const signInWithGoogle = async () => {
     if (!acceptTerms) {
-      formRef.current && formRef.current.reportValidity();
+      if (formRef.current) {
+        formRef.current.reportValidity();
+      }
       return;
     }
 
@@ -148,9 +150,8 @@ export default function AuthComponent() {
                     sign-in process.
                   </div>
                   <div>
-                    Waiting for your to click the sign-in link.{" "}
+                    Waiting for you to click the sign-in link.{" "}
                     <span>
-                      {" "}
                       <PulseLoader color="#000000" size={6} />
                     </span>
                   </div>
