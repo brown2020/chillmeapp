@@ -1,5 +1,10 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Manually define __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function checkEnvVars() {
   const requiredVars = [
@@ -28,21 +33,13 @@ function checkEnvVars() {
 }
 
 function checkServiceAccountConfigFile() {
-  const filePath = path.join(
-    __dirname,
-    "src",
-    "config",
-    "firebase",
-    "serviceAccountConfig.json",
-  );
+  const filePath = path.join(__dirname, "src", "config", "firebase");
 
   if (!fs.existsSync(filePath)) {
     console.error(
-      'File "serviceAccountConfig.json" does not exist in src/config/firebase.',
+      `Firebase service account config file is missing at: ${filePath}`,
     );
-    throw new Error(
-      'File "serviceAccountConfig.json" does not exist in src/config/firebase.',
-    );
+    throw new Error(`Firebase service account config file is missing.`);
   }
 }
 
