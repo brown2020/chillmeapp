@@ -1,21 +1,24 @@
-// app/[room]/page.tsx
+// app/[roomId]/page.tsx
 "use client";
 
 import React, { useCallback, useEffect } from "react";
-import JoinForm from "@/components/JoinForm";
 import {
   selectIsConnectedToRoom,
   useHMSActions,
   useHMSStore,
 } from "@100mslive/react-sdk";
 import Livestream from "@/components/Livestream";
+import useMeeting from "@/hooks/useMeeting";
+import { useAuthStore } from "@/zustand/useAuthStore";
 
-export default function RoomPage({ params }: { params: { room: string } }) {
+export default function RoomPage({ params }: { params: { roomId: string } }) {
   const isConnected = useHMSStore(selectIsConnectedToRoom);
   const hmsActions = useHMSActions();
+  const { joinRoom } = useMeeting();
+  const { authDisplayName } = useAuthStore();
 
   // Extract the room parameter from the dynamic route segment
-  const { room } = params;
+  const { roomId } = params;
 
   // Memoized cleanup function
   const handleUnload = useCallback(() => {
@@ -23,6 +26,11 @@ export default function RoomPage({ params }: { params: { room: string } }) {
       hmsActions.leave();
     }
   }, [hmsActions, isConnected]);
+
+  useEffect(() => {
+    const role = "broadcaster";
+    joinRoom(roomId, role, authDisplayName);
+  }, []);
 
   // Set log level and handle leaving the room on component unmount
   useEffect(() => {
@@ -38,9 +46,5 @@ export default function RoomPage({ params }: { params: { room: string } }) {
   }, [hmsActions, handleUnload]);
 
   // Pass both role and initialRoom to JoinForm
-  return isConnected ? (
-    <Livestream />
-  ) : (
-    <JoinForm role="guest" initialRoom={room} />
-  );
+  return <Livestream />;
 }

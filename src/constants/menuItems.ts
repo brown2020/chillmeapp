@@ -1,4 +1,4 @@
-import { CircleUserIcon, VideoIcon } from "lucide-react";
+import { CircleUserIcon, VideoIcon, PresentationIcon } from "lucide-react";
 
 export const MENU_ITEMS: MenuItem[] = [
   {
@@ -37,7 +37,11 @@ export const navItems: navItemType[] = [
     icon: VideoIcon,
     path: "/live",
   },
-
+  {
+    label: "Past Meetings",
+    icon: PresentationIcon,
+    path: "/past-meetings",
+  },
   {
     label: "Profile",
     icon: CircleUserIcon,
