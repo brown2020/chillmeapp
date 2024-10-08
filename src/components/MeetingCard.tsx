@@ -3,12 +3,14 @@ import { findUserById } from "@/frontend/services/user";
 import { useEffect, useState } from "react";
 import { formatSeconds } from "@/utils/dateUtils";
 import { fetchRecording } from "@/frontend/services/meeting";
+import { useRouter } from "next/navigation";
 
 type Props = {
   data: MeetingSnapShot;
 };
 
 const MeetingCard = ({ data }: Props) => {
+  const router = useRouter();
   const [hostDisplayName, setHostDisplayName] = useState<string>("");
   const [recordingUrl, setRecordingUrl] = useState<string>("");
   const [recordingStatus, setRecordingStatus] = useState<string | null>(null);
@@ -34,6 +36,11 @@ const MeetingCard = ({ data }: Props) => {
     setRecordingStatus("available");
   };
 
+  const viewRecording = (url: string) => {
+    const encodedUrl = btoa(url);
+    router.push(`/recording?source=${encodedUrl}`);
+  };
+
   useEffect(() => {
     aggregateMeetingData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,7 +63,11 @@ const MeetingCard = ({ data }: Props) => {
         <div>
           {recordingUrl ? (
             <a
-              href={recordingUrl}
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                viewRecording(recordingUrl);
+              }}
               target="_blank"
               className="mt-1 text-sm font-medium text-gray-600"
             >
