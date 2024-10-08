@@ -12,6 +12,7 @@ import {
 } from "@100mslive/react-sdk";
 import { Share2Icon } from "lucide-react";
 import Modal from "./Modal";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   peer: HMSPeer;
@@ -23,11 +24,18 @@ export default function Header({ peer }: HeaderProps) {
   const room: HMSRoom | null = useHMSStore(selectRoom);
   const hmsActions = useHMSActions();
   const { error, resetError, unblockAudio } = useAutoplayError();
+  const router = useRouter();
 
   // Handlers using useCallback for memoization
   const handleModalOpen = useCallback(() => setIsModalOpen(true), []);
   const handleModalClose = useCallback(() => setIsModalOpen(false), []);
-  const handleLeave = useCallback(() => hmsActions.leave(), [hmsActions]);
+  const handleLeave = useCallback(() => {
+    try {
+      hmsActions.leave();
+    } finally {
+      router.push("/");
+    }
+  }, [hmsActions, router]);
   const handleAllowAudio = useCallback(() => {
     unblockAudio();
     resetError();

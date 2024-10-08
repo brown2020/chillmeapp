@@ -30,6 +30,7 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
   useEffect(() => {
     const role = "broadcaster";
     joinRoom(roomId, role, authDisplayName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Set log level and handle leaving the room on component unmount
