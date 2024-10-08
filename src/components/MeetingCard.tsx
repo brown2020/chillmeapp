@@ -11,18 +11,32 @@ type Props = {
 const MeetingCard = ({ data }: Props) => {
   const [hostDisplayName, setHostDisplayName] = useState<string>("");
   const [recordingUrl, setRecordingUrl] = useState<string>("");
+  const [recordingStatus, setRecordingStatus] = useState<string | null>(null);
+
+  const aggregateMeetingData = async () => {
+    const result = await findUserById(data.broadcaster);
+    setHostDisplayName(result.authDisplayName);
+
+    if (!data.recording_info?.enabled) {
+      setRecordingStatus("not-available");
+      return;
+    }
+
+    if (!data.recording_info?.is_recording_ready) {
+      setRecordingStatus("processing");
+      return;
+    }
+
+    const recordingFileUrl = await fetchRecording(
+      data.recording_info.recording_storage_path,
+    );
+    setRecordingUrl(recordingFileUrl);
+    setRecordingStatus("available");
+  };
 
   useEffect(() => {
-    (async () => {
-      const result = await findUserById(data.broadcaster);
-      setHostDisplayName(result.authDisplayName);
-      if (data.recording_info?.is_recording_ready) {
-        const recordingFileUrl = await fetchRecording(
-          data.recording_info.recording_storage_path,
-        );
-        setRecordingUrl(recordingFileUrl);
-      }
-    })();
+    aggregateMeetingData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -31,7 +45,7 @@ const MeetingCard = ({ data }: Props) => {
 
       <div className="sm:flex sm:justify-between sm:gap-4">
         <div>
-          <h3 className="text-lg font-bold text-gray-900 sm:text-xl uppercase">
+          <h3 className="text-sm font-bold text-gray-900 sm:text-sm uppercase">
             {data.name}
           </h3>
 
@@ -40,15 +54,19 @@ const MeetingCard = ({ data }: Props) => {
           </p>
         </div>
         <div>
-          {recordingUrl && (
+          {recordingUrl ? (
             <a
               href={recordingUrl}
-              target="_blnk"
+              target="_blank"
               className="mt-1 text-sm font-medium text-gray-600"
             >
               Watch Recording
             </a>
-          )}
+          ) : recordingStatus === "processing" ? (
+            <p className="mt-1 text-sm font-medium text-gray-600">
+              Processing Recording
+            </p>
+          ) : null}
         </div>
       </div>
 
