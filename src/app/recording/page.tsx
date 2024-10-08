@@ -20,6 +20,7 @@ const Page = () => {
     fluid: true,
     loop: true,
     poster: "",
+    aspectRatio: "16:6",
     sources: [
       {
         src: videoSource,
