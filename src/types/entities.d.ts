@@ -4,12 +4,11 @@ type Meeting = HMS.Room.Object;
 
 type MeetingSnapShot = Omit<Meeting, "created_at"> & {
   broadcaster: string;
-  doc_id: string;
   created_at: { seconds: number };
   session_duration: number;
   recording_info?: {
     enabled: boolean;
-    is_recording_ready: boolean;
+    is_recording_ready?: boolean;
     recording_storage_path: string;
   };
 };
