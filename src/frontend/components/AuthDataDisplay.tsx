@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/zustand/useAuthStore";
+import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 
 export default function AuthDataDisplay() {
   const uid = useAuthStore((s) => s.uid);

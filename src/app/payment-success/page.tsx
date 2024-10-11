@@ -1,6 +1,6 @@
 "use client";
 
-import PaymentSuccessPage from "@/components/PaymentSuccessPage";
+import PaymentSuccessPage from "@/frontend/components/PaymentSuccessPage";
 import { useSearchParams } from "next/navigation";
 
 export default function PaymentSuccess() {

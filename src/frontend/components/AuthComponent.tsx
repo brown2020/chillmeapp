@@ -13,8 +13,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { MailIcon, XIcon } from "lucide-react";
 import { PulseLoader } from "react-spinners";
-import { useAuthStore } from "@/zustand/useAuthStore";
-import { auth } from "@/frontend/lib/firebaseClient";
+import { useAuthStore } from "@/frontend/zustand/useAuthStore";
+import { auth } from "@/frontend/lib/firebase";
 
 export default function AuthComponent() {
   const setAuthDetails = useAuthStore((s) => s.setAuthDetails);

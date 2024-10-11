@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
-import { navItems } from "@/constants/menuItems";
+import { navItems } from "@/frontend/constants/menuItems";
 
 import logo from "@/app/assets/logo.png";
 import Image from "next/image";

@@ -4,7 +4,7 @@ import React, { useState, useCallback, useRef } from "react";
 import { useHMSActions } from "@100mslive/react-sdk";
 import { createRoom, getAppToken } from "@/frontend/services/broadcasting";
 import { saveMeeting } from "@/frontend/services/meeting";
-import { useAuthStore } from "@/zustand/useAuthStore";
+import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 
 interface JoinFormProps {
   role: string;

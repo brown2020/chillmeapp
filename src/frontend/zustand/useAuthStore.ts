@@ -1,4 +1,4 @@
-import { db } from "@/frontend/lib/firebaseClient";
+import { db } from "@/frontend/lib/firebase";
 import { Timestamp, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { create } from "zustand";
 

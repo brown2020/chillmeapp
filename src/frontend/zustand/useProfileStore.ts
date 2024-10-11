@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { useAuthStore } from "./useAuthStore";
-import { db } from "@/frontend/lib/firebaseClient";
+import { db } from "@/frontend/lib/firebase";
 
 export interface ProfileType {
   email: string;

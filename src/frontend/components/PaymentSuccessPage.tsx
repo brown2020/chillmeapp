@@ -1,8 +1,8 @@
 "use client";
 
-import { useAuthStore } from "@/zustand/useAuthStore";
-import { usePaymentsStore } from "@/zustand/usePaymentsStore";
-import useProfileStore from "@/zustand/useProfileStore";
+import { useAuthStore } from "@/frontend/zustand/useAuthStore";
+import { usePaymentsStore } from "@/frontend/zustand/usePaymentsStore";
+import useProfileStore from "@/frontend/zustand/useProfileStore";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { validatePaymentIntent } from "@/frontend/services/payment";
