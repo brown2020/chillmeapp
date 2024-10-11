@@ -4,7 +4,12 @@ import { deleteCookie, setCookie } from "cookies-next";
 import { debounce } from "lodash";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useAuthStore } from "@/zustand/useAuthStore";
-import { auth } from "@/config/firebase/firebaseClient";
+import { auth } from "@/frontend/lib/firebaseClient";
+
+/**
+ *
+ * @brown2000 This hook needs to be merged with `useAuth`
+ */
 
 const useAuthToken = (cookieName = "authToken") => {
   const [user, loading, error] = useAuthState(auth);

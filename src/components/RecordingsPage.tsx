@@ -14,7 +14,7 @@ import {
 import { deleteObject, ref } from "@firebase/storage";
 import { updateDoc } from "firebase/firestore";
 import { useAuthStore } from "@/zustand/useAuthStore";
-import { db, storage } from "@/config/firebase/firebaseClient";
+import { db, storage } from "@/frontend/lib/firebaseClient";
 
 export type VideoType = {
   id: string;
