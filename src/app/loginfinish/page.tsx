@@ -2,7 +2,7 @@
 
 import { useAuthStore } from "@/zustand/useAuthStore";
 import { isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
-import { auth } from "@/config/firebase/firebaseClient";
+import { auth } from "@/frontend/lib/firebaseClient";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FirebaseError } from "firebase/app";
