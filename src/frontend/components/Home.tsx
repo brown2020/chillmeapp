@@ -1,21 +1,30 @@
 "use client";
 
-import AuthComponent from "@/frontend/components/AuthComponent";
+import { Button } from "@chill-ui";
 
 export default function Home() {
   return (
-    <div className="flex flex-col h-full w-full justify-center items-center text-white">
-      <div className="flex flex-col z-10 gap-5 px-4 py-4 md:px-9 md:py-9 text-center max-w-4xl bg-black/60 rounded-lg">
-        <h2 className="text-3xl md:text-5xl font-semibold">
-          Welcome to Chill.me
-        </h2>
+    <section className="bg-gray-900 text-white">
+      <div className="mx-auto max-w-screen-xl px-4 py-32 lg:flex  lg:items-center h-[calc(5000px - 10px)]">
+        <div className="mx-auto text-center">
+          <h1 className="bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 bg-clip-text text-3xl font-extrabold text-transparent sm:text-5xl">
+            Seamless Meetings.
+            <span className="sm:block"> Collaborate Effortlessly. </span>
+          </h1>
 
-        <h2 className="text-xl md:text-2xl md:px-9">
-          Sign in to use this video chat demo.
-        </h2>
+          <p className="mx-auto mt-4  sm:text-xl/relaxed">
+            Say goodbye to complicated setups and hello to smooth, real-time
+            communication. Empower your team with AI-powered interactions that
+            make every meeting count.
+          </p>
 
-        <AuthComponent />
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Button>Start Now</Button>
+
+            <Button>Login</Button>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
