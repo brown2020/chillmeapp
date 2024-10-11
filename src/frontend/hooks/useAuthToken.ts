@@ -3,8 +3,8 @@ import { getIdToken } from "firebase/auth";
 import { deleteCookie, setCookie } from "cookies-next";
 import { debounce } from "lodash";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useAuthStore } from "@/zustand/useAuthStore";
-import { auth } from "@/frontend/lib/firebaseClient";
+import { useAuthStore } from "@/frontend/zustand/useAuthStore";
+import { auth } from "@/frontend/lib/firebase";
 
 /**
  *

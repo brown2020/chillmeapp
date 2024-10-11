@@ -1,6 +1,6 @@
 "use client";
 
-import AuthComponent from "@/components/AuthComponent";
+import AuthComponent from "@/frontend/components/AuthComponent";
 
 export default function Home() {
   return (

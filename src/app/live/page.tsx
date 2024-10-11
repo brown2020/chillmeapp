@@ -7,10 +7,10 @@ import {
   useHMSStore,
 } from "@100mslive/react-sdk";
 
-import Livestream from "@/components/Livestream";
-import JoinForm from "@/components/JoinForm";
-import TabGroup from "@/components/TabGroup";
-import PastMeetings from "@/components/PastMeetings";
+import Livestream from "@/frontend/components/Livestream";
+import JoinForm from "@/frontend/components/JoinForm";
+import TabGroup from "@/frontend/components/TabGroup";
+import PastMeetings from "@/frontend/components/PastMeetings";
 
 interface HomePageProps {
   searchParams: { [key: string]: string | string[] | undefined };

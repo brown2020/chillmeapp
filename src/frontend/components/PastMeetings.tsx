@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import MeetingCard from "./MeetingCard";
 import { listUserMeetings } from "@/frontend/services/meeting";
-import { useAuthStore } from "@/zustand/useAuthStore";
+import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 import { MeetingSnapShot } from "@/types/entities";
 
 const PastMeetings = () => {

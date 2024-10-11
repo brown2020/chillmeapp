@@ -13,8 +13,8 @@ import {
 
 import { deleteObject, ref } from "@firebase/storage";
 import { updateDoc } from "firebase/firestore";
-import { useAuthStore } from "@/zustand/useAuthStore";
-import { db, storage } from "@/frontend/lib/firebaseClient";
+import { useAuthStore } from "@/frontend/zustand/useAuthStore";
+import { db, storage } from "@/frontend/lib/firebase";
 
 export type VideoType = {
   id: string;

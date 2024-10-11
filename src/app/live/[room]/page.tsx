@@ -2,13 +2,13 @@
 "use client";
 
 import React, { useCallback, useEffect } from "react";
-import JoinForm from "@/components/JoinForm";
+import JoinForm from "@/frontend/components/JoinForm";
 import {
   selectIsConnectedToRoom,
   useHMSActions,
   useHMSStore,
 } from "@100mslive/react-sdk";
-import Livestream from "@/components/Livestream";
+import Livestream from "@/frontend/components/Livestream";
 
 export default function RoomPage({ params }: { params: { room: string } }) {
   const isConnected = useHMSStore(selectIsConnectedToRoom);

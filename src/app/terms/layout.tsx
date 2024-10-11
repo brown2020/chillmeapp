@@ -1,4 +1,4 @@
-import AboutFooter from "@/components/AboutFooter";
+import AboutFooter from "@/frontend/components/AboutFooter";
 
 export default function RootLayout({
   children,

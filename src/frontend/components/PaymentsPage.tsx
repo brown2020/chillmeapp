@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuthStore } from "@/zustand/useAuthStore";
-import { usePaymentsStore } from "@/zustand/usePaymentsStore";
+import { useAuthStore } from "@/frontend/zustand/useAuthStore";
+import { usePaymentsStore } from "@/frontend/zustand/usePaymentsStore";
 import { useEffect } from "react";
 
 export default function PaymentsPage() {

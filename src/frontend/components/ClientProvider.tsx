@@ -5,8 +5,8 @@ import { Toaster } from "react-hot-toast";
 import { ClipLoader } from "react-spinners";
 import CookieConsent from "react-cookie-consent";
 
-import useAuthToken from "@/hooks/useAuthToken";
-import { useInitializeStores } from "@/zustand/useInitializeStores";
+import useAuthToken from "@/frontend/hooks/useAuthToken";
+import { useInitializeStores } from "@/frontend/zustand/useInitializeStores";
 import ErrorBoundary from "./ErrorBoundary";
 import { usePathname, useRouter } from "next/navigation";
 import { HMSRoomProvider } from "@100mslive/react-sdk";

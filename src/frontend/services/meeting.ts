@@ -1,4 +1,4 @@
-import { db, storage } from "@/frontend/lib/firebaseClient";
+import { db, storage } from "@/frontend/lib/firebase";
 import { Meeting, MeetingSnapShot } from "@/types/entities";
 import { addDoc, getDocs, query, collection, where } from "firebase/firestore";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";

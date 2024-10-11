@@ -9,7 +9,7 @@ import {
 } from "firebase/firestore";
 import { useAuthStore } from "./useAuthStore";
 import toast from "react-hot-toast";
-import { db } from "@/frontend/lib/firebaseClient";
+import { db } from "@/frontend/lib/firebase";
 
 export type PaymentType = {
   id: string;

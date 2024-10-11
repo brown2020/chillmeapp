@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import useProfileStore from "@/zustand/useProfileStore";
+import useProfileStore from "@/frontend/zustand/useProfileStore";
 import { useEffect, useState } from "react";
 
 export default function ProfileComponent() {
