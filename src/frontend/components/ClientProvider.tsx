@@ -8,14 +8,10 @@ import CookieConsent from "react-cookie-consent";
 import useAuthToken from "@/frontend/hooks/useAuthToken";
 import { useInitializeStores } from "@/frontend/zustand/useInitializeStores";
 import ErrorBoundary from "./ErrorBoundary";
-import { usePathname, useRouter } from "next/navigation";
 import { HMSRoomProvider } from "@100mslive/react-sdk";
-import AboutHeader from "./AboutHeader";
 
 export function ClientProvider({ children }: { children: React.ReactNode }) {
-  const { loading, uid } = useAuthToken(process.env.NEXT_PUBLIC_COOKIE_NAME!);
-  const router = useRouter();
-  const pathname = usePathname();
+  const { loading } = useAuthToken(process.env.NEXT_PUBLIC_COOKIE_NAME!);
   useInitializeStores();
 
   useEffect(() => {
@@ -50,11 +46,11 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (!loading && !uid && pathname != "/" && !pathname.includes("images/")) {
       router.push("/");
     }
-  }, [loading, pathname, router, uid]);
+  }, [loading, pathname, router, uid]); */
 
   if (loading)
     return (
@@ -70,7 +66,7 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       <div className="flex flex-col h-full">
-        <AboutHeader />
+        {/* <AboutHeader /> */}
         <HMSRoomProvider>{children}</HMSRoomProvider>
         {!window.ReactNativeWebView && (
           <CookieConsent>
