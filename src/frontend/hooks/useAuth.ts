@@ -1,11 +1,16 @@
 import { auth } from "@/frontend/lib/firebase";
 import { signInWithPopup, GoogleAuthProvider, User } from "firebase/auth";
 import { useAuthStore } from "@frontend/zustand/useAuthStore";
-import { handleAuth } from "../services/auth";
+import { handleAuth, signOut } from "../services/auth";
 
 export const useAuth = () => {
-  const { setAuthDetails, isAuthenticating, user, setIsAuthenticating } =
-    useAuthStore();
+  const {
+    setAuthDetails,
+    isAuthenticating,
+    user,
+    setIsAuthenticating,
+    clearAuthDetails,
+  } = useAuthStore();
   const isLogged = Boolean(user?.uid);
 
   const checkAuthState = () => {
@@ -18,6 +23,11 @@ export const useAuth = () => {
       setIsAuthenticating(false);
     });
     return unsubscribe;
+  };
+
+  const setLoggedOutState = async () => {
+    signOut();
+    clearAuthDetails();
   };
 
   const setLoggedInState = (user: User) => {
@@ -38,6 +48,7 @@ export const useAuth = () => {
   return {
     signinWithGoogle,
     checkAuthState,
+    setLoggedOutState,
     isAuthenticating,
     user,
     isLogged,
