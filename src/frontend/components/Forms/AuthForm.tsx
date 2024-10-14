@@ -1,15 +1,24 @@
+"use client";
+
 import { Button, Input, GoogleIcon } from "@chill-ui";
+import { useAuth } from "@frontend/hooks";
 
 const AuthForm = () => {
+  const { signinWithGoogle } = useAuth();
+
   return (
-    <div className="flex h-[70vh] w-full justify-center items-center">
-      <div className="flex flex-col gap-4 w-1/3 gap-3 border-solid border border-zinc-700 rounded-lg p-10">
-        <h3 className="text-3xl">Login</h3>
-        <h1 className="text-sm">
+    <div className="flex h-[80vh] w-full justify-center items-center p-4 sm:p-8">
+      <div className="flex flex-col gap-6 w-full max-w-md border border-zinc-700 rounded-lg p-8 sm:p-10">
+        <h3 className="text-2xl sm:text-3xl font-semibold text-center">
+          Login
+        </h3>
+        <p className="text-sm text-center text-zinc-600">
           Enter your credentials to start collaborating with your team
-        </h1>
-        <Input type="email" placeholder="Email" />
-        <Input type="password" placeholder="Password" />
+        </p>
+
+        <Input type="email" placeholder="Email" className="w-full" />
+        <Input type="password" placeholder="Password" className="w-full" />
+
         <Button className="w-full">Login with Email</Button>
 
         <div className="text-sm text-center">
@@ -18,7 +27,10 @@ const AuthForm = () => {
           </span>
         </div>
 
-        <Button className="w-full bg-white hover:bg-zinc-800 hover:text-white text-black hover:fill-white group">
+        <Button
+          className="w-full bg-white text-black hover:bg-zinc-800 hover:text-white group"
+          onClick={signinWithGoogle}
+        >
           <GoogleIcon className="mr-2 fill-black group-hover:fill-white" />
           Login with Google
         </Button>

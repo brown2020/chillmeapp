@@ -19,7 +19,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@chill-ui": ["./src/frontend/components/ui"]
+      "@chill-ui": ["./src/frontend/components/ui"],
+      "@frontend/*": ["./src/frontend/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
