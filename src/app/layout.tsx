@@ -1,8 +1,10 @@
 // app/layout.tsx
 import type { Metadata } from "next";
-import "./globals.css";
+import "../frontend/styles/globals.css";
 
-import { ClientProvider } from "@/components/ClientProvider";
+import { ClientProvider } from "@/frontend/components/ClientProvider";
+import { ThemeProvider } from "@/frontend/providers/ThemeProvider";
+import Layout from "@/frontend/layout";
 
 export const metadata: Metadata = {
   title: "Chill.me",
@@ -16,14 +18,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* Add Tailwind classes for dark mode background and text */}
-      <body className="bg-black text-white min-h-screen">
-        {/* Use the client-only component */}
-        <ClientProvider>
-          <div className="flex flex-col h-full">
-            <div className="flex-1">{children}</div>
-          </div>
-        </ClientProvider>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Layout>
+            {/* Use the client-only component */}
+            <ClientProvider>{children}</ClientProvider>
+          </Layout>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,12 +1,12 @@
 "use client";
 
-import { useAuthStore } from "@/zustand/useAuthStore";
+import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 import { isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
-import { auth } from "@/config/firebase/firebaseClient";
+import { auth } from "@/frontend/lib/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FirebaseError } from "firebase/app";
-import useProfileStore from "@/zustand/useProfileStore";
+import useProfileStore from "@/frontend/zustand/useProfileStore";
 
 export default function LoginFinishPage() {
   const router = useRouter();

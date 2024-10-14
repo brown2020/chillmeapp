@@ -1,4 +1,4 @@
-import { adminDb as db } from "@/config/firebase/firebaseAdmin";
+import { adminDb as db } from "@/backend/lib/firebase";
 
 interface UpdatePayload {
   room_id: string;
