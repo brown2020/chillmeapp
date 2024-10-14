@@ -1,5 +1,7 @@
+import AuthForm from "@/frontend/components/Forms/AuthForm";
+
 const SigninPage = () => {
-  return <h1>This is sigin page</h1>;
+  return <AuthForm />;
 };
 
 export default SigninPage;
