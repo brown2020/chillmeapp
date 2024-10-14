@@ -1,6 +1,6 @@
 import axios from "axios";
 import stream from "stream";
-import { adminBucket } from "@/config/firebase/firebaseAdmin";
+import { adminBucket } from "@/backend/lib/firebase";
 import { v4 } from "uuid";
 import { File } from "@google-cloud/storage";
 

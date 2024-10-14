@@ -1,4 +1,4 @@
-import { db } from "@/config/firebase/firebaseClient";
+import { db } from "@/frontend/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 const findUserById = async (uid: string) => {
