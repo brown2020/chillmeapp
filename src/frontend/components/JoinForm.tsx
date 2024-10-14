@@ -1,29 +1,36 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
-import { useHMSActions } from "@100mslive/react-sdk";
-import { createRoom, getAppToken } from "@/frontend/services/broadcasting";
+import React, { useState, useCallback, useRef, useEffect } from "react";
+import { createRoom } from "@/frontend/services/broadcasting";
 import { saveMeeting } from "@/frontend/services/meeting";
 import { useAuthStore } from "@/frontend/zustand/useAuthStore";
+import { useRouter } from "next/navigation";
 
-interface JoinFormProps {
-  role: string;
-  initialRoom: string;
-}
-
-const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
-  const hmsActions = useHMSActions();
-  const [inputValues, setInputValues] = useState<{
-    name: string;
-    room: string;
-  }>({
-    name: "",
-    room: initialRoom || "",
-  });
+const JoinForm: React.FC = () => {
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const checkBoxRef = useRef<HTMLInputElement>(null);
   const authStore = useAuthStore();
+  const [inputValues, setInputValues] = useState<{
+    name: string;
+  }>({
+    name: authStore?.authDisplayName || "",
+  });
+  const router = useRouter();
+
+  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({
+        video: true,
+        // audio: true,
+      })
+      .then((stream) => {
+        const videoElem = document.querySelector("video");
+        if (videoElem) {
+          videoElem.srcObject = stream;
+        }
+      });
+  }, []);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,7 +51,7 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
       const shouldRecord = checkBoxRef.current?.checked || false;
 
       // Step 1: Create a new room
-      const roomResponse = await createRoom(inputValues.room, shouldRecord);
+      const roomResponse = await createRoom(shouldRecord);
       if (!roomResponse.room || roomResponse.error) {
         setError(`Problem creating room: ${roomResponse.error}`);
         setIsLoading(false);
@@ -58,32 +65,11 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
         setIsLoading(false);
         return;
       }
-
-      // Step 2: Get app token
-      const tokenResponse = await getAppToken(roomId, "user", role);
-      if (tokenResponse.error) {
-        setError(`Problem joining room: ${tokenResponse.error}`);
-        setIsLoading(false);
-        return;
-      }
-
-      if (!tokenResponse.appToken) {
-        setError("Problem joining room: App token is undefined.");
-        setIsLoading(false);
-        return;
-      }
-
-      saveMeeting(authStore.uid, roomResponse.room);
-
-      // Step 3: Join the room
-      hmsActions.join({
-        userName: inputValues.name,
-        authToken: tokenResponse.appToken.token,
-      });
-
-      setIsLoading(false);
+      console.log("Room created with id ", roomId);
+      await saveMeeting(authStore.uid, roomResponse.room);
+      router.push(`/live/${roomId}`);
     },
-    [inputValues, role, hmsActions, authStore.uid],
+    [authStore.uid, router],
   );
 
   return (
@@ -100,19 +86,6 @@ const JoinForm: React.FC<JoinFormProps> = ({ role, initialRoom }) => {
         placeholder="Your name"
         className="mb-3 p-2 border border-gray-600 rounded w-full bg-black text-white placeholder-gray-400"
       />
-
-      {role === "broadcaster" && (
-        <input
-          required
-          value={inputValues.room.split(" ").join("")}
-          onChange={handleInputChange}
-          id="room"
-          type="text"
-          name="room"
-          placeholder="Room"
-          className="mb-3 p-2 border border-gray-600 rounded w-full bg-black text-white placeholder-gray-400"
-        />
-      )}
 
       <div className="self-start">
         <input
