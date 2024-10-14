@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: "100ms Video SDK Example",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
