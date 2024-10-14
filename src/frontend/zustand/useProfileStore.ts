@@ -87,13 +87,6 @@ const useProfileStore = create<ProfileState>((set, get) => ({
             authEmailVerified,
           );
 
-      console.log(
-        docSnap.exists()
-          ? "Profile found:"
-          : "No profile found. Creating new profile document.",
-        newProfile,
-      );
-
       await setDoc(userRef, newProfile);
       set({ profile: newProfile });
     } catch (error) {
@@ -111,7 +104,6 @@ const useProfileStore = create<ProfileState>((set, get) => ({
 
       set({ profile: updatedProfile });
       await updateDoc(userRef, updatedProfile);
-      console.log("Profile updated successfully");
     } catch (error) {
       handleProfileError("updating profile", error);
     }

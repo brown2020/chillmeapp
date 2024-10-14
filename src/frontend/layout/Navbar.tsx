@@ -1,11 +1,17 @@
 "use client";
 
-import { navItems } from "@/frontend/constants/menuItems";
+import {
+  guestNavItems,
+  authenticatedNavItems,
+} from "@/frontend/constants/menuItems";
+import { useAuth } from "../hooks";
 import logo from "@/app/assets/logo.png";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Navbar() {
+  const { isLogged } = useAuth();
+  const navItems = isLogged ? authenticatedNavItems : guestNavItems;
   return (
     <div className="z-10 flex items-center justify-between h-16 px-4 bg-white sticky top-0">
       <div className="flex items-center cursor-pointer">

@@ -2,9 +2,9 @@
 import type { Metadata } from "next";
 import "../frontend/styles/globals.css";
 
-import { ClientProvider } from "@/frontend/components/ClientProvider";
 import { ThemeProvider } from "@/frontend/providers/ThemeProvider";
 import Layout from "@/frontend/layout";
+import AuthGuard from "@/frontend/components/AuthGuard";
 
 export const metadata: Metadata = {
   title: "Chill.me",
@@ -25,10 +25,9 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Layout>
-            {/* Use the client-only component */}
-            <ClientProvider>{children}</ClientProvider>
-          </Layout>
+          <AuthGuard>
+            <Layout>{children}</Layout>
+          </AuthGuard>
         </ThemeProvider>
       </body>
     </html>
