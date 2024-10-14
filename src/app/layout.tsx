@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "../frontend/styles/globals.css";
 
 import { ClientProvider } from "@/frontend/components/ClientProvider";
+import { ThemeProvider } from "@/frontend/providers/ThemeProvider";
 import Layout from "@/frontend/layout";
 
 export const metadata: Metadata = {
@@ -17,12 +18,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* Add Tailwind classes for dark mode background and text */}
-      <body className="bg-black text-white min-h-screen">
-        <Layout>
-          {/* Use the client-only component */}
-          <ClientProvider>{children}</ClientProvider>
-        </Layout>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Layout>
+            {/* Use the client-only component */}
+            <ClientProvider>{children}</ClientProvider>
+          </Layout>
+        </ThemeProvider>
       </body>
     </html>
   );
