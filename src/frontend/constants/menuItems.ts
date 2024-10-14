@@ -65,4 +65,9 @@ export const guestNavItems: navItemType[] = [
     icon: KeyRound,
     path: "/auth/signin",
   },
+  {
+    label: "Create Account",
+    icon: CircleUserIcon,
+    path: "/auth/signup",
+  },
 ];
