@@ -1,19 +1,29 @@
 import { auth } from "@/frontend/lib/firebase";
 import { signInWithPopup, GoogleAuthProvider, User } from "firebase/auth";
 import { useAuthStore } from "@frontend/zustand/useAuthStore";
+import { handleAuth } from "../services/auth";
 
 export const useAuth = () => {
-  const { setAuthDetails } = useAuthStore();
+  const { setAuthDetails, isAuthenticating, user, setIsAuthenticating } =
+    useAuthStore();
+  const isLogged = Boolean(user?.uid);
 
-  const setLoginState = (user: User) => {
+  const checkAuthState = () => {
+    setIsAuthenticating(true);
+    const unsubscribe = handleAuth((user) => {
+      if (user?.uid) {
+        setLoggedInState(user);
+        return;
+      }
+      setIsAuthenticating(false);
+    });
+    return unsubscribe;
+  };
+
+  const setLoggedInState = (user: User) => {
     setAuthDetails({
-      uid: user.uid,
-      authEmail: user.email || "",
-      authDisplayName: user.displayName || "",
-      authPhotoUrl: user.photoURL || "",
-      authEmailVerified: user.emailVerified || false,
-      authReady: true,
-      authPending: false,
+      user: user,
+      isAuthenticating: false,
     });
   };
 
@@ -21,11 +31,15 @@ export const useAuth = () => {
     const googleAuthProvider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, googleAuthProvider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
-    setLoginState(result.user);
+    setLoggedInState(result.user);
     return credential;
   };
 
   return {
     signinWithGoogle,
+    checkAuthState,
+    isAuthenticating,
+    user,
+    isLogged,
   };
 };
