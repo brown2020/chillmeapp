@@ -1,4 +1,9 @@
-import { onAuthStateChanged, NextOrObserver, User } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  NextOrObserver,
+  User,
+  signOut as logOut,
+} from "firebase/auth";
 import { auth } from "@frontend/lib/firebase";
 
 const handleAuth = (cb: NextOrObserver<User>) => {
@@ -6,4 +11,8 @@ const handleAuth = (cb: NextOrObserver<User>) => {
   return handler;
 };
 
-export { handleAuth };
+const signOut = async () => {
+  await logOut(auth);
+};
+
+export { handleAuth, signOut };

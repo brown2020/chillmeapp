@@ -52,6 +52,11 @@ export const authenticatedNavItems: navItemType[] = [
     icon: CircleUserIcon,
     path: "/profile",
   },
+  {
+    label: "Signout",
+    icon: KeyRound,
+    path: "/auth/signout",
+  },
 ];
 
 export const guestNavItems: navItemType[] = [
