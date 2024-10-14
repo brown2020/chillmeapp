@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
-import { ClipLoader } from "react-spinners";
 import CookieConsent from "react-cookie-consent";
 
 import useAuthToken from "@/frontend/hooks/useAuthToken";
@@ -52,29 +51,18 @@ export function ClientProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loading, pathname, router, uid]); */
 
-  if (loading)
-    return (
-      <ErrorBoundary>
-        <div
-          className={`flex flex-col items-center justify-center h-full bg-[#333b51]`}
-        >
-          <ClipLoader color="#fff" size={80} />
-        </div>
-      </ErrorBoundary>
-    );
+  if (loading) return null;
 
   return (
     <ErrorBoundary>
-      <div className="flex flex-col h-full">
-        {/* <AboutHeader /> */}
-        <HMSRoomProvider>{children}</HMSRoomProvider>
-        {!window.ReactNativeWebView && (
-          <CookieConsent>
-            This app uses cookies to enhance the user experience.
-          </CookieConsent>
-        )}
-        <Toaster position="bottom-center" />
-      </div>
+      {/* <AboutHeader /> */}
+      <HMSRoomProvider>{children}</HMSRoomProvider>
+      {!window.ReactNativeWebView && (
+        <CookieConsent>
+          This app uses cookies to enhance the user experience.
+        </CookieConsent>
+      )}
+      <Toaster position="bottom-center" />
     </ErrorBoundary>
   );
 }

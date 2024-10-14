@@ -1,2 +1,3 @@
 export * from "./Button";
-export * as ChillIcon from "lucide-react";
+export * from "./Input";
+export { GoogleIcon } from "./Icons/Google.jsx";
