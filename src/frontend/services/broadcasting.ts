@@ -1,7 +1,7 @@
 "use server";
 // import * as dotenv from "dotenv";
 import * as HMS from "@100mslive/server-sdk"; // Correct wildcard import
-import config from "@/config";
+import { v4 } from "uuid";
 
 // dotenv.config();
 
@@ -16,12 +16,10 @@ console.log("APP_ACCESS_KEY:", app_access_key ? "Loaded" : "Missing");
 // Initialize the SDK with credentials
 const hms = new HMS.SDK(app_access_key, app_secret);
 
-export async function createRoom(roomName: string, shouldRecord: boolean) {
-  console.log(config);
-  console.log("Attempting to create a room with name:", roomName);
+export async function createRoom(shouldRecord: boolean) {
   try {
     const room = await hms.rooms.create({
-      name: roomName,
+      name: v4(),
       recording_info: {
         enabled: shouldRecord,
       },

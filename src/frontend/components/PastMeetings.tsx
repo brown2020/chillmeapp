@@ -15,7 +15,7 @@ const PastMeetings = () => {
     })();
   }, [authStore.uid]);
 
-  return meetingsData.map((d) => <MeetingCard key={d.doc_id} data={d} />);
+  return meetingsData.map((d) => <MeetingCard key={d.id} data={d} />);
 };
 
 export default PastMeetings;
