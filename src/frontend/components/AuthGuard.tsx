@@ -11,13 +11,14 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
   const { checkAuthState, isAuthenticating, user } = useAuth();
 
   const isUnprotectedRoute = useMemo(
-    () => routePath.includes("signin"),
+    () => routePath.includes("signin") || routePath.includes("signup"),
     [routePath],
   );
 
   useEffect(() => {
     const unsubscribe = checkAuthState();
     return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
