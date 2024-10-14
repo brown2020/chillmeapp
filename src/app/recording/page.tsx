@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import VideoPlayer from "@/components/VideoPlayer";
+import VideoPlayer from "@/frontend/components/VideoPlayer";
 import { useSearchParams, redirect } from "next/navigation";
 
 const Page = () => {
