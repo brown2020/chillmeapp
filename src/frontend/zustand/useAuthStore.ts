@@ -31,7 +31,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   clearAuthDetails: () => set({ ...defaultAuthState }),
 
   setIsAuthenticating: (authenticating: boolean) => {
-    console.log("setting", { authenticating });
     set((state) => ({ ...state, isAuthenticating: authenticating }));
   },
 }));

@@ -39,32 +39,34 @@ const CreateMeetingForm: React.FC = () => {
       });
   };
 
-  const stopWebcamStream = () => {
+  const stopWebcamStream = useCallback(() => {
+    console.log("Stopping webcam stream");
     if (stream) {
+      console.log("Stream found");
       stream.getTracks().forEach((track) => {
         track.stop();
       });
     }
-  };
+  }, [stream]);
 
-  const toggleVideoStream = () => {
+  const toggleVideoStream = useCallback(() => {
     if (stream) {
       stream.getTracks().forEach((track) => {
         if (track.kind == "video") {
-          track.enabled = !mediaStatus.video;
+          track.enabled = mediaStatus.video;
         }
       });
     }
-  };
+  }, [mediaStatus.video, stream]);
 
   useEffect(() => {
     toggleVideoStream();
-  }, [mediaStatus.video]);
+  }, [mediaStatus.video, toggleVideoStream]);
 
   useEffect(() => {
     startWebcamStream();
     return stopWebcamStream;
-  }, []);
+  }, [stopWebcamStream]);
 
   const toggleMediaTrack = (type: "audio" | "video") => {
     setMediaStatus((prev) => ({
