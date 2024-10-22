@@ -46,7 +46,15 @@ const SignupForm = () => {
             type="password"
             placeholder="Password"
             className={clsx("w-full")}
-            {...register("password", { required: "Password is required" })}
+            {...register("password", {
+              required: "Password is required",
+              pattern: {
+                value:
+                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                message:
+                  "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character",
+              },
+            })}
             errorMessage={errors.password?.message}
             error={Boolean(errors.password)}
           />
