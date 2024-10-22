@@ -1,7 +1,7 @@
 # Chill.me MVP Feature Planning
 
 ## 1. User Authentication (Firebase)
-- [ ] Implement user sign-up and login using Firebase Authentication (email/password, Google, etc.).
+- [x] Implement user sign-up and login using Firebase Authentication (email/password, Google, etc.).
 - [ ] Test and ensure secure authentication flow.
 
 ## 2. Session Creation and Invitation
