@@ -10,10 +10,10 @@ const PastMeetings = () => {
 
   useEffect(() => {
     (async () => {
-      const data = await listUserMeetings(authStore.uid);
+      const data = await listUserMeetings(authStore.user?.uid as string);
       setMeetingsData(data);
     })();
-  }, [authStore.uid]);
+  }, [authStore.user?.uid]);
 
   return meetingsData.map((d) => <MeetingCard key={d.id} data={d} />);
 };

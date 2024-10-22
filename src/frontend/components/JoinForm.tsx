@@ -1,21 +1,17 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { createRoom } from "@/frontend/services/broadcasting";
 import { saveMeeting } from "@/frontend/services/meeting";
 import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 import { useRouter } from "next/navigation";
+import { Button, Switch } from "@chill-ui";
 
 const JoinForm: React.FC = () => {
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const checkBoxRef = useRef<HTMLInputElement>(null);
+  const [shouldRecord, setShouldRecord] = useState<boolean>(false);
   const authStore = useAuthStore();
-  const [inputValues, setInputValues] = useState<{
-    name: string;
-  }>({
-    name: authStore?.authDisplayName || "",
-  });
   const router = useRouter();
 
   useEffect(() => {
@@ -32,23 +28,11 @@ const JoinForm: React.FC = () => {
       });
   }, []);
 
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setInputValues((prevValues) => ({
-        ...prevValues,
-        [e.target.name]: e.target.value,
-      }));
-    },
-    [],
-  );
-
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       setIsLoading(true);
       setError(undefined); // Reset any previous error
-
-      const shouldRecord = checkBoxRef.current?.checked || false;
 
       // Step 1: Create a new room
       const roomResponse = await createRoom(shouldRecord);
@@ -66,43 +50,23 @@ const JoinForm: React.FC = () => {
         return;
       }
       console.log("Room created with id ", roomId);
-      await saveMeeting(authStore.uid, roomResponse.room);
+      await saveMeeting(authStore.user?.uid as string, roomResponse.room);
       router.push(`/live/${roomId}`);
     },
-    [authStore.uid, router],
+    [authStore.user?.uid as string, router],
   );
 
   return (
-    <form onSubmit={handleSubmit} className="w-full flex gap-y-3 flex-col">
-      <h2 className="text-2xl mb-4 text-white">Stream</h2>
-
-      <input
-        required
-        value={inputValues.name}
-        onChange={handleInputChange}
-        id="name"
-        type="text"
-        name="name"
-        placeholder="Your name"
-        className="mb-3 p-2 border border-gray-600 rounded w-full bg-black text-white placeholder-gray-400"
-      />
-
-      <div className="self-start">
-        <input
-          type="checkbox"
-          id="record-session"
-          value="true"
-          ref={checkBoxRef}
-        />
+    <form onSubmit={handleSubmit} className="w-full flex gap-y-3 flex-col mt-4">
+      <div className="flex justify-between">
         <label htmlFor="record-session"> Record Session</label>
+        <Switch
+          id="record-session"
+          onCheckedChange={(checked) => setShouldRecord(checked)}
+        />
       </div>
 
-      <button
-        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-        disabled={isLoading}
-      >
-        {isLoading ? "Joining..." : "Join"}
-      </button>
+      <Button disabled={isLoading}>{isLoading ? "Joining..." : "Join"}</Button>
 
       {error && (
         <p

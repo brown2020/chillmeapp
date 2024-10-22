@@ -5,7 +5,7 @@ import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 import Link from "next/link";
 
 export default function AboutFooter() {
-  const uid = useAuthStore((s) => s.uid);
+  const uid = useAuthStore((s) => s.user?.uid);
 
   const menuItems = MENU_ITEMS.filter((item) => {
     if (item.footer && item.show === "everyone") return true;

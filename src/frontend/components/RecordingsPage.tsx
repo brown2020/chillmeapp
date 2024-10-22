@@ -31,7 +31,7 @@ export type VideoType = {
 };
 
 export default function RecordingsPage() {
-  const uid = useAuthStore((state) => state.uid);
+  const uid = useAuthStore((state) => state.user?.uid);
 
   const [videos, setVideos] = useState<VideoType[]>([]);
   const [featuredVideo, setFeaturedVideo] = useState<VideoType | null>(null);

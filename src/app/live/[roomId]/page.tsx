@@ -15,7 +15,7 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
   const isConnected = useHMSStore(selectIsConnectedToRoom);
   const hmsActions = useHMSActions();
   const { joinRoom } = useMeeting();
-  const { authDisplayName } = useAuthStore();
+  const { user } = useAuthStore();
 
   // Extract the room parameter from the dynamic route segment
   const { roomId } = params;
@@ -29,7 +29,7 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
 
   useEffect(() => {
     const role = "broadcaster";
-    joinRoom(roomId, role, authDisplayName);
+    joinRoom(roomId, role, user?.displayName as string);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
