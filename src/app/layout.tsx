@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "../frontend/styles/globals.css";
 
 import { ThemeProvider } from "@/frontend/providers/ThemeProvider";
+import { HMSProvider } from "@frontend/providers/HMSProvider";
 import Layout from "@/frontend/layout";
 import AuthGuard from "@/frontend/components/AuthGuard";
 
@@ -25,9 +26,11 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthGuard>
-            <Layout>{children}</Layout>
-          </AuthGuard>
+          <HMSProvider>
+            <AuthGuard>
+              <Layout>{children}</Layout>
+            </AuthGuard>
+          </HMSProvider>
         </ThemeProvider>
       </body>
     </html>
