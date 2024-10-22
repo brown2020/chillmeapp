@@ -5,7 +5,7 @@ import {
   authenticatedNavItems,
 } from "@/frontend/constants/menuItems";
 import { useAuth } from "../hooks";
-import logo from "@/app/assets/logo.png";
+import logo from "@/frontend/assets/logo.png";
 import Image from "next/image";
 import Link from "next/link";
 
