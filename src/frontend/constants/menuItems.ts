@@ -36,7 +36,7 @@ type navItemType = {
   path: string;
 };
 
-export const navItems: navItemType[] = [
+export const authenticatedNavItems: navItemType[] = [
   {
     label: "Live",
     icon: VideoIcon,
@@ -53,8 +53,21 @@ export const navItems: navItemType[] = [
     path: "/profile",
   },
   {
+    label: "Signout",
+    icon: KeyRound,
+    path: "/auth/signout",
+  },
+];
+
+export const guestNavItems: navItemType[] = [
+  {
     label: "Signin",
     icon: KeyRound,
     path: "/auth/signin",
+  },
+  {
+    label: "Create Account",
+    icon: CircleUserIcon,
+    path: "/auth/signup",
   },
 ];

@@ -1,46 +1,24 @@
 import { db } from "@/frontend/lib/firebase";
-import { Timestamp, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { create } from "zustand";
+import { User } from "firebase/auth";
 
 interface AuthState {
-  uid: string;
-  firebaseUid: string;
-  authEmail: string;
-  authDisplayName: string;
-  authPhotoUrl: string;
-  authEmailVerified: boolean;
-  authReady: boolean;
-  authPending: boolean;
-  isAdmin: boolean;
-  isAllowed: boolean;
-  isInvited: boolean;
-  lastSignIn: Timestamp | null;
-  premium: boolean;
-  credits: number;
+  user: User | null;
+  isAuthenticating: boolean;
 }
 
 interface AuthActions {
   setAuthDetails: (details: Partial<AuthState>) => void;
   clearAuthDetails: () => void;
+  setIsAuthenticating: (authenticating: boolean) => void;
 }
 
 type AuthStore = AuthState & AuthActions;
 
 const defaultAuthState: AuthState = {
-  uid: "",
-  firebaseUid: "",
-  authEmail: "",
-  authDisplayName: "",
-  authPhotoUrl: "",
-  authEmailVerified: false,
-  authReady: false,
-  authPending: false,
-  isAdmin: false,
-  isAllowed: false,
-  isInvited: false,
-  lastSignIn: null,
-  premium: false,
-  credits: 0,
+  user: null,
+  isAuthenticating: false,
 };
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
@@ -50,10 +28,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     const { ...oldState } = get();
     const newState = { ...oldState, ...details };
     set(newState);
-    await updateUserDetailsInFirestore(newState, get().uid);
+    await updateUserDetailsInFirestore(newState, get().user?.uid || "");
   },
 
   clearAuthDetails: () => set({ ...defaultAuthState }),
+
+  setIsAuthenticating: (authenticating: boolean) => {
+    console.log("setting", { authenticating });
+    set((state) => ({ ...state, isAuthenticating: authenticating }));
+  },
 }));
 
 async function updateUserDetailsInFirestore(
@@ -73,14 +56,12 @@ async function updateUserDetailsInFirestore(
       }
     });
 
-    console.log("Updating auth details in Firestore:", sanitizedDetails);
     try {
       await setDoc(
         userRef,
         { ...sanitizedDetails, lastSignIn: serverTimestamp() },
         { merge: true },
       );
-      console.log("Auth details updated successfully in Firestore.");
     } catch (error) {
       console.error("Error updating auth details in Firestore:", error);
     }
