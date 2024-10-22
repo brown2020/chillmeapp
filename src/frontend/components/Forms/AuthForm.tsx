@@ -2,9 +2,25 @@
 
 import { Button, Input, GoogleIcon } from "@chill-ui";
 import { useAuth } from "@frontend/hooks";
+import { useForm } from "react-hook-form";
+import clsx from "clsx";
+
+type FormVals = {
+  email: string;
+  password: string;
+};
 
 const AuthForm = () => {
-  const { signinWithGoogle } = useAuth();
+  const { signinWithGoogle, loginWithEmail } = useAuth();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormVals>();
+
+  const onSubmit = async (data: FormVals) => {
+    await loginWithEmail(data.email, data.password);
+  };
 
   return (
     <div className="flex h-[80vh] w-full justify-center items-center p-4 sm:p-8">
@@ -16,10 +32,37 @@ const AuthForm = () => {
           Enter your credentials to start collaborating with your team
         </p>
 
-        <Input type="email" placeholder="Email" className="w-full" />
-        <Input type="password" placeholder="Password" className="w-full" />
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+          <Input
+            type="email"
+            placeholder="Email"
+            className={clsx("w-full")}
+            {...register("email", { required: "Email is required" })}
+            error={Boolean(errors.email)}
+            errorMessage={errors.email?.message}
+          />
 
-        <Button className="w-full">Login with Email</Button>
+          <Input
+            type="password"
+            placeholder="Password"
+            className={clsx("w-full")}
+            {...register("password", {
+              required: "Password is required",
+              pattern: {
+                value:
+                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                message:
+                  "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character",
+              },
+            })}
+            error={Boolean(errors.password)}
+            errorMessage={errors.password?.message}
+          />
+
+          <Button disabled={isSubmitting} type="submit" className="w-full">
+            Login with Email
+          </Button>
+        </form>
 
         <div className="text-sm text-center">
           <span className="bg-background px-2 text-muted-foreground">

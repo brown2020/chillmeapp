@@ -5,6 +5,7 @@ import {
   handleAuth,
   signOut,
   createAccountWithEmailAndPassword,
+  signin,
 } from "../services/auth";
 import { useToast } from "@frontend/hooks";
 
@@ -51,18 +52,40 @@ export const useAuth = () => {
     return credential;
   };
 
-  const createAccount = async (email: string, password: string) => {
+  const createAccount = async (
+    email: string,
+    password: string,
+  ): Promise<void> => {
     try {
       await createAccountWithEmailAndPassword(email, password);
       toast({
         title: "Account Created",
-        description: "Your account created, Please login",
+        description: "Your account created, Logging you in...",
         variant: "success",
       });
     } catch (err: unknown) {
       const error = err as Error;
       toast({
         title: "Error in creating account",
+        description:
+          error.message || "There is an error in creating an account for you",
+        variant: "error",
+      });
+    }
+  };
+
+  const loginWithEmail = async (email: string, password: string) => {
+    try {
+      await signin(email, password);
+      toast({
+        title: "Login credentials validated",
+        description: "Logging you in...",
+        variant: "success",
+      });
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast({
+        title: "Error in signing in",
         description:
           error.message || "There is an error in creating an account for you",
         variant: "error",
@@ -78,5 +101,6 @@ export const useAuth = () => {
     user,
     isLogged,
     createAccount,
+    loginWithEmail,
   };
 };
