@@ -8,6 +8,12 @@ import { useRouter } from "next/navigation";
 import { Button, Switch, Icons } from "@chill-ui";
 import clsx from "clsx";
 
+let stream: MediaStream | null = null;
+
+const setStream = (mstream: MediaStream | null) => {
+  stream = mstream;
+};
+
 const CreateMeetingForm: React.FC = () => {
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -19,12 +25,11 @@ const CreateMeetingForm: React.FC = () => {
     audio: true,
     video: true,
   });
-  const [stream, setStream] = useState<MediaStream | null>(null);
 
   const authStore = useAuthStore();
   const router = useRouter();
 
-  const startWebcamStream = () => {
+  const startWebcamStream = useCallback(() => {
     navigator.mediaDevices
       .getUserMedia({
         video: true,
@@ -37,17 +42,17 @@ const CreateMeetingForm: React.FC = () => {
           videoElem.srcObject = stream;
         }
       });
-  };
+  }, []);
 
   const stopWebcamStream = useCallback(() => {
-    console.log("Stopping webcam stream");
     if (stream) {
-      console.log("Stream found");
-      stream.getTracks().forEach((track) => {
+      const tracks = stream.getVideoTracks();
+      tracks.map((track) => {
         track.stop();
       });
+      setStream(null);
     }
-  }, [stream]);
+  }, []);
 
   const toggleVideoStream = useCallback(() => {
     if (stream) {
@@ -57,7 +62,7 @@ const CreateMeetingForm: React.FC = () => {
         }
       });
     }
-  }, [mediaStatus.video, stream]);
+  }, [mediaStatus.video]);
 
   useEffect(() => {
     toggleVideoStream();
@@ -65,8 +70,11 @@ const CreateMeetingForm: React.FC = () => {
 
   useEffect(() => {
     startWebcamStream();
-    return stopWebcamStream;
-  }, [stopWebcamStream]);
+    return () => {
+      stopWebcamStream();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleMediaTrack = (type: "audio" | "video") => {
     setMediaStatus((prev) => ({
@@ -100,7 +108,7 @@ const CreateMeetingForm: React.FC = () => {
       await saveMeeting(authStore.user?.uid as string, roomResponse.room);
       router.push(`/live/${roomId}`);
     },
-    [authStore.user?.uid as string, router],
+    [authStore.user?.uid, router, shouldRecord],
   );
 
   const _renderMeetingControls = () => {
