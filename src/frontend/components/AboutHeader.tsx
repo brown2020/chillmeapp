@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
-import { navItems } from "@/frontend/constants/menuItems";
+import { authenticatedNavItems as navItems } from "@/frontend/constants/menuItems";
 
-import logo from "@/app/assets/logo.png";
+import logo from "@/frontend/assets/logo.png";
 import Image from "next/image";
 
 export default function Header() {

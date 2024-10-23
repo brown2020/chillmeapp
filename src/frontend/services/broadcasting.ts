@@ -24,7 +24,6 @@ export async function createRoom(shouldRecord: boolean) {
         enabled: shouldRecord,
       },
     });
-    console.log("Room created successfully:", { room });
     return { room }; // Ensure you return the room ID correctly
   } catch (err: unknown) {
     const error = err as Error;

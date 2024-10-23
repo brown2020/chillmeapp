@@ -1,9 +1,11 @@
 import { useHMSActions } from "@100mslive/react-sdk";
 import { getAppToken } from "@/frontend/services/broadcasting";
 import { useCallback } from "react";
+import useMeetingStore from "../zustand/useMeetingStore";
 
 const useMeeting = () => {
   const hmsActions = useHMSActions();
+  const { mediaStatus, setMediaStatus } = useMeetingStore();
 
   async function _joinRoom(roomId: string, role: string, userName: string) {
     console.log("Joining romt with id", roomId);
@@ -27,8 +29,10 @@ const useMeeting = () => {
   const joinRoom = useCallback(_joinRoom, [hmsActions]);
 
   return {
+    mediaStatus,
+    setMediaStatus,
     joinRoom,
   };
 };
 
-export default useMeeting;
+export { useMeeting };

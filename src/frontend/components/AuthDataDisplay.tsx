@@ -1,8 +1,8 @@
 import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 
 export default function AuthDataDisplay() {
-  const uid = useAuthStore((s) => s.uid);
-  const authEmail = useAuthStore((s) => s.authEmail);
+  const uid = useAuthStore((s) => s.user?.uid);
+  const authEmail = useAuthStore((s) => s.user?.email);
 
   return (
     <div className="flex flex-col px-5 py-3 space-y-3 border border-gray-500 rounded-md">
