@@ -5,5 +5,6 @@
     "plugin:prettier/recommended"
   ],
   // ,
-  "ignorePatterns": ["tailwind.config.ts"]
+  "ignorePatterns": ["tailwind.config.ts"],
+  "rules": {}
 }
