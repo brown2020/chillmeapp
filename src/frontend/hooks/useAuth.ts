@@ -21,7 +21,6 @@ export const useAuth = () => {
   const { toast } = useToast();
 
   const checkAuthState = () => {
-    setIsAuthenticating(true);
     const unsubscribe = handleAuth((user) => {
       if (user?.uid) {
         setLoggedInState(user);
