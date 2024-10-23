@@ -10,7 +10,8 @@
     "prepare": "husky",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx .",
     "eslint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx .",
-    "tunnel": "ssh -R chillme:80:localhost:3000 serveo.net"
+    "tunnel": "ssh -R chillme:80:localhost:3000 serveo.net",
+    "tslint": "tsc"
   },
   "dependencies": {
     "@100mslive/react-sdk": "^0.10.20",
@@ -18,6 +19,7 @@
     "@auth/firebase-adapter": "^2.7.0",
     "@radix-ui/react-icons": "^1.3.0",
     "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-switch": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.2",
     "@stripe/react-stripe-js": "^2.8.0",
     "class-variance-authority": "^0.7.0",
