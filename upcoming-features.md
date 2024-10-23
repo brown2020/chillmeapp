@@ -5,7 +5,7 @@
 - [ ] Test and ensure secure authentication flow.
 
 ## 2. Session Creation and Invitation
-- [ ] Develop a simple interface for one-click meeting/live stream creation.
+- [x] Develop a simple interface for one-click meeting/live stream creation.
 - [ ] Generate unique invite links for easy sharing.
   
 ## 3. Password Protection
