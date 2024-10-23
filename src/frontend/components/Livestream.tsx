@@ -7,12 +7,16 @@ import {
   selectDominantSpeaker,
   selectLocalPeer,
   useVideo,
+  selectIsLocalAudioEnabled,
+  selectIsLocalVideoEnabled,
+  useHMSActions,
 } from "@100mslive/react-sdk";
 
 import Footer from "./Footer";
 import Header from "./Header";
 import PeerDisplay from "./PeerDisplay";
 import ChatView from "./ChatView";
+import { useMeeting } from "@/frontend/hooks";
 
 export default function Livestream() {
   const [showChat, setShowChat] = useState(true);
@@ -20,6 +24,25 @@ export default function Livestream() {
   const localPeer = useHMSStore(selectLocalPeer);
   const dominantSpeaker = useHMSStore(selectDominantSpeaker);
   const latestDominantSpeakerRef = useRef(dominantSpeaker);
+  const { mediaStatus } = useMeeting();
+  const audioEnabled = useHMSStore(selectIsLocalAudioEnabled);
+  const videoEnabled = useHMSStore(selectIsLocalVideoEnabled);
+  const hmsActions = useHMSActions();
+
+  useEffect(() => {
+    (async () => {
+      await Promise.all([
+        hmsActions.setLocalAudioEnabled(mediaStatus.audio),
+        hmsActions.setLocalVideoEnabled(mediaStatus.video),
+      ]);
+      console.log("Updated media settings", mediaStatus);
+      console.log({
+        audioEnabled,
+        videoEnabled,
+      });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mediaStatus.audio, mediaStatus.video]);
 
   // Memoize the active speaker value
   const activeSpeaker = useMemo(() => {

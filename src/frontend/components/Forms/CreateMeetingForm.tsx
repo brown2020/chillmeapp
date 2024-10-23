@@ -6,7 +6,10 @@ import { saveMeeting } from "@/frontend/services/meeting";
 import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 import { useRouter } from "next/navigation";
 import { Button, Switch, Icons } from "@chill-ui";
+import { useMeeting } from "@frontend/hooks";
 import clsx from "clsx";
+
+type MediaType = "audio" | "video";
 
 let stream: MediaStream | null = null;
 
@@ -18,13 +21,7 @@ const CreateMeetingForm: React.FC = () => {
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [shouldRecord, setShouldRecord] = useState<boolean>(false);
-  const [mediaStatus, setMediaStatus] = React.useState<{
-    audio: boolean;
-    video: boolean;
-  }>({
-    audio: true,
-    video: true,
-  });
+  const { mediaStatus, setMediaStatus } = useMeeting();
 
   const authStore = useAuthStore();
   const router = useRouter();
@@ -56,8 +53,13 @@ const CreateMeetingForm: React.FC = () => {
 
   const toggleVideoStream = useCallback(() => {
     if (stream) {
+      const videoElem = document.querySelector("video");
+
       stream.getTracks().forEach((track) => {
         if (track.kind == "video") {
+          if (videoElem) {
+            videoElem.srcObject = mediaStatus.video ? stream : null;
+          }
           track.enabled = mediaStatus.video;
         }
       });
@@ -76,11 +78,10 @@ const CreateMeetingForm: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const toggleMediaTrack = (type: "audio" | "video") => {
-    setMediaStatus((prev) => ({
-      ...prev,
-      [type]: !prev[type],
-    }));
+  const toggleMediaTrack = (type: MediaType) => {
+    setMediaStatus({
+      [type]: !mediaStatus[type],
+    });
   };
 
   const handleSubmit = useCallback(
@@ -104,7 +105,6 @@ const CreateMeetingForm: React.FC = () => {
         setIsLoading(false);
         return;
       }
-      console.log("Room created with id ", roomId);
       await saveMeeting(authStore.user?.uid as string, roomResponse.room);
       router.push(`/live/${roomId}`);
     },
@@ -153,7 +153,7 @@ const CreateMeetingForm: React.FC = () => {
     <>
       <video
         autoPlay
-        className="border border-slate-700 rounded-xl"
+        className="border border-slate-800 bg-slate-700 rounded-xl"
         style={{
           transform: "scaleX(-1)",
           height: 300,
