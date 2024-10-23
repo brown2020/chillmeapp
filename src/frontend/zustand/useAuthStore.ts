@@ -16,7 +16,7 @@ type AuthStore = AuthState & AuthActions;
 
 const defaultAuthState: AuthState = {
   user: null,
-  isAuthenticating: false,
+  isAuthenticating: true,
 };
 
 export const useAuthStore = create<AuthStore>((set, get) => ({

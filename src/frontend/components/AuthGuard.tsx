@@ -22,6 +22,7 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
   }, []);
 
   useEffect(() => {
+    console.log("Hook updated");
     if (!isAuthenticating) {
       if (user?.uid && isUnprotectedRoute) {
         router.replace("/live"); // Redirect logged-in users from unprotected route
