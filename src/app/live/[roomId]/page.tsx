@@ -8,7 +8,7 @@ import {
   useHMSStore,
 } from "@100mslive/react-sdk";
 import Livestream from "@/frontend/components/Livestream";
-import useMeeting from "@/frontend/hooks/useMeeting";
+import { useMeeting } from "@/frontend/hooks";
 import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 
 export default function RoomPage({ params }: { params: { roomId: string } }) {
