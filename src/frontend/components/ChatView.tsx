@@ -33,7 +33,7 @@ export default function ChatView() {
   );
 
   return (
-    <div className="flex flex-col h-full w-full justify-end overflow-y-auto p-2 max-w-[200px]">
+    <div className="flex flex-col w-full justify-end overflow-y-auto p-2 max-w-[200px]">
       {messages.map((message, index) => (
         <div key={index} className="mb-2">
           <div className="flex items-start">

@@ -11,7 +11,7 @@ type MeetingStore = {
 const useMeetingStore = create<MeetingStore>((set) => ({
   mediaStatus: {
     audio: true,
-    video: true,
+    video: false,
   },
   setMediaStatus: (update: Partial<MeetingStore["mediaStatus"]>) =>
     set((state) => ({

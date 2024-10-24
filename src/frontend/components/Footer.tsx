@@ -1,26 +1,20 @@
 "use client";
 
 import React, { useState, ChangeEvent, FormEvent, useCallback } from "react";
-import { useAVToggle, useHMSActions } from "@100mslive/react-sdk";
-import {
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
-  MessageCircle,
-  MessageCircleOff,
-} from "lucide-react";
+import { useHMSActions } from "@100mslive/react-sdk";
+
+import { useMeeting } from "../hooks";
+import { Button, Icons } from "@frontend/components/ui";
 
 interface FooterProps {
   showChat: boolean;
   setShowChat: (showChat: boolean) => void;
 }
 
-export default function Footer({ showChat, setShowChat }: FooterProps) {
+export default function Footer({ showChat }: FooterProps) {
   const [messageDraft, setMessageDraft] = useState<string>("");
   const hmsActions = useHMSActions();
-  const { isLocalAudioEnabled, isLocalVideoEnabled, toggleAudio, toggleVideo } =
-    useAVToggle();
+  const { mediaStatus, setMediaStatus, isConnected } = useMeeting();
 
   const handleMessage = useCallback(
     async (e: FormEvent) => {
@@ -50,28 +44,32 @@ export default function Footer({ showChat, setShowChat }: FooterProps) {
         />
       </form>
       <div className="flex items-center">
-        <button
-          className="p-2 mx-1 bg-transparent"
-          onClick={() => setShowChat(!showChat)}
-          aria-pressed={showChat}
+        <Button
+          variant={mediaStatus.audio ? "outline" : "danger"}
+          size="icon"
+          className={"mr-2"}
+          onClick={() => setMediaStatus({ audio: !mediaStatus.audio })}
         >
-          {showChat ? <MessageCircle /> : <MessageCircleOff />}
-        </button>
-        <button
-          className="p-2 mx-1 bg-transparent"
-          onClick={toggleAudio}
-          aria-pressed={isLocalAudioEnabled}
+          {!mediaStatus.audio ? (
+            <Icons.MicOff className="h-4 w-4" />
+          ) : (
+            <Icons.MicIcon className="h-4 w-4" />
+          )}
+        </Button>
+
+        <Button
+          size="icon"
+          variant={mediaStatus.video ? "outline" : "danger"}
+          onClick={() => setMediaStatus({ video: !mediaStatus.video })}
         >
-          {isLocalAudioEnabled ? <Mic /> : <MicOff />}
-        </button>
-        <button
-          className="p-2 mx-1 bg-transparent"
-          onClick={toggleVideo}
-          aria-pressed={isLocalVideoEnabled}
-        >
-          {isLocalVideoEnabled ? <Video /> : <VideoOff />}
-        </button>
+          {!mediaStatus.video ? (
+            <Icons.VideoOff className="h-4 w-4" />
+          ) : (
+            <Icons.Video className="h-4 w-4" />
+          )}
+        </Button>
       </div>
+      {isConnected && <Button variant={"danger"}>End Stream</Button>}
     </div>
   );
 }

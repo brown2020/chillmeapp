@@ -7,16 +7,11 @@ import {
   selectDominantSpeaker,
   selectLocalPeer,
   useVideo,
-  selectIsLocalAudioEnabled,
-  selectIsLocalVideoEnabled,
-  useHMSActions,
 } from "@100mslive/react-sdk";
-
 import Footer from "./Footer";
 import Header from "./Header";
 import PeerDisplay from "./PeerDisplay";
 import ChatView from "./ChatView";
-import { useMeeting } from "@/frontend/hooks";
 
 export default function Livestream() {
   const [showChat, setShowChat] = useState(true);
@@ -24,25 +19,6 @@ export default function Livestream() {
   const localPeer = useHMSStore(selectLocalPeer);
   const dominantSpeaker = useHMSStore(selectDominantSpeaker);
   const latestDominantSpeakerRef = useRef(dominantSpeaker);
-  const { mediaStatus } = useMeeting();
-  const audioEnabled = useHMSStore(selectIsLocalAudioEnabled);
-  const videoEnabled = useHMSStore(selectIsLocalVideoEnabled);
-  const hmsActions = useHMSActions();
-
-  useEffect(() => {
-    (async () => {
-      await Promise.all([
-        hmsActions.setLocalAudioEnabled(mediaStatus.audio),
-        hmsActions.setLocalVideoEnabled(mediaStatus.video),
-      ]);
-      console.log("Updated media settings", mediaStatus);
-      console.log({
-        audioEnabled,
-        videoEnabled,
-      });
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mediaStatus.audio, mediaStatus.video]);
 
   // Memoize the active speaker value
   const activeSpeaker = useMemo(() => {
@@ -73,34 +49,37 @@ export default function Livestream() {
     )); // No extra semicolon here
 
   return (
-    <div className="relative flex flex-col w-full h-container-custom">
+    <div className="flex flex-col w-full justify-between h-[80vh]">
       {/* Background Video */}
-      <div className="absolute inset-0 flex flex-col h-full">
+      <div className="absolute w-full z-[-1]">
         <video
           ref={videoRef}
           autoPlay
           muted
           playsInline
-          className="w-full h-full object-cover"
+          className="w-full h-[80vh]"
+          style={{
+            transform: "scaleX(-1)",
+          }}
         />
       </div>
       {/* Foreground Content */}
-      <div className="relative flex flex-col h-full">
+      <div className="flex-col">
         {/* Header */}
         {activeSpeaker && <Header peer={activeSpeaker} />}
         {/* Main Content */}
-        <div className="flex flex-row h-full overflow-hidden">
+        <div className="flex flex-row overflow-hidden">
           {/* Chat View */}
           {showChat && <ChatView />}
 
           {/* Peer Displays */}
-          <div className="flex flex-col max-h-[80%] overflow-y-scroll fixed right-0 top-[70px] mt-[70px] mr-[10px] mb-[70px]">
+          <div className="flex flex-col overflow-y-scroll fixed right-0 top-[70px] mt-[70px] mr-[10px] mb-[70px]">
             {renderPeers()}
           </div>
         </div>
         {/* Footer */}
-        <Footer showChat={showChat} setShowChat={setShowChat} />
       </div>
+      <Footer showChat={showChat} setShowChat={setShowChat} />
     </div>
   );
 }

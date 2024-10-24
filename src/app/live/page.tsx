@@ -24,14 +24,6 @@ export default function LiveMain() {
             <h1 className="text-xl font-bold">Start a meeting real quick</h1>
           </div>
         </div>
-
-        {/* <div className="flex flex-col md:flex-row w-full">
-          <div className="camera-preview md:w-1/2">
-            <video autoPlay height="{200}"></video>
-            <JoinForm />
-          </div>
-          <div className="bg-green-500 p-4 md:w-1/2">Column 2</div>
-        </div> */}
       </LayoutWrapper>
     </>
   );

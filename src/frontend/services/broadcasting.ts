@@ -39,11 +39,6 @@ export async function getAppToken(
   userId: string,
   role: string,
 ) {
-  console.log("Attempting to get app token with parameters:", {
-    roomId,
-    userId,
-    role,
-  });
   try {
     const appToken = await hms.auth.getAuthToken({ roomId, role, userId });
     console.log("App token generated successfully"); // Remove sensitive token from the log
