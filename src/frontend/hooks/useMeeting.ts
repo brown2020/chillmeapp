@@ -20,12 +20,12 @@ const useMeeting = () => {
   const router = useRouter();
 
   const updateHMSMediaStore = useCallback(async () => {
-    console.log("Previous", { audioEnabled, videoEnabled });
+    // console.log("Previous", { audioEnabled, videoEnabled });
     await Promise.all([
       hmsActions.setLocalVideoEnabled(mediaStatus.video),
       // hmsActions.setLocalAudioEnabled(mediaStatus.audio),
     ]);
-    console.log("Updated", { audioEnabled, videoEnabled });
+    // console.log("Updated", { audioEnabled, videoEnabled });
   }, [mediaStatus, hmsActions, audioEnabled, videoEnabled]);
 
   const leaveMeeting = useCallback(() => {

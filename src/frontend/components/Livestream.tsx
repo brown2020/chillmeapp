@@ -1,24 +1,45 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import {
   selectPeers,
   useHMSStore,
   selectDominantSpeaker,
   selectLocalPeer,
-  useVideo,
 } from "@100mslive/react-sdk";
-import Footer from "./Footer";
-import Header from "./Header";
+import MeetingControls from "./MeetingControls";
 import PeerDisplay from "./PeerDisplay";
-import ChatView from "./ChatView";
+import MeetingMemberStream from "./MeetingMemberStream";
 
 export default function Livestream() {
-  const [showChat, setShowChat] = useState(true);
   const peers = useHMSStore(selectPeers);
   const localPeer = useHMSStore(selectLocalPeer);
   const dominantSpeaker = useHMSStore(selectDominantSpeaker);
   const latestDominantSpeakerRef = useRef(dominantSpeaker);
+  const meetingPeers = new Array(3).fill("");
+
+  function calcColumns() {
+    switch (true) {
+      case meetingPeers.length === 1:
+        return 1;
+      case meetingPeers.length === 2:
+        return 2;
+      default:
+        return 3;
+    }
+  }
+
+  // Calculate height based on peers count
+  function calcHeight() {
+    switch (true) {
+      case meetingPeers.length <= 3:
+        return "70vh";
+      case meetingPeers.length <= 4:
+        return "50vh";
+      default:
+        return "33vh";
+    }
+  }
 
   // Memoize the active speaker value
   const activeSpeaker = useMemo(() => {
@@ -31,10 +52,6 @@ export default function Livestream() {
       latestDominantSpeakerRef.current = dominantSpeaker;
     }
   }, [dominantSpeaker, localPeer]);
-
-  const { videoRef } = useVideo({
-    trackId: activeSpeaker?.videoTrack ?? "",
-  });
 
   // Extracted function to render peers
   const renderPeers = () =>
@@ -50,36 +67,24 @@ export default function Livestream() {
 
   return (
     <div className="flex flex-col w-full justify-between h-[80vh]">
-      {/* Background Video */}
-      <div className="absolute w-full z-[-1]">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          className="w-full h-[80vh]"
-          style={{
-            transform: "scaleX(-1)",
-          }}
-        />
+      <div className={`grid gap-4 p-4 grid-cols-${calcColumns()}`}>
+        {meetingPeers.map((peer, index) => (
+          <MeetingMemberStream
+            key={index}
+            memberType={peer.type}
+            height={calcHeight()}
+          />
+        ))}
       </div>
-      {/* Foreground Content */}
-      <div className="flex-col">
-        {/* Header */}
-        {activeSpeaker && <Header peer={activeSpeaker} />}
-        {/* Main Content */}
-        <div className="flex flex-row overflow-hidden">
-          {/* Chat View */}
-          {showChat && <ChatView />}
 
-          {/* Peer Displays */}
+      <div className="flex-col">
+        <div className="flex flex-row overflow-hidden">
           <div className="flex flex-col overflow-y-scroll fixed right-0 top-[70px] mt-[70px] mr-[10px] mb-[70px]">
             {renderPeers()}
           </div>
         </div>
-        {/* Footer */}
       </div>
-      <Footer showChat={showChat} setShowChat={setShowChat} />
+      <MeetingControls />
     </div>
   );
 }
