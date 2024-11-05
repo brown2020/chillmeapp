@@ -8,13 +8,15 @@ import {
   selectIsPeerVideoEnabled,
   HMSPeer,
 } from "@100mslive/react-sdk";
+import clsx from "clsx";
 
 interface Props {
   height: string;
   peer: HMSPeer;
+  totalPeers: number;
 }
 
-const MeetingMemberStream = ({ peer, height }: Props) => {
+const MeetingMemberStream = ({ peer, height, totalPeers }: Props) => {
   const localPeer = useHMSStore(selectLocalPeer);
   const dominantSpeaker = useHMSStore(selectDominantSpeaker);
   const latestDominantSpeakerRef = useRef(dominantSpeaker);
@@ -37,9 +39,11 @@ const MeetingMemberStream = ({ peer, height }: Props) => {
 
   return (
     <div
-      className={`relative w-full border border-slate-800 bg-slate-700 rounded-xl 
-        ${activeSpeaker?.id === dominantSpeaker?.id ? "ring-4 ring-blue-500" : ""}
-      `}
+      className={clsx(
+        `relative w-full border border-slate-800 bg-slate-700 rounded-xl`,
+        activeSpeaker?.id === dominantSpeaker?.id && "ring-4 ring-blue-500",
+        totalPeers === 1 && "w-6/12 m-auto",
+      )}
       style={{ height }}
     >
       <video
