@@ -1,11 +1,10 @@
 // app/layout.tsx
 import type { Metadata } from "next";
-import "../frontend/styles/globals.css";
-
 import { ThemeProvider } from "@/frontend/providers/ThemeProvider";
 import { HMSProvider } from "@frontend/providers/HMSProvider";
 import Layout from "@/frontend/layout";
 import AuthGuard from "@/frontend/components/AuthGuard";
+import "../frontend/styles/globals.css";
 
 export const metadata: Metadata = {
   title: "Chill.me",
