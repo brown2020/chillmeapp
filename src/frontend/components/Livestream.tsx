@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef } from "react";
 import {
   selectPeers,
   useHMSStore,
@@ -8,16 +8,17 @@ import {
   selectLocalPeer,
 } from "@100mslive/react-sdk";
 import MeetingControls from "./MeetingControls";
-import PeerDisplay from "./PeerDisplay";
 import MeetingMemberStream from "./MeetingMemberStream";
+import clsx from "clsx";
 
 export default function Livestream() {
   const peers = useHMSStore(selectPeers);
   const localPeer = useHMSStore(selectLocalPeer);
   const dominantSpeaker = useHMSStore(selectDominantSpeaker);
   const latestDominantSpeakerRef = useRef(dominantSpeaker);
-  const meetingPeers = new Array(3).fill("");
+  const meetingPeers = peers;
 
+  // Calculate columns based on peers count
   function calcColumns() {
     switch (true) {
       case meetingPeers.length === 1:
@@ -41,11 +42,6 @@ export default function Livestream() {
     }
   }
 
-  // Memoize the active speaker value
-  const activeSpeaker = useMemo(() => {
-    return latestDominantSpeakerRef.current || localPeer;
-  }, [localPeer]);
-
   // Track changes in the dominant speaker
   useEffect(() => {
     if (dominantSpeaker && dominantSpeaker !== localPeer) {
@@ -53,36 +49,20 @@ export default function Livestream() {
     }
   }, [dominantSpeaker, localPeer]);
 
-  // Extracted function to render peers
-  const renderPeers = () =>
-    peers.map((peer) => (
-      <div key={peer.id}>
-        {peer.id !== activeSpeaker?.id && (
-          <div className="flex flex-col">
-            <PeerDisplay peer={peer} />
-          </div>
-        )}
-      </div>
-    )); // No extra semicolon here
-
   return (
     <div className="flex flex-col w-full justify-between h-[80vh]">
-      <div className={`grid gap-4 p-4 grid-cols-${calcColumns()}`}>
-        {meetingPeers.map((peer, index) => (
-          <MeetingMemberStream
-            key={index}
-            memberType={peer.type}
-            height={calcHeight()}
-          />
-        ))}
-      </div>
-
-      <div className="flex-col">
-        <div className="flex flex-row overflow-hidden">
-          <div className="flex flex-col overflow-y-scroll fixed right-0 top-[70px] mt-[70px] mr-[10px] mb-[70px]">
-            {renderPeers()}
-          </div>
-        </div>
+      <div className={clsx(`grid gap-4 mt-2 grid-cols-${calcColumns()}`)}>
+        {meetingPeers.map((peer, index) => {
+          if (peer) {
+            return (
+              <MeetingMemberStream
+                key={index}
+                height={calcHeight()}
+                peer={peer}
+              />
+            );
+          }
+        })}
       </div>
       <MeetingControls />
     </div>
