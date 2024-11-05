@@ -37,12 +37,14 @@ const MeetingMemberStream = ({ peer, height, totalPeers }: Props) => {
     personIconRef.current.style.display = peerVideoEnabled ? "none" : "flex";
   }, [peerVideoEnabled, personIconRef]);
 
+  console.log(totalPeers);
+
   return (
     <div
       className={clsx(
-        `relative w-full border border-slate-800 bg-slate-700 rounded-xl`,
+        `relative border border-slate-800 bg-slate-700 rounded-xl`,
         activeSpeaker?.id === dominantSpeaker?.id && "ring-4 ring-blue-500",
-        totalPeers === 1 && "w-6/12 m-auto",
+        totalPeers === 1 ? "w-6/12 m-auto" : "w-full",
       )}
       style={{ height }}
     >
