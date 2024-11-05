@@ -51,7 +51,12 @@ export default function Livestream() {
 
   return (
     <div className="flex flex-col w-full justify-between h-[80vh]">
-      <div className={clsx(`grid gap-4 mt-2 grid-cols-${calcColumns()}`)}>
+      <div
+        className={clsx(`grid gap-4 mt-2`)}
+        style={{
+          gridTemplateColumns: `repeat(${calcColumns()}, minmax(0, 1fr))`,
+        }}
+      >
         {meetingPeers.map((peer, index) => {
           if (peer) {
             return (
