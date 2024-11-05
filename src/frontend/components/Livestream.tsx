@@ -59,6 +59,7 @@ export default function Livestream() {
                 key={index}
                 height={calcHeight()}
                 peer={peer}
+                totalPeers={peers.length}
               />
             );
           }
