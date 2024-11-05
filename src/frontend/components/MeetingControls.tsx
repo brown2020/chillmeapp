@@ -11,7 +11,7 @@ export default function MeetingControls() {
   return (
     <div className="grid grid-cols-3 gap-4 items-center">
       <div className="justify-self-start">
-        <p>You</p>
+        <p>Meeting</p>
       </div>
       <div className="justify-self-center">
         <Button
