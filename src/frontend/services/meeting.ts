@@ -1,6 +1,13 @@
 import { db, storage } from "@/frontend/lib/firebase";
 import { Meeting, MeetingSnapShot } from "@/types/entities";
-import { addDoc, getDocs, query, collection, where } from "firebase/firestore";
+import {
+  addDoc,
+  getDocs,
+  query,
+  collection,
+  where,
+  orderBy,
+} from "firebase/firestore";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
 
 const saveMeeting = async (uid: string, payload: Meeting) => {
@@ -15,6 +22,7 @@ const listUserMeetings = async (uid: string) => {
   const q = query(
     collection(db, "meeting_sessions"),
     where("broadcaster", "==", uid),
+    orderBy("created_at", "desc"),
   );
   const querySnapshot = await getDocs(q);
   const results = querySnapshot.docs

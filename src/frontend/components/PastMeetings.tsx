@@ -15,7 +15,15 @@ const PastMeetings = () => {
     })();
   }, [authStore.user?.uid]);
 
-  return meetingsData.map((d) => <MeetingCard key={d.id} data={d} />);
+  return (
+    <div className="grid gap-3 grid-cols-4 w-full">
+      {meetingsData.map((d) => (
+        <>
+          <MeetingCard key={d.id} data={d} />
+        </>
+      ))}
+    </div>
+  );
 };
 
 export default PastMeetings;

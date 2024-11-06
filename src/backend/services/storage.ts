@@ -22,13 +22,15 @@ function uploadRecordingToStorage(
     // Pipe the response stream to PassThrough stream
     response.data.pipe(passThroughStream);
 
-    const storagePath = `${destinationFolder}${v4()}.mp4`;
+    const filename = `${v4()}.mp4`;
+    const storagePath = `${destinationFolder}${filename}`;
     // Upload to Firebase Storage
-    const file = adminBucket.file(storagePath);
+    const file = adminBucket.file(storagePath, {});
 
     const uploadStream = file.createWriteStream({
       metadata: {
         contentType: response.headers["content-type"],
+        contentDisposition: `attachment; filename="${filename}"`,
       },
     });
 

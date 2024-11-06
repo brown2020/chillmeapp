@@ -9,6 +9,7 @@ export default function ProfileComponent() {
     <div>
       <p>Name : {auth.user?.displayName || "Not Available"}</p>
       <p>Email : {auth.user?.email || ""}</p>
+      <p> ID : {auth.user?.uid}</p>
     </div>
   );
 }
