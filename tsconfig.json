@@ -20,7 +20,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@chill-ui": ["./src/frontend/components/ui"],
-      "@frontend/*": ["./src/frontend/*"]
+      "@frontend/*": ["./src/frontend/*"],
+      "@backend/*": ["./src/backend/*"]
     }
   },
   "include": [

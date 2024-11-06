@@ -8,9 +8,13 @@ import { useAuth } from "../hooks";
 import logo from "@/frontend/assets/logo.png";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import clsx from "clsx";
 
 export default function Navbar() {
   const { isLogged } = useAuth();
+  const pathname = usePathname();
+
   const navItems = isLogged ? authenticatedNavItems : guestNavItems;
   return (
     <div className="z-10 flex items-center justify-between h-16 px-4 bg-white sticky top-0">
@@ -28,7 +32,10 @@ export default function Navbar() {
           <Link
             href={item.path}
             key={index}
-            className={`flex items-center gap-1 px-3 h-full transition duration-300 cursor-pointer text-black`}
+            className={clsx(
+              `flex items-center gap-1 px-3 h-full transition duration-300 cursor-pointer`,
+              pathname === item.path ? "text-primary" : "text-black",
+            )}
           >
             <div>
               <item.icon size={20} className="object-cover" />

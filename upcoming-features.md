@@ -15,8 +15,8 @@
 - [x] Integrate 100ms for high-quality real-time video and audio streaming.
   
 ## 5. Recording and Playback
-- [ ] Implement session recording with cloud storage.
-- [ ] Develop an interface for viewing/downloading previous recordings.
+- [x] Implement session recording with cloud storage.
+- [x] Develop an interface for viewing/downloading previous recordings.
 
 ## 6. Basic In-Session Controls
 - [ ] Add controls for mute/unmute and toggling video.

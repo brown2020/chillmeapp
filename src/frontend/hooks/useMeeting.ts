@@ -1,8 +1,6 @@
 import {
   useHMSActions,
   useHMSStore,
-  selectIsLocalAudioEnabled,
-  selectIsLocalVideoEnabled,
   selectIsConnectedToRoom,
 } from "@100mslive/react-sdk";
 import { getAppToken } from "@/frontend/services/broadcasting";
@@ -13,8 +11,6 @@ import { useRouter } from "next/navigation";
 
 const useMeeting = () => {
   const hmsActions = useHMSActions();
-  const audioEnabled = useHMSStore(selectIsLocalAudioEnabled);
-  const videoEnabled = useHMSStore(selectIsLocalVideoEnabled);
   const { mediaStatus, setMediaStatus } = useMeetingStore();
   const isConnected = useHMSStore(selectIsConnectedToRoom);
   const router = useRouter();
@@ -26,11 +22,19 @@ const useMeeting = () => {
       // hmsActions.setLocalAudioEnabled(mediaStatus.audio),
     ]);
     // console.log("Updated", { audioEnabled, videoEnabled });
-  }, [mediaStatus, hmsActions, audioEnabled, videoEnabled]);
+  }, [mediaStatus, hmsActions]);
 
   const leaveMeeting = useCallback(() => {
     try {
       hmsActions.leave();
+    } finally {
+      router.push("/");
+    }
+  }, [hmsActions, router]);
+
+  const endMeeting = useCallback(() => {
+    try {
+      hmsActions.endRoom(true, "meeting-finished");
     } finally {
       router.push("/");
     }
@@ -66,6 +70,7 @@ const useMeeting = () => {
     joinRoom,
     updateHMSMediaStore,
     leaveMeeting,
+    endMeeting,
     isConnected,
   };
 };
