@@ -1,5 +1,5 @@
 import { MeetingSnapShot } from "@/types/entities";
-import { findUserById } from "@/frontend/services/user";
+import { getUserById } from "@/backend/services/auth";
 import { useEffect, useState } from "react";
 import { formatSeconds } from "@/utils/dateUtils";
 import { fetchRecording } from "@/frontend/services/meeting";
@@ -16,8 +16,8 @@ const MeetingCard = ({ data }: Props) => {
   const [recordingStatus, setRecordingStatus] = useState<string | null>(null);
 
   const aggregateMeetingData = async () => {
-    const result = await findUserById(data.broadcaster);
-    setHostDisplayName(result.authDisplayName);
+    const result = await getUserById(data.broadcaster);
+    setHostDisplayName(result.displayName || "Unknown");
 
     if (!data.recording_info?.enabled) {
       setRecordingStatus("not-available");

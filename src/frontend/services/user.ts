@@ -1,3 +1,5 @@
+"use server";
+
 import { db } from "@/frontend/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
