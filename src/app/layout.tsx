@@ -1,11 +1,10 @@
 // app/layout.tsx
 import type { Metadata } from "next";
-import "../frontend/styles/globals.css";
-
 import { ThemeProvider } from "@/frontend/providers/ThemeProvider";
 import { HMSProvider } from "@frontend/providers/HMSProvider";
 import Layout from "@/frontend/layout";
 import AuthGuard from "@/frontend/components/AuthGuard";
+import "../frontend/styles/globals.css";
 
 export const metadata: Metadata = {
   title: "Chill.me",
@@ -18,21 +17,21 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <HMSProvider>
+    <HMSProvider>
+      <html lang="en">
+        <body>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
             <AuthGuard>
               <Layout>{children}</Layout>
             </AuthGuard>
-          </HMSProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+          </ThemeProvider>
+        </body>
+      </html>
+    </HMSProvider>
   );
 }

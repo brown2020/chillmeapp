@@ -2,17 +2,14 @@
 
 import React, { useState, useCallback } from "react";
 import {
-  selectIsConnectedToRoom,
   selectRoom,
   useAutoplayError,
-  useHMSActions,
   useHMSStore,
   HMSPeer,
   HMSRoom,
 } from "@100mslive/react-sdk";
 import { Share2Icon } from "lucide-react";
 import Modal from "./Modal";
-import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   peer: HMSPeer;
@@ -20,22 +17,13 @@ interface HeaderProps {
 
 export default function Header({ peer }: HeaderProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const isConnected = useHMSStore(selectIsConnectedToRoom);
   const room: HMSRoom | null = useHMSStore(selectRoom);
-  const hmsActions = useHMSActions();
   const { error, resetError, unblockAudio } = useAutoplayError();
-  const router = useRouter();
 
   // Handlers using useCallback for memoization
   const handleModalOpen = useCallback(() => setIsModalOpen(true), []);
   const handleModalClose = useCallback(() => setIsModalOpen(false), []);
-  const handleLeave = useCallback(() => {
-    try {
-      hmsActions.leave();
-    } finally {
-      router.push("/");
-    }
-  }, [hmsActions, router]);
+
   const handleAllowAudio = useCallback(() => {
     unblockAudio();
     resetError();
@@ -57,16 +45,6 @@ export default function Header({ peer }: HeaderProps) {
       <button className="bg-black bg-opacity-30 text-white rounded px-4 py-2">
         {peer.name} {peer.isLocal ? "(You)" : ""}
       </button>
-
-      {isConnected && (
-        <button
-          id="leave-btn"
-          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-          onClick={handleLeave}
-        >
-          End Stream
-        </button>
-      )}
 
       {isModalOpen && (
         <Modal roomName={room?.name} onClose={handleModalClose} />
