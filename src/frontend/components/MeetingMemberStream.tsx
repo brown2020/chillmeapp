@@ -37,8 +37,6 @@ const MeetingMemberStream = ({ peer, height, totalPeers }: Props) => {
     personIconRef.current.style.display = peerVideoEnabled ? "none" : "flex";
   }, [peerVideoEnabled, personIconRef]);
 
-  console.log(totalPeers);
-
   return (
     <div
       className={clsx(
