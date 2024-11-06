@@ -55,7 +55,6 @@ const CreateMeetingForm: React.FC = () => {
   }, []);
 
   const toggleVideoStream = useCallback(() => {
-    console.log("Toggling vid stream", mediaStatus.video, stream);
     if (stream) {
       const videoElem = document.querySelector("video");
 

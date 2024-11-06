@@ -1,7 +1,7 @@
 "use server";
 // import * as dotenv from "dotenv";
 import * as HMS from "@100mslive/server-sdk"; // Correct wildcard import
-import { v4 } from "uuid";
+import { generateUniqueRoomCode } from "@/utils/roomCodeGenerator";
 
 // dotenv.config();
 
@@ -19,7 +19,7 @@ const hms = new HMS.SDK(app_access_key, app_secret);
 export async function createRoom(shouldRecord: boolean) {
   try {
     const room = await hms.rooms.create({
-      name: v4(),
+      name: generateUniqueRoomCode(),
       recording_info: {
         enabled: shouldRecord,
       },
@@ -41,7 +41,6 @@ export async function getAppToken(
 ) {
   try {
     const appToken = await hms.auth.getAuthToken({ roomId, role, userId });
-    console.log("App token generated successfully"); // Remove sensitive token from the log
     return { appToken };
   } catch (error: unknown) {
     console.error("Error getting app token:", error);
