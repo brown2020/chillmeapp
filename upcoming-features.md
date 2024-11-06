@@ -6,7 +6,7 @@
 
 ## 2. Session Creation and Invitation
 - [x] Develop a simple interface for one-click meeting/live stream creation.
-- [ ] Generate unique invite links for easy sharing.
+- [x] Generate unique invite links for easy sharing.
   
 ## 3. Password Protection
 - [ ] Add functionality for password-protected sessions.
