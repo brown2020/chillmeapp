@@ -12,7 +12,7 @@
 - [ ] Add functionality for password-protected sessions.
   
 ## 4. Real-time Video and Audio (100ms)
-- [ ] Integrate 100ms for high-quality real-time video and audio streaming.
+- [x] Integrate 100ms for high-quality real-time video and audio streaming.
   
 ## 5. Recording and Playback
 - [ ] Implement session recording with cloud storage.
