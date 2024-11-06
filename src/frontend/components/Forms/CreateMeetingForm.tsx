@@ -27,6 +27,9 @@ const CreateMeetingForm: React.FC = () => {
   const router = useRouter();
 
   const startWebcamStream = useCallback(() => {
+    if (!mediaStatus.video) {
+      return;
+    }
     navigator.mediaDevices
       .getUserMedia({
         video: true,
@@ -39,7 +42,7 @@ const CreateMeetingForm: React.FC = () => {
           videoElem.srcObject = stream;
         }
       });
-  }, []);
+  }, [mediaStatus.video]);
 
   const stopWebcamStream = useCallback(() => {
     if (stream) {
@@ -52,6 +55,7 @@ const CreateMeetingForm: React.FC = () => {
   }, []);
 
   const toggleVideoStream = useCallback(() => {
+    console.log("Toggling vid stream", mediaStatus.video, stream);
     if (stream) {
       const videoElem = document.querySelector("video");
 
@@ -63,12 +67,14 @@ const CreateMeetingForm: React.FC = () => {
           track.enabled = mediaStatus.video;
         }
       });
+    } else {
+      startWebcamStream();
     }
-  }, [mediaStatus.video]);
+  }, [mediaStatus.video, startWebcamStream]);
 
   useEffect(() => {
     toggleVideoStream();
-  }, [mediaStatus.video, toggleVideoStream]);
+  }, [toggleVideoStream]);
 
   useEffect(() => {
     startWebcamStream();
