@@ -5,7 +5,7 @@ import { useMeeting } from "../hooks";
 import { Button, Icons, ClickableTooltip } from "@frontend/components/ui";
 
 export default function MeetingControls() {
-  const { mediaStatus, setMediaStatus, isConnected } = useMeeting();
+  const { mediaStatus, setMediaStatus, isConnected, endMeeting } = useMeeting();
 
   const copyShareableUrl = async () => {
     await navigator.clipboard.writeText(window.location.href);
@@ -51,7 +51,11 @@ export default function MeetingControls() {
           </Button>
         </ClickableTooltip>
 
-        {isConnected && <Button variant={"danger"}>End Stream</Button>}
+        {isConnected && (
+          <Button onClick={endMeeting} variant={"danger"}>
+            End Stream
+          </Button>
+        )}
       </div>
     </div>
   );
