@@ -8,6 +8,7 @@ import {
   selectLocalPeer,
 } from "@100mslive/react-sdk";
 import { getAppToken } from "@/frontend/services/broadcasting";
+import { getMeetingInfo } from "@backend/services/meeting";
 import { useCallback } from "react";
 import useMeetingStore from "../zustand/useMeetingStore";
 import { useEffect, useMemo } from "react";
@@ -28,12 +29,10 @@ const useMeeting = () => {
   const dominantSpeaker = useHMSStore(selectDominantSpeaker);
 
   const updateHMSMediaStore = useCallback(async () => {
-    // console.log("Previous", { audioEnabled, videoEnabled });
     await Promise.all([
       hmsActions.setLocalVideoEnabled(mediaStatus.video),
       // hmsActions.setLocalAudioEnabled(mediaStatus.audio),
     ]);
-    // console.log("Updated", { audioEnabled, videoEnabled });
   }, [mediaStatus, hmsActions]);
 
   const leaveMeeting = useCallback(async () => {
@@ -56,9 +55,11 @@ const useMeeting = () => {
     updateHMSMediaStore();
   }, [updateHMSMediaStore]);
 
-  const joinRoom = async (roomId: string, role: string, userName: string) => {
+  const joinRoom = async (roomId: string, userName: string, userId: string) => {
     try {
-      const tokenResponse = await getAppToken(roomId, "user", role);
+      const roomInfo = await getMeetingInfo(roomId);
+      const role = userId === roomInfo?.broadcaster ? "host" : "guest";
+      const tokenResponse = await getAppToken(roomId, userName, role);
       // Step 3: Join the room
       await hmsActions.join({
         userName: userName,
