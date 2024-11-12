@@ -1,3 +1,4 @@
+"use server";
 import { adminDb as db } from "@/backend/lib/firebase";
 
 interface UpdatePayload {
@@ -21,4 +22,21 @@ const updateMeeting = async (payload: UpdatePayload) => {
   return updateResult;
 };
 
-export { updateMeeting };
+const getMeetingInfo = async (
+  roomId: string,
+): Promise<MeetingSession | null> => {
+  const snap = await db
+    .collection("meeting_sessions")
+    .where("id", "==", roomId)
+    .limit(1)
+    .get();
+  if (snap.empty) {
+    return null;
+  }
+  const docs = snap.docs.map((doc) => doc.data());
+  return docs.length > 0
+    ? (JSON.parse(JSON.stringify(docs[0])) as MeetingSession)
+    : null;
+};
+
+export { updateMeeting, getMeetingInfo };

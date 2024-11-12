@@ -5,7 +5,14 @@ import { useMeeting } from "../hooks";
 import { Button, Icons, ClickableTooltip } from "@frontend/components/ui";
 
 export default function MeetingControls() {
-  const { mediaStatus, setMediaStatus, isConnected, endMeeting } = useMeeting();
+  const {
+    mediaStatus,
+    setMediaStatus,
+    isConnected,
+    endMeeting,
+    localPeerRole,
+    leaveMeeting,
+  } = useMeeting();
 
   const copyShareableUrl = async () => {
     await navigator.clipboard.writeText(window.location.href);
@@ -51,11 +58,15 @@ export default function MeetingControls() {
           </Button>
         </ClickableTooltip>
 
-        {isConnected && (
+        {isConnected && localPeerRole?.name == "host" ? (
           <Button onClick={endMeeting} variant={"danger"}>
-            End Stream
+            End Meeting and Leave
           </Button>
-        )}
+        ) : isConnected ? (
+          <Button onClick={leaveMeeting} variant={"danger"}>
+            Leave Meeting
+          </Button>
+        ) : null}
       </div>
     </div>
   );
