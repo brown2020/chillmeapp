@@ -39,16 +39,6 @@ export async function getAppToken(
   userId: string,
   role: string,
 ) {
-  try {
-    const appToken = await hms.auth.getAuthToken({ roomId, role, userId });
-    return { appToken };
-  } catch (error: unknown) {
-    console.error("Error getting app token:", error);
-    return {
-      error:
-        error instanceof Error
-          ? error.message
-          : "An error occurred while getting the app token",
-    };
-  }
+  const appToken = await hms.auth.getAuthToken({ roomId, role, userId });
+  return { appToken };
 }
