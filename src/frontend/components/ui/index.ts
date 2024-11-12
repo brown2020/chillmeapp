@@ -8,5 +8,7 @@ export * from "./Tooltip";
 export * from "./Textarea";
 export * from "./Chat";
 export * from "./Avatar";
+export * from "./Card";
+export * from "./DropdownMenu";
 export { GoogleIcon } from "./Icons/Google.jsx";
 export * as Icons from "lucide-react";

@@ -2,7 +2,17 @@
 
 import React from "react";
 import { useMeeting } from "../hooks";
-import { Button, Icons, ClickableTooltip } from "@frontend/components/ui";
+import {
+  Button,
+  Icons,
+  ClickableTooltip,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@frontend/components/ui";
 
 export default function MeetingControls() {
   const {
@@ -39,6 +49,7 @@ export default function MeetingControls() {
           size="icon"
           variant={mediaStatus.video ? "outline" : "danger"}
           onClick={() => setMediaStatus({ video: !mediaStatus.video })}
+          className="mr-2"
         >
           {!mediaStatus.video ? (
             <Icons.VideoOff className="h-4 w-4" />
@@ -46,6 +57,20 @@ export default function MeetingControls() {
             <Icons.Video className="h-4 w-4" />
           )}
         </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger className="outline-none">
+            <Button size="icon" variant={"outline"}>
+              <Icons.MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Meeting Options</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>View Chat</DropdownMenuItem>
+            <DropdownMenuItem>Close meeting</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div className="justify-self-end flex items-center">
         <ClickableTooltip content={"Link copied"}>
