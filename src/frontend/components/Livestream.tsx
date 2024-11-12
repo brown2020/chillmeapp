@@ -1,22 +1,31 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import {
-  selectPeers,
-  useHMSStore,
-  selectDominantSpeaker,
-  selectLocalPeer,
-} from "@100mslive/react-sdk";
 import MeetingControls from "./MeetingControls";
 import MeetingMemberStream from "./MeetingMemberStream";
 import clsx from "clsx";
+import { useMeeting } from "@frontend/hooks";
 
 export default function Livestream() {
-  const peers = useHMSStore(selectPeers);
-  const localPeer = useHMSStore(selectLocalPeer);
-  const dominantSpeaker = useHMSStore(selectDominantSpeaker);
+  const {
+    meetingNotification,
+    peers,
+    localPeer,
+    dominantSpeaker,
+    leaveMeeting,
+  } = useMeeting();
   const latestDominantSpeakerRef = useRef(dominantSpeaker);
   const meetingPeers = peers;
+
+  useEffect(() => {
+    if (!meetingNotification) {
+      return;
+    }
+    if (meetingNotification.type === "ROOM_ENDED") {
+      leaveMeeting();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meetingNotification]);
 
   // Calculate columns based on peers count
   function calcColumns() {
