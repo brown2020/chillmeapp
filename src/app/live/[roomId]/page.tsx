@@ -22,9 +22,7 @@ export default function RoomPage({ params }: { params: { roomId: string } }) {
   }, [isConnected]);
 
   useEffect(() => {
-    // ! @developeranku Handle role settings dynamically
-    const role = "host";
-    joinRoom(roomId, role, user?.displayName as string);
+    joinRoom(roomId, user?.displayName || "User", user?.uid || "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
