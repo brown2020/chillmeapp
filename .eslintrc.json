@@ -6,5 +6,12 @@
   ],
   // ,
   "ignorePatterns": ["tailwind.config.ts"],
-  "rules": {}
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ]
+  }
 }

@@ -5,5 +5,8 @@ export * from "./Toaster";
 export * from "./Switch";
 export * from "./Popover";
 export * from "./Tooltip";
+export * from "./Textarea";
+export * from "./Chat";
+export * from "./Avatar";
 export { GoogleIcon } from "./Icons/Google.jsx";
 export * as Icons from "lucide-react";
