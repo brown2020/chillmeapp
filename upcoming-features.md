@@ -19,8 +19,8 @@
 - [x] Develop an interface for viewing/downloading previous recordings.
 
 ## 6. Basic In-Session Controls
-- [ ] Add controls for mute/unmute and toggling video.
-- [ ] Implement leave/end session functionality, allowing hosts to end the session for all participants.
+- [x] Add controls for mute/unmute and toggling video.
+- [x] Implement leave/end session functionality, allowing hosts to end the session for all participants.
   
 ## 7. In-Session Chat
 - [ ] Integrate real-time chat functionality during sessions.
@@ -50,3 +50,6 @@
 - [ ] Implement a credits-based system allowing users to purchase 10,000 credits for $99.99.
 - [ ] Deduct credits based on 100ms usage and AI functionalities.
 - [ ] Create a dashboard for users to track remaining credits and usage history.
+
+## 15. Project Maintenence
+- [ ] Move server functions to `backend/services` from `frontend/services` 
