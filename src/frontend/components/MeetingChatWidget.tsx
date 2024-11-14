@@ -46,19 +46,20 @@ export default function MeetingChatWidget() {
 
   return (
     <>
-      <Card className="w-full ml-auto max-h-screen bg-white flex flex-col justify-between max-h-[80vh] h-[80vh]">
-        <CardHeader>
+      <Card className="w-full ml-auto max-h-screen bg-white flex flex-col justify-between max-h-[70vh] h-[70vh] p-4">
+        <CardHeader className="p-0">
           <div className="w-full rounded-lg flex flex-col gap-2">
             <h1 className="font-bold text-black">
               Welcome to this chill me in-meeting chat
             </h1>
-            <p className="text-muted-foreground text-sm">
-              This is a simple Next.JS example application created using{" "}
-            </p>
           </div>
         </CardHeader>
         <CardContent className="p-0 scrollbar overflow-scroll">
-          <ChatMessageList className="px-4 py-0">
+          <ChatMessageList className="p-0">
+            <small className="text-muted-foreground">
+              Note: This chat is temporary
+            </small>
+
             {/* Render Messages from Array */}
             {messages.map((message, index) => (
               <ChatBubble
@@ -74,7 +75,7 @@ export default function MeetingChatWidget() {
             ))}
           </ChatMessageList>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="p-0">
           {/* Static Input Form */}
           <div className="w-full mt-5">
             <form className="relative rounded-lg bg-background">
