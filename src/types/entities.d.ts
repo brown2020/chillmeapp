@@ -13,10 +13,10 @@ type MeetingSnapShot = Omit<Meeting, "created_at"> & {
   };
 };
 
-type TabGroupItem = {
+interface TabGroupItem<T = string> {
   label: string;
-  value: string;
-};
+  value: T;
+}
 
 interface WebhookRecordingMeta {
   URL: string;
@@ -50,3 +50,5 @@ interface WebhookSessionCloseMeta {
   session_stopped_at: string;
   template_id: string;
 }
+
+type ProfilePageTab = "profile" | "subscription";

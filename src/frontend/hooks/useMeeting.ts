@@ -9,7 +9,7 @@ import {
   selectHMSMessages,
   selectLocalPeerID,
 } from "@100mslive/react-sdk";
-import { getAppToken } from "@/frontend/services/broadcasting";
+import { getAppToken } from "@/backend/services/broadcasting";
 import { getMeetingInfo } from "@backend/services/meeting";
 import { useCallback } from "react";
 import useMeetingStore from "../zustand/useMeetingStore";

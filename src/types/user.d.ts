@@ -17,3 +17,9 @@ type UserSnapshot = {
   isAdmin: boolean;
   authEmail: string;
 };
+
+type UserProfile = {
+  stripeCustomerId: string;
+  isStripeCustomer: string;
+  signupProcessFinished: boolean;
+};

@@ -8,6 +8,7 @@ import {
   signin,
 } from "../services/auth";
 import { useToast } from "@frontend/hooks";
+import { findUserById, configureUserAfterSignup } from "@backend/services/user";
 
 export const useAuth = () => {
   const {
@@ -21,12 +22,20 @@ export const useAuth = () => {
   const { toast } = useToast();
 
   const checkAuthState = () => {
-    const unsubscribe = handleAuth((user) => {
-      if (user?.uid) {
-        setLoggedInState(user);
-        return;
+    const unsubscribe = handleAuth(async (user) => {
+      try {
+        if (user?.uid) {
+          const userProfile = await findUserById(user.uid);
+          if (!userProfile || !userProfile.stripeCustomerId) {
+            await configureUserAfterSignup(user.uid, user.email as string);
+          }
+          setLoggedInState(user);
+          return;
+        }
+        setIsAuthenticating(false);
+      } catch (error) {
+        console.log(error);
       }
-      setIsAuthenticating(false);
     });
     return unsubscribe;
   };

@@ -53,3 +53,4 @@
 
 ## 15. Project Maintenence
 - [ ] Move server functions to `backend/services` from `frontend/services` 
+- [ ] Remove unused files and redundant code
