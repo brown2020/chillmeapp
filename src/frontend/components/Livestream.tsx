@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import MeetingControls from "./MeetingControls";
 import MeetingMemberStream from "./MeetingMemberStream";
+import MeetingChatWidget from "./MeetingChatWidget";
 import clsx from "clsx";
 import { useMeeting } from "@frontend/hooks";
 
@@ -13,6 +14,7 @@ export default function Livestream() {
     localPeer,
     dominantSpeaker,
     leaveMeeting,
+    showChatWidget,
   } = useMeeting();
   const latestDominantSpeakerRef = useRef(dominantSpeaker);
   const meetingPeers = peers;
@@ -59,27 +61,30 @@ export default function Livestream() {
   }, [dominantSpeaker, localPeer]);
 
   return (
-    <div className="flex flex-col w-full justify-between h-[80vh]">
-      <div
-        className={clsx(`grid gap-4 mt-2`)}
-        style={{
-          gridTemplateColumns: `repeat(${calcColumns()}, minmax(0, 1fr))`,
-        }}
-      >
-        {meetingPeers.map((peer, index) => {
-          if (peer) {
-            return (
-              <MeetingMemberStream
-                key={index}
-                height={calcHeight()}
-                peer={peer}
-                totalPeers={peers.length}
-              />
-            );
-          }
-        })}
+    <div className="flex flex-row gap-5">
+      <div className="flex flex-col w-full justify-between h-[80vh]">
+        <div
+          className={clsx(`grid gap-4 mt-2`)}
+          style={{
+            gridTemplateColumns: `repeat(${calcColumns()}, minmax(0, 1fr))`,
+          }}
+        >
+          {meetingPeers.map((peer, index) => {
+            if (peer) {
+              return (
+                <MeetingMemberStream
+                  key={index}
+                  height={calcHeight()}
+                  peer={peer}
+                  totalPeers={peers.length}
+                />
+              );
+            }
+          })}
+        </div>
+        <MeetingControls />
       </div>
-      <MeetingControls />
+      {showChatWidget && <MeetingChatWidget />}
     </div>
   );
 }

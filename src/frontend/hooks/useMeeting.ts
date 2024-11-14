@@ -6,6 +6,8 @@ import {
   selectPeers,
   selectDominantSpeaker,
   selectLocalPeer,
+  selectHMSMessages,
+  selectLocalPeerID,
 } from "@100mslive/react-sdk";
 import { getAppToken } from "@/frontend/services/broadcasting";
 import { getMeetingInfo } from "@backend/services/meeting";
@@ -18,7 +20,8 @@ import { toast } from "@frontend/hooks/useToast";
 
 const useMeeting = () => {
   const hmsActions = useHMSActions();
-  const { mediaStatus, setMediaStatus } = useMeetingStore();
+  const { mediaStatus, setMediaStatus, setShowChatWidget, showChatWidget } =
+    useMeetingStore();
   const isConnected = useHMSStore(selectIsConnectedToRoom);
   const router = useRouter();
   const notification = useHMSNotifications();
@@ -27,6 +30,8 @@ const useMeeting = () => {
   const peers = useHMSStore(selectPeers);
   const localPeer = useHMSStore(selectLocalPeer);
   const dominantSpeaker = useHMSStore(selectDominantSpeaker);
+  const messages = useHMSStore(selectHMSMessages);
+  const localPeerId = useHMSStore(selectLocalPeerID);
 
   const updateHMSMediaStore = useCallback(async () => {
     await Promise.all([
@@ -50,6 +55,14 @@ const useMeeting = () => {
       router.push("/");
     }
   }, [hmsActions, router]);
+
+  const sendBroadcastMessage = async (text: string) => {
+    try {
+      await hmsActions.sendBroadcastMessage(text);
+    } catch {
+      console.log("Error occured in sending message");
+    }
+  };
 
   useEffect(() => {
     updateHMSMediaStore();
@@ -93,6 +106,11 @@ const useMeeting = () => {
     updateHMSMediaStore,
     leaveMeeting,
     endMeeting,
+    setShowChatWidget,
+    showChatWidget,
+    sendBroadcastMessage,
+    messages,
+    localPeerId,
   };
 };
 
