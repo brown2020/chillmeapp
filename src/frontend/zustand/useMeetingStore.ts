@@ -5,7 +5,9 @@ type MeetingStore = {
     audio: boolean;
     video: boolean;
   };
+  showChatWidget: boolean;
   setMediaStatus: (update: Partial<MeetingStore["mediaStatus"]>) => void;
+  setShowChatWidget: (payload: boolean) => void;
 };
 
 const useMeetingStore = create<MeetingStore>((set) => ({
@@ -13,6 +15,11 @@ const useMeetingStore = create<MeetingStore>((set) => ({
     audio: true,
     video: false,
   },
+  showChatWidget: true,
+  setShowChatWidget: (payload: boolean) =>
+    set(() => ({
+      showChatWidget: payload,
+    })),
   setMediaStatus: (update: Partial<MeetingStore["mediaStatus"]>) =>
     set((state) => ({
       mediaStatus: {

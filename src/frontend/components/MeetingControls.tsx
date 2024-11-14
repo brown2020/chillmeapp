@@ -5,7 +5,6 @@ import { useMeeting } from "../hooks";
 import {
   Button,
   Icons,
-  ClickableTooltip,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -22,6 +21,8 @@ export default function MeetingControls() {
     endMeeting,
     localPeerRole,
     leaveMeeting,
+    setShowChatWidget,
+    showChatWidget,
   } = useMeeting();
 
   const copyShareableUrl = async () => {
@@ -67,32 +68,33 @@ export default function MeetingControls() {
           <DropdownMenuContent>
             <DropdownMenuLabel>Meeting Options</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View Chat</DropdownMenuItem>
-            <DropdownMenuItem>Close meeting</DropdownMenuItem>
+            {showChatWidget ? (
+              <DropdownMenuItem onClick={() => setShowChatWidget(false)}>
+                Hide Chat
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onClick={() => setShowChatWidget(true)}>
+                View Chat
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={copyShareableUrl}>
+              <Icons.Share2 className="h-4 w-4" /> Copy Meeting URL
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              {isConnected && localPeerRole?.name == "host" ? (
+                <Button onClick={endMeeting} variant={"danger"}>
+                  End Meeting and Leave
+                </Button>
+              ) : isConnected ? (
+                <Button onClick={leaveMeeting} variant={"danger"}>
+                  Leave Meeting
+                </Button>
+              ) : null}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="justify-self-end flex items-center">
-        <ClickableTooltip content={"Link copied"}>
-          <Button
-            variant={"outline"}
-            className="mr-2"
-            onClick={copyShareableUrl}
-          >
-            <Icons.Share2 className="h-4 w-4" />
-          </Button>
-        </ClickableTooltip>
-
-        {isConnected && localPeerRole?.name == "host" ? (
-          <Button onClick={endMeeting} variant={"danger"}>
-            End Meeting and Leave
-          </Button>
-        ) : isConnected ? (
-          <Button onClick={leaveMeeting} variant={"danger"}>
-            Leave Meeting
-          </Button>
-        ) : null}
-      </div>
+      <div className="justify-self-end flex items-center"></div>
     </div>
   );
 }
