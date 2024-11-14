@@ -23,7 +23,7 @@
 - [x] Implement leave/end session functionality, allowing hosts to end the session for all participants.
   
 ## 7. In-Session Chat
-- [ ] Integrate real-time chat functionality during sessions.
+- [x] Integrate real-time chat functionality during sessions.
   
 ## 8. Session Locking
 - [ ] Allow hosts to lock the session once all participants have joined.
