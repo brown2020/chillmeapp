@@ -14,6 +14,7 @@ const config = {
   stripe: {
     pubKey: process.env.STRIPE_PUB_KEY,
     secretKey: process.env.STRIPE_SECRET_KEY,
+    defaultProductId: process.env.STRIPE_DEFAULT_PRICE_ID,
   },
 };
 
