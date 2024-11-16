@@ -8,25 +8,40 @@ import {
   signin,
 } from "../services/auth";
 import { useToast } from "@frontend/hooks";
+import { findUserById, configureUserAfterSignup } from "@backend/services/user";
 
 export const useAuth = () => {
   const {
     setAuthDetails,
     isAuthenticating,
     user,
+    profile,
     setIsAuthenticating,
     clearAuthDetails,
+    setProfileData,
   } = useAuthStore();
   const isLogged = Boolean(user?.uid);
   const { toast } = useToast();
 
   const checkAuthState = () => {
-    const unsubscribe = handleAuth((user) => {
-      if (user?.uid) {
-        setLoggedInState(user);
-        return;
+    const unsubscribe = handleAuth(async (user) => {
+      try {
+        if (user?.uid) {
+          let userProfile = await findUserById(user.uid);
+          if (!userProfile || !userProfile.stripeCustomerId) {
+            await configureUserAfterSignup(user.uid, user.email as string);
+            userProfile = await findUserById(user.uid);
+          }
+          if (userProfile) {
+            setProfileDetails(userProfile);
+          }
+          setLoggedInState(user);
+          return;
+        }
+        setIsAuthenticating(false);
+      } catch (error) {
+        console.log(error);
       }
-      setIsAuthenticating(false);
     });
     return unsubscribe;
   };
@@ -41,6 +56,10 @@ export const useAuth = () => {
       user: user,
       isAuthenticating: false,
     });
+  };
+
+  const setProfileDetails = (profile: UserProfile) => {
+    setProfileData(profile);
   };
 
   const signinWithGoogle = async () => {
@@ -101,5 +120,7 @@ export const useAuth = () => {
     isLogged,
     createAccount,
     loginWithEmail,
+    setProfileDetails,
+    profile,
   };
 };

@@ -1,8 +1,9 @@
 # Chill.me MVP Feature Planning
 
-## 1. User Authentication (Firebase)
+## 1. User Authentication and Management (Firebase)
 - [x] Implement user sign-up and login using Firebase Authentication (email/password, Google, etc.).
 - [ ] Test and ensure secure authentication flow.
+- [ ] Add user profile page
 
 ## 2. Session Creation and Invitation
 - [x] Develop a simple interface for one-click meeting/live stream creation.
@@ -47,9 +48,13 @@
 - [ ] Display credits-based pricing details on the landing page.
 
 ## 14. Credits-Based Payment System
-- [ ] Implement a credits-based system allowing users to purchase 10,000 credits for $99.99.
+- [x] Implement a credits-based system allowing users to purchase 10,000 credits for $99.99.
 - [ ] Deduct credits based on 100ms usage and AI functionalities.
 - [ ] Create a dashboard for users to track remaining credits and usage history.
 
 ## 15. Project Maintenence
 - [ ] Move server functions to `backend/services` from `frontend/services` 
+- [ ] Remove unused files and redundant code
+
+## 16. Resources Setup
+- [ ] Add script to auto create resources across multiple services

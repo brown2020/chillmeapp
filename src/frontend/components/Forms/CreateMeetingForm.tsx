@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { createRoom } from "@/frontend/services/broadcasting";
+import { createRoom } from "@/backend/services/broadcasting";
 import { saveMeeting } from "@/frontend/services/meeting";
 import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 import { useRouter } from "next/navigation";
