@@ -1,3 +1,4 @@
+/// <reference types="stripe-event-types" />
 import * as HMS from "@100mslive/server-sdk"; // Correct wildcard import
 
 type Meeting = HMS.Room.Object;

@@ -3,6 +3,7 @@
 import { createStripeCustomer } from "./payment";
 import { adminDb } from "../lib/firebase";
 import _ from "lodash";
+import admin from "firebase-admin";
 
 const findUserById = async (uid: string): Promise<UserProfile | null> => {
   const userDoc = await adminDb.doc(`users/${uid}`).get();
@@ -19,7 +20,16 @@ const configureUserAfterSignup = async (uid: string, email: string) => {
     stripeCustomerId,
     isStripeCustomer: true,
     signupProcessFinished: true,
+    availableCredits: 0,
+  } satisfies UserProfile);
+};
+
+const updateUserCredits = async (uid: string, credits: number) => {
+  const docRef = adminDb.collection("users").doc(uid);
+  // Update the document with the increment
+  await docRef.update({
+    availableCredits: admin.firestore.FieldValue.increment(credits),
   });
 };
 
-export { configureUserAfterSignup, findUserById };
+export { configureUserAfterSignup, findUserById, updateUserCredits };

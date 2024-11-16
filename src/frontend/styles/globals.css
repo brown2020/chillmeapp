@@ -21,6 +21,7 @@
     height: calc(100vh - 4rem);
     overscroll-behavior-y: contain;
   }
+
   /* .h-container-max {
     max-height: calc(100vh - 4rem);
     overscroll-behavior-y: contain;
@@ -99,6 +100,7 @@
   .btn {
     @apply flex items-center justify-center px-3 py-2 hover:opacity-50 rounded-md gap-1 disabled:opacity-50;
   }
+
   .btn-primary {
     @apply cursor-pointer flex w-full outline-none text-center justify-center items-center gap-2 mt-2 px-6 py-2 bg-[#2563EB] text-white font-semibold hover:bg-[#2563EB]/30 rounded-full disabled:bg-[#2563EB]/30 disabled:hover:bg-[#2563EB]/30 disabled:cursor-not-allowed;
   }
@@ -118,23 +120,27 @@
   .btn-primary2 {
     @apply cursor-pointer flex outline-none items-center gap-2 mt-2 px-6 py-2 bg-black/20 text-black font-semibold hover:bg-black/30 rounded-full disabled:bg-white/10 disabled:hover:bg-white/10 disabled:cursor-not-allowed;
   }
+
   .btn-secondary {
     @apply cursor-pointer flex outline-none items-center gap-2 mt-2 px-6 py-2 bg-white/10 text-black/50 font-semibold hover:bg-white/30 ml-auto rounded-full;
   }
 
   .input-primary {
-    @apply w-full text-black px-4 py-2 outline-none border border-[#111113]/20  bg-white rounded-lg;
+    @apply w-full text-black px-4 py-2 outline-none border border-[#111113]/20 bg-white rounded-lg;
   }
 
   .text-wrapper {
     @apply flex flex-col space-y-3 max-w-4xl mx-auto;
   }
+
   .text-wrapper h3 {
     @apply text-2xl;
   }
+
   .text-wrapper h4 {
     @apply text-lg;
   }
+
   .text-wrapper ul {
     @apply list-disc mx-4 space-y-3;
   }
@@ -142,26 +148,32 @@
   .form-wrapper {
     @apply flex flex-col space-y-3 w-full;
   }
+
   .form-wrapper form {
     @apply flex flex-col space-y-3;
   }
+
   .form-wrapper label {
     @apply flex flex-col space-y-1;
   }
+
   .form-wrapper input,
   .form-wrapper textarea {
     @apply px-3 py-2 outline-none border rounded-md;
   }
+
   .form-wrapper button {
     @apply mr-auto py-2 px-3 bg-orange-500 text-black rounded-md cursor-pointer disabled:opacity-50 hover:opacity-50;
   }
+
   .response {
     @apply p-3 bg-orange-500 bg-opacity-20 my-3 rounded-md whitespace-pre-wrap;
   }
 
   .form-input {
-    @apply px-2 py-2 border  border-[#111113]/20  w-full outline-none text-sm rounded-[4px];
+    @apply px-2 py-2 border border-[#111113]/20 w-full outline-none text-sm rounded-[4px];
   }
+
   .form-input-required {
     @apply px-2 py-2 border border-red-500 w-full outline-none text-sm rounded-[4px];
   }
@@ -169,26 +181,32 @@
   .checkbox-container {
     display: flex;
     align-items: center;
-    margin-bottom: 8px; /* Adjust as needed */
+    margin-bottom: 8px;
+    /* Adjust as needed */
   }
 
   .custom-checkbox {
     appearance: none;
     -webkit-appearance: none;
-    background-color: #fff; /* Default background */
-    border-color: rgba(66, 80, 102, 0.4); /* Border color */
+    background-color: #fff;
+    /* Default background */
+    border-color: rgba(66, 80, 102, 0.4);
+    /* Border color */
     border-width: 1px;
     box-shadow: 0px 0px 2px 4px rgba(66, 80, 102, 0.1);
-    padding: 10px; /* Size of the checkbox */
+    padding: 10px;
+    /* Size of the checkbox */
     display: inline-block;
     position: relative;
     cursor: pointer;
     vertical-align: middle;
-    margin-right: 8px; /* Space between checkbox and label */
+    margin-right: 8px;
+    /* Space between checkbox and label */
   }
 
   .custom-checkbox:checked {
-    background-color: #fbbf24; /* Bright yellow background */
+    background-color: #fbbf24;
+    /* Bright yellow background */
   }
 
   .custom-checkbox:checked:after {
@@ -197,7 +215,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 16px; /* Adjust size of checkmark */
+    font-size: 16px;
+    /* Adjust size of checkmark */
     color: #000000;
   }
 }
@@ -279,7 +298,21 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Disable Scrollbar for input number */
+/* For modern browsers */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none; /* Hides the spin buttons */
+    margin: 0; /* Removes default margin for a cleaner look */
+}
+
+/* For Firefox */
+input[type="number"] {
+    -moz-appearance: textfield; /* Disables number input spin buttons in Firefox */
 }

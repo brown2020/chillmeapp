@@ -5,35 +5,38 @@ import { useState } from "react";
 
 const ProfileTab = () => {
   const auth = useAuth();
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(100);
 
   const handleCheckout = async () => {
     const session = await createCheckoutSession(
+      auth.user?.uid as string,
       auth.profile?.stripeCustomerId || "",
-      2,
+      quantity,
     );
     window.open(session.url as string, "_blank");
   };
 
   return (
     <div>
-      <div className="mb-4">
-        <p>Available Credits: 2000</p>
-      </div>
-      <div className="flex flex-row gap-4">
-        <Input
-          type="number"
-          min={0}
-          max={30}
-          value={quantity}
-          className="w-20"
-          onChange={(e) => {
-            setQuantity(parseInt(e.target.value));
-          }}
-        />
-        <Button disabled={quantity < 1} onClick={handleCheckout}>
-          Buy Credits
-        </Button>
+      <div className="flex flex-row justify-between w-full">
+        <div>
+          <p>Available Credits: {auth.profile?.availableCredits}</p>
+        </div>
+        <div className="flex flex-row gap-4">
+          <Input
+            type="number"
+            min={0}
+            max={30000}
+            value={quantity}
+            className="w-28 no-scrollba"
+            onChange={(e) => {
+              setQuantity(parseInt(e.target.value) || 0);
+            }}
+          />
+          <Button disabled={quantity < 1} onClick={handleCheckout}>
+            Buy Credits
+          </Button>
+        </div>
       </div>
       <div className="mt-5">
         <p>Name : {auth.user?.displayName || "Not Available"}</p>

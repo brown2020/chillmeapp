@@ -44,7 +44,7 @@ export default function ProfileComponent() {
                 ))}
               </div>
             </div>
-            <div className="col-span-8 p-8">
+            <div className="col-span-10 p-8">
               {activeTab === "subscription" ? (
                 <SubscriptionTab />
               ) : (
