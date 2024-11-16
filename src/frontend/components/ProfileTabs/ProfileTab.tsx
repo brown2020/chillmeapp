@@ -12,8 +12,9 @@ const ProfileTab = () => {
       auth.user?.uid as string,
       auth.profile?.stripeCustomerId || "",
       quantity,
+      window.location.origin,
     );
-    window.open(session.url as string, "_blank");
+    window.open(session.url as string, "_self");
   };
 
   return (
