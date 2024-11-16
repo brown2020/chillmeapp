@@ -18,7 +18,7 @@ const tabs: TabGroupItem<ProfilePageTab>[] = [
 ];
 
 export default function ProfileComponent() {
-  const [activeTab, setActiveTab] = useState<ProfilePageTab>("subscription");
+  const [activeTab, setActiveTab] = useState<ProfilePageTab>("profile");
 
   return (
     <>

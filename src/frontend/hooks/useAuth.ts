@@ -15,8 +15,10 @@ export const useAuth = () => {
     setAuthDetails,
     isAuthenticating,
     user,
+    profile,
     setIsAuthenticating,
     clearAuthDetails,
+    setProfileData,
   } = useAuthStore();
   const isLogged = Boolean(user?.uid);
   const { toast } = useToast();
@@ -25,9 +27,13 @@ export const useAuth = () => {
     const unsubscribe = handleAuth(async (user) => {
       try {
         if (user?.uid) {
-          const userProfile = await findUserById(user.uid);
+          let userProfile = await findUserById(user.uid);
           if (!userProfile || !userProfile.stripeCustomerId) {
             await configureUserAfterSignup(user.uid, user.email as string);
+            userProfile = await findUserById(user.uid);
+          }
+          if (userProfile) {
+            setProfileDetails(userProfile);
           }
           setLoggedInState(user);
           return;
@@ -50,6 +56,10 @@ export const useAuth = () => {
       user: user,
       isAuthenticating: false,
     });
+  };
+
+  const setProfileDetails = (profile: UserProfile) => {
+    setProfileData(profile);
   };
 
   const signinWithGoogle = async () => {
@@ -110,5 +120,7 @@ export const useAuth = () => {
     isLogged,
     createAccount,
     loginWithEmail,
+    setProfileDetails,
+    profile,
   };
 };
