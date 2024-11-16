@@ -1,5 +1,6 @@
 "use server";
 import { adminDb as db } from "@/backend/lib/firebase";
+import _ from "lodash";
 
 interface UpdatePayload {
   room_id: string;
@@ -34,9 +35,7 @@ const getMeetingInfo = async (
     return null;
   }
   const docs = snap.docs.map((doc) => doc.data());
-  return docs.length > 0
-    ? (JSON.parse(JSON.stringify(docs[0])) as MeetingSession)
-    : null;
+  return docs.length > 0 ? _.toPlainObject(docs[0] as MeetingSession) : null;
 };
 
 export { updateMeeting, getMeetingInfo };
