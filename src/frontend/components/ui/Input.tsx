@@ -31,4 +31,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 );
 Input.displayName = "Input";
 
+export interface InputLabelProps {
+  children: React.ReactNode;
+}
+
+export const InputLabel: React.FC<
+  React.LabelHTMLAttributes<HTMLLabelElement> & { label: string }
+> = ({ label, className, ...props }) => {
+  return (
+    <label
+      className={cn("block text-sm font-medium text-white", className)}
+      {...props}
+    >
+      {label}
+    </label>
+  );
+};
+
 export { Input };

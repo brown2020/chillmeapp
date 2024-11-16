@@ -54,7 +54,7 @@
     "uuid": "^10.0.0",
     "video.js": "^8.18.1",
     "videojs-vjsdownload": "^2.0.1",
-    "zustand": "^5.0.0-rc.2"
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.9",
