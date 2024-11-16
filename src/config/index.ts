@@ -11,6 +11,11 @@ const config = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APPID,
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENTID,
   },
+  stripe: {
+    pubKey: process.env.STRIPE_PUB_KEY,
+    secretKey: process.env.STRIPE_SECRET_KEY,
+    defaultProductId: process.env.STRIPE_DEFAULT_PRICE_ID,
+  },
 };
 
 export default config;
