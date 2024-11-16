@@ -1,5 +1,5 @@
-import { create } from "zustand";
 import { User } from "firebase/auth";
+import { composeStore } from "@/utils/storeComposer";
 
 interface AuthState {
   user: User | null;
@@ -22,22 +22,29 @@ const defaultAuthState: AuthState = {
   isAuthenticating: true,
 };
 
-export const useAuthStore = create<AuthStore>((set, get) => ({
-  ...defaultAuthState,
+// Correctly type the state creator with devtools mutator
+export const useAuthStore = composeStore<AuthStore>(
+  (set, get) => ({
+    ...defaultAuthState,
 
-  setAuthDetails: async (details: Partial<AuthState>) => {
-    const { ...oldState } = get();
-    const newState = { ...oldState, ...details };
-    set(newState);
-  },
+    setAuthDetails: async (details: Partial<AuthState>) => {
+      const { ...oldState } = get();
+      const newState = { ...oldState, ...details };
+      set(newState);
+    },
 
-  setProfileData: async (payload: UserProfile) => {
-    set({ profile: payload });
-  },
+    setProfileData: async (payload: UserProfile) => {
+      set({ profile: payload });
+    },
 
-  clearAuthDetails: () => set({ ...defaultAuthState }),
+    clearAuthDetails: () => set({ ...defaultAuthState }),
 
-  setIsAuthenticating: (authenticating: boolean) => {
-    set((state) => ({ ...state, isAuthenticating: authenticating }));
-  },
-}));
+    setIsAuthenticating: (authenticating: boolean) => {
+      set((state: AuthState) => ({
+        ...state,
+        isAuthenticating: authenticating,
+      }));
+    },
+  }),
+  { name: "AuthStore" },
+);

@@ -2,8 +2,8 @@
 
 import stripe from "../lib/stripe";
 import { Stripe } from "stripe";
-import _ from "lodash";
 import config from "@/config";
+import { toPlainObject } from "@/utils/common";
 
 const createStripeCustomer = async (email: string): Promise<string> => {
   const customer = await stripe.customers.create({
@@ -32,7 +32,7 @@ const createCheckoutSession = async (
       uid,
     },
   });
-  return _.toPlainObject(stripeSession);
+  return toPlainObject(stripeSession);
 };
 
 const getCheckoutSessionDetails = async (

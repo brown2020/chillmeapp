@@ -2,15 +2,15 @@
 
 import { createStripeCustomer } from "./payment";
 import { adminDb } from "../lib/firebase";
-import _ from "lodash";
 import admin from "firebase-admin";
+import { toPlainObject } from "@/utils/common";
 
 const findUserById = async (uid: string): Promise<UserProfile | null> => {
   const userDoc = await adminDb.doc(`users/${uid}`).get();
   if (!userDoc.exists) {
     return null;
   }
-  return _.toPlainObject(userDoc.data()) as UserProfile;
+  return toPlainObject<UserProfile>(userDoc.data() as object);
 };
 
 /* Add more steps in this function to handle side effects of user creation like creating resources for the user or adding default setting values */

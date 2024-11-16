@@ -2,11 +2,11 @@
 
 import { adminAuth } from "@backend/lib/firebase";
 import { UserRecord } from "firebase-admin/auth";
-import _ from "lodash";
+import { toPlainObject } from "@/utils/common";
 
 const getUserById = async (uid: string) => {
   const result = await adminAuth.getUser(uid);
-  return _.toPlainObject(result) as UserRecord;
+  return toPlainObject<UserRecord>(result);
 };
 
 export { getUserById };
