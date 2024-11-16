@@ -16,10 +16,11 @@ const createCheckoutSession = async (
   uid: string,
   customerId: string,
   quantity: number,
+  originFullUrl: string,
 ): Promise<Stripe.Response<Stripe.Checkout.Session>> => {
   const stripeSession = await stripe.checkout.sessions.create({
     mode: "payment",
-    success_url: "https://checkout.stripe.com/pay/success",
+    success_url: originFullUrl,
     customer: customerId,
     line_items: [
       {
