@@ -8,7 +8,11 @@ import {
   signin,
 } from "../services/auth";
 import { useToast } from "@frontend/hooks";
-import { findUserById, configureUserAfterSignup } from "@backend/services/user";
+import {
+  findUserById,
+  configureUserAfterSignup,
+  updateUserData,
+} from "@backend/services/user";
 
 export const useAuth = () => {
   const {
@@ -19,6 +23,7 @@ export const useAuth = () => {
     setIsAuthenticating,
     clearAuthDetails,
     setProfileData,
+    updateUserAuthInfo,
   } = useAuthStore();
   const isLogged = Boolean(user?.uid);
   const { toast } = useToast();
@@ -111,6 +116,23 @@ export const useAuth = () => {
     }
   };
 
+  const updateUser = async (payload: UpdateUserPayload) => {
+    try {
+      await updateUserData(user?.uid as string, payload);
+      updateUserAuthInfo(payload);
+      toast({
+        variant: "success",
+        title: "User data updated",
+      });
+    } catch (err: unknown) {
+      console.log(err);
+      toast({
+        variant: "error",
+        title: "Error occured in updating user info",
+      });
+    }
+  };
+
   return {
     signinWithGoogle,
     checkAuthState,
@@ -122,5 +144,6 @@ export const useAuth = () => {
     loginWithEmail,
     setProfileDetails,
     profile,
+    updateUser,
   };
 };
