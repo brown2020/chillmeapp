@@ -12,6 +12,7 @@ interface AuthActions {
   clearAuthDetails: () => void;
   setIsAuthenticating: (authenticating: boolean) => void;
   setProfileData: (payload: UserProfile) => Promise<void>;
+  updateUserAuthInfo: (payload: Partial<User>) => void;
 }
 
 type AuthStore = AuthState & AuthActions;
@@ -43,6 +44,16 @@ export const useAuthStore = composeStore<AuthStore>(
       set((state: AuthState) => ({
         ...state,
         isAuthenticating: authenticating,
+      }));
+    },
+
+    updateUserAuthInfo: (payload) => {
+      set((state) => ({
+        ...state,
+        user: {
+          ...(state.user as User),
+          ...payload,
+        },
       }));
     },
   }),

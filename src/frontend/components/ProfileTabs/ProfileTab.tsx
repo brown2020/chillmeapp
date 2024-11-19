@@ -2,8 +2,13 @@ import { useAuth } from "@frontend/hooks";
 import { Input, Button, Separator, InputLabel } from "@chill-ui";
 import { createCheckoutSession } from "@backend/services/payment";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import clsx from "clsx";
+
+interface FormVals {
+  email: string;
+  displayName: string;
+}
 
 const ProfileTab = () => {
   const auth = useAuth();
@@ -12,11 +17,10 @@ const ProfileTab = () => {
   const {
     register,
     formState: { errors },
-  } = useForm({
+    handleSubmit,
+  } = useForm<FormVals>({
     defaultValues: {
-      name: auth.user?.displayName || "Not Available",
-      email: auth.user?.email || "",
-      id: auth.user?.uid || "",
+      displayName: auth.user?.displayName || "Not Available",
     },
   });
 
@@ -28,6 +32,10 @@ const ProfileTab = () => {
       window.location.origin,
     );
     window.open(session.url as string, "_self");
+  };
+
+  const onSubmit: SubmitHandler<FormVals> = (data) => {
+    auth.updateUser(data);
   };
 
   return (
@@ -60,47 +68,50 @@ const ProfileTab = () => {
           </Button>
         </div>
       </div>
-      <form className="space-y-4">
-        <div>
-          <InputLabel label="Name" htmlFor="name" className="mb-3" />
-          <Input
-            type="text"
-            id="name"
-            className={clsx("w-full")}
-            {...register("name", { required: "Name is required" })}
-            error={Boolean(errors.name)}
-            errorMessage={errors.name?.message}
-          />
-        </div>
+      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <InputLabel label="Name" htmlFor="name" className="mb-3" />
+            <Input
+              type="text"
+              id="name"
+              className={clsx("w-full")}
+              {...register("displayName", { required: "Name is required" })}
+              error={Boolean(errors.displayName)}
+              errorMessage={errors.displayName?.message}
+            />
+          </div>
 
-        <div>
-          <InputLabel label="Email" htmlFor="email" className="mb-3" />
-          <Input
-            type="email"
-            id="email"
-            placeholder="Email"
-            className={clsx("w-full")}
-            {...register("email", { required: "Email is required" })}
-            error={Boolean(errors.email)}
-            errorMessage={errors.email?.message}
-          />
-        </div>
+          <div>
+            <InputLabel label="Email" htmlFor="email" className="mb-3" />
+            <Input
+              type="email"
+              id="email"
+              placeholder="Email"
+              className={clsx("w-full")}
+              value={auth.user?.email as string}
+              disabled
+            />
+          </div>
 
-        <div>
-          <InputLabel label="ID" htmlFor="id" className="mb-3" />
-          <Input
-            type="text"
-            id="id"
-            className={clsx("w-full")}
-            {...register("id", { required: "ID is required" })}
-            error={Boolean(errors.id)}
-            errorMessage={errors.id?.message}
-          />
+          <div>
+            <InputLabel
+              label="Payment ID"
+              htmlFor="paymentId"
+              className="mb-3"
+            />
+            <Input
+              type="text"
+              id="id"
+              className={clsx("w-full")}
+              disabled
+              value={auth.profile?.stripeCustomerId}
+            />
+          </div>
         </div>
-
-        <Button type="submit" className="w-full">
-          Submit
-        </Button>
+        <div className="ml-auto text-right">
+          <Button type="submit">Update Profile</Button>
+        </div>
       </form>
     </div>
   );

@@ -1,9 +1,10 @@
 "use server";
 
 import { createStripeCustomer } from "./payment";
-import { adminDb } from "../lib/firebase";
+import { adminDb, adminAuth } from "../lib/firebase";
 import admin from "firebase-admin";
 import { toPlainObject } from "@/utils/common";
+import { User } from "firebase/auth";
 
 const findUserById = async (uid: string): Promise<UserProfile | null> => {
   const userDoc = await adminDb.doc(`users/${uid}`).get();
@@ -32,4 +33,17 @@ const updateUserCredits = async (uid: string, credits: number) => {
   });
 };
 
-export { configureUserAfterSignup, findUserById, updateUserCredits };
+const updateUserData = async (
+  uid: string,
+  payload: Pick<User, "displayName">,
+) => {
+  await adminAuth.updateUser(uid, payload);
+  return true;
+};
+
+export {
+  configureUserAfterSignup,
+  findUserById,
+  updateUserCredits,
+  updateUserData,
+};

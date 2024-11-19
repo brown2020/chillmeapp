@@ -32,7 +32,7 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
   }, [isAuthenticating, user, isUnprotectedRoute, router]);
 
   if (isAuthenticating) {
-    return <h1>Loading user...</h1>;
+    return null;
   }
 
   // Render children only if user state and route permissions are valid
