@@ -4,3 +4,7 @@ type UserProfile = {
   signupProcessFinished: boolean;
   availableCredits: number;
 };
+
+type UpdateUserPayload = {
+  displayName: string;
+};

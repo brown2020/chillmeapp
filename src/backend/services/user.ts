@@ -1,16 +1,17 @@
 "use server";
 
 import { createStripeCustomer } from "./payment";
-import { adminDb } from "../lib/firebase";
-import _ from "lodash";
+import { adminDb, adminAuth } from "../lib/firebase";
 import admin from "firebase-admin";
+import { toPlainObject } from "@/utils/common";
+import { User } from "firebase/auth";
 
 const findUserById = async (uid: string): Promise<UserProfile | null> => {
   const userDoc = await adminDb.doc(`users/${uid}`).get();
   if (!userDoc.exists) {
     return null;
   }
-  return _.toPlainObject(userDoc.data()) as UserProfile;
+  return toPlainObject<UserProfile>(userDoc.data() as object);
 };
 
 /* Add more steps in this function to handle side effects of user creation like creating resources for the user or adding default setting values */
@@ -32,4 +33,17 @@ const updateUserCredits = async (uid: string, credits: number) => {
   });
 };
 
-export { configureUserAfterSignup, findUserById, updateUserCredits };
+const updateUserData = async (
+  uid: string,
+  payload: Pick<User, "displayName">,
+) => {
+  await adminAuth.updateUser(uid, payload);
+  return true;
+};
+
+export {
+  configureUserAfterSignup,
+  findUserById,
+  updateUserCredits,
+  updateUserData,
+};
