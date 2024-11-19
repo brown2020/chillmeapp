@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { composeStore } from "@/utils/storeComposer";
 
 type MeetingStore = {
   mediaStatus: {
@@ -10,23 +10,28 @@ type MeetingStore = {
   setShowChatWidget: (payload: boolean) => void;
 };
 
-const useMeetingStore = create<MeetingStore>((set) => ({
-  mediaStatus: {
-    audio: true,
-    video: false,
+const useMeetingStore = composeStore<MeetingStore>(
+  (set) => ({
+    mediaStatus: {
+      audio: true,
+      video: false,
+    },
+    showChatWidget: true,
+    setShowChatWidget: (payload: boolean) =>
+      set(() => ({
+        showChatWidget: payload,
+      })),
+    setMediaStatus: (update: Partial<MeetingStore["mediaStatus"]>) =>
+      set((state) => ({
+        mediaStatus: {
+          ...state.mediaStatus,
+          ...update, // Spread the update object here
+        },
+      })),
+  }),
+  {
+    name: "MeetingStore",
   },
-  showChatWidget: true,
-  setShowChatWidget: (payload: boolean) =>
-    set(() => ({
-      showChatWidget: payload,
-    })),
-  setMediaStatus: (update: Partial<MeetingStore["mediaStatus"]>) =>
-    set((state) => ({
-      mediaStatus: {
-        ...state.mediaStatus,
-        ...update, // Spread the update object here
-      },
-    })),
-}));
+);
 
 export default useMeetingStore;
