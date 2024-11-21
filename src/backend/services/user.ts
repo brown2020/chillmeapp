@@ -40,7 +40,7 @@ const deductUserCredits = async (
   meetingId: string,
   secondsGap: number,
 ) => {
-  console.log("Deducting credits");
+  console.log("Deducting credits", { secondsGap });
   const docRef = adminDb.collection("users").doc(uid);
   const deductableCredits = calculateDeductableCredits(secondsGap);
   await docRef.update({
@@ -53,7 +53,7 @@ const deductUserCredits = async (
     .get();
   const meetingDocRef = doc.docs[0].ref;
   await meetingDocRef.update({
-    lastCreditDeductionAt: Date.now(),
+    lastCreditDeductionAt: admin.firestore.Timestamp.now(),
   });
 };
 

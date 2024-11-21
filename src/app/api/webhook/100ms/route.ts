@@ -6,7 +6,6 @@ import {
   WebhookSessionCloseMeta,
 } from "@/types/entities";
 import { deductUserCredits } from "@/backend/services/user";
-// import { deductUserCredits } from "@backend/services/user";
 
 type EventTypes = "recording.success" | "session.close.success";
 
