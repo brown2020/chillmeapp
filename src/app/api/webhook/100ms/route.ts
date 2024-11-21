@@ -17,18 +17,20 @@ interface EventBody {
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as EventBody;
 
-  console.log(body);
+  // console.log(body);
 
   if (body.type === "session.close.success") {
+    console.log("Session closed");
     const bodyJson = body.data as WebhookSessionCloseMeta;
     const meetingInfo = await getMeetingInfo(bodyJson.room_id);
     if (!meetingInfo) {
       return;
     }
+    const lastDeductionTime = meetingInfo.last_credit_deduction_at;
     const seconds =
-      (new Date(meetingInfo.last_credit_deduction_at as Date).getTime() -
-        Date.now()) /
-      1000;
+      Date.now() - (meetingInfo.last_credit_deduction_at?._seconds || 0) / 1000;
+
+    console.log({ seconds, lastDeductionTime });
 
     await deductUserCredits(
       meetingInfo?.broadcaster as string,
@@ -39,7 +41,6 @@ export async function POST(request: NextRequest) {
       room_id: bodyJson.room_id,
       session_duration: bodyJson.session_duration,
     });
-    console.log("Session closed");
   }
 
   if (body.type === "recording.success") {
@@ -58,7 +59,6 @@ export async function POST(request: NextRequest) {
         recording_storage_path: uploadResult.metadata.name as string,
       },
     });
-    console.log("Recording uploaded");
   }
 
   return Response.json({ status: "ok" });

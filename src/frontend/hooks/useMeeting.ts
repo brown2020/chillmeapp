@@ -9,6 +9,7 @@ import {
   selectHMSMessages,
   selectLocalPeerID,
   selectRoomID,
+  HMSLogLevel,
 } from "@100mslive/react-sdk";
 import { getAppToken } from "@/backend/services/broadcasting";
 import { getMeetingInfo } from "@backend/services/meeting";
@@ -37,6 +38,11 @@ const useMeeting = () => {
   const localPeerId = useHMSStore(selectLocalPeerID);
   const roomId = useHMSStore(selectRoomID);
   const { user } = useAuthStore();
+
+  useEffect(() => {
+    hmsActions.setLogLevel(HMSLogLevel.NONE);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateHMSMediaStore = useCallback(async () => {
     await Promise.all([

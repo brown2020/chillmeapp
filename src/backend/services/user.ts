@@ -53,7 +53,7 @@ const deductUserCredits = async (
     .get();
   const meetingDocRef = doc.docs[0].ref;
   await meetingDocRef.update({
-    lastCreditDeductionAt: admin.firestore.Timestamp.now(),
+    last_credit_deduction_at: admin.firestore.FieldValue.serverTimestamp(),
   });
 };
 
