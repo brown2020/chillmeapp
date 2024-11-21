@@ -5,6 +5,7 @@ import { adminDb, adminAuth } from "../lib/firebase";
 import admin from "firebase-admin";
 import { toPlainObject } from "@/utils/common";
 import { User } from "firebase/auth";
+import { calculateDeductableCredits } from "@/utils/common";
 
 const findUserById = async (uid: string): Promise<UserProfile | null> => {
   const userDoc = await adminDb.doc(`users/${uid}`).get();
@@ -33,6 +34,29 @@ const updateUserCredits = async (uid: string, credits: number) => {
   });
 };
 
+/* This function is invoked every n seconds and deducts credits for n seconds duration from user account */
+const deductUserCredits = async (
+  uid: string,
+  meetingId: string,
+  secondsGap: number,
+) => {
+  console.log("Deducting credits");
+  const docRef = adminDb.collection("users").doc(uid);
+  const deductableCredits = calculateDeductableCredits(secondsGap);
+  await docRef.update({
+    availableCredits: admin.firestore.FieldValue.increment(-deductableCredits),
+  });
+  const doc = await adminDb
+    .collection("meeting_sessions")
+    .where("id", "==", meetingId)
+    .limit(1)
+    .get();
+  const meetingDocRef = doc.docs[0].ref;
+  await meetingDocRef.update({
+    lastCreditDeductionAt: Date.now(),
+  });
+};
+
 const updateUserData = async (
   uid: string,
   payload: Pick<User, "displayName">,
@@ -46,4 +70,5 @@ export {
   findUserById,
   updateUserCredits,
   updateUserData,
+  deductUserCredits,
 };
