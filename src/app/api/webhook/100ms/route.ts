@@ -1,10 +1,12 @@
 import { type NextRequest } from "next/server";
 import { uploadRecordingToStorage } from "@/backend/services/storage";
-import { updateMeeting } from "@/backend/services/meeting";
+import { updateMeeting, getMeetingInfo } from "@/backend/services/meeting";
 import {
   WebhookRecordingMeta,
   WebhookSessionCloseMeta,
 } from "@/types/entities";
+import { deductUserCredits } from "@/backend/services/user";
+// import { deductUserCredits } from "@backend/services/user";
 
 type EventTypes = "recording.success" | "session.close.success";
 
@@ -20,6 +22,20 @@ export async function POST(request: NextRequest) {
 
   if (body.type === "session.close.success") {
     const bodyJson = body.data as WebhookSessionCloseMeta;
+    const meetingInfo = await getMeetingInfo(bodyJson.room_id);
+    if (!meetingInfo) {
+      return;
+    }
+    const seconds =
+      (new Date(meetingInfo.last_credit_deduction_at as Date).getTime() -
+        Date.now()) /
+      1000;
+
+    await deductUserCredits(
+      meetingInfo?.broadcaster as string,
+      meetingInfo?.id as string,
+      seconds,
+    );
     await updateMeeting({
       room_id: bodyJson.room_id,
       session_duration: bodyJson.session_duration,

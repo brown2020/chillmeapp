@@ -7,6 +7,8 @@ import MeetingChatWidget from "./MeetingChatWidget";
 import clsx from "clsx";
 import { useMeeting } from "@frontend/hooks";
 
+const creditsDeductionIntervalSecs: number = 20;
+
 export default function Livestream() {
   const {
     meetingNotification,
@@ -15,9 +17,27 @@ export default function Livestream() {
     dominantSpeaker,
     leaveMeeting,
     showChatWidget,
+    handleCreditsDeduction,
   } = useMeeting();
   const latestDominantSpeakerRef = useRef(dominantSpeaker);
   const meetingPeers = peers;
+
+  useEffect(() => {
+    if (localPeer?.roleName === "host") {
+      console.log("Host has joined and now we are deducting credits");
+      const intervalId = setInterval(() => {
+        handleCreditsDeduction(creditsDeductionIntervalSecs);
+      }, creditsDeductionIntervalSecs * 1000);
+
+      // Clear the interval when the component unmounts or when `localPeer?.roleName` changes
+      return () => clearInterval(intervalId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peers]);
+
+  useEffect(() => {
+    console.log(meetingNotification);
+  }, [meetingNotification]);
 
   useEffect(() => {
     if (!meetingNotification) {

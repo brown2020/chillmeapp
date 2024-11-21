@@ -3,7 +3,7 @@
 ## 1. User Authentication and Management (Firebase)
 - [x] Implement user sign-up and login using Firebase Authentication (email/password, Google, etc.).
 - [ ] Test and ensure secure authentication flow.
-- [ ] Add user profile page
+- [x] Add user profile page
 
 ## 2. Session Creation and Invitation
 - [x] Develop a simple interface for one-click meeting/live stream creation.

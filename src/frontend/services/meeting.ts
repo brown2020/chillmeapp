@@ -14,6 +14,7 @@ const saveMeeting = async (uid: string, payload: Meeting) => {
   const result = await addDoc(collection(db, "meeting_sessions"), {
     ...payload,
     broadcaster: uid,
+    last_credit_deduction_at: null,
   });
   return result;
 };
