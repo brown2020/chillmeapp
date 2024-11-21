@@ -7,7 +7,7 @@ import MeetingChatWidget from "./MeetingChatWidget";
 import clsx from "clsx";
 import { useMeeting } from "@frontend/hooks";
 
-const creditsDeductionIntervalSecs: number = 20;
+const creditsDeductionIntervalSecs: number = 10;
 
 export default function Livestream() {
   const {
@@ -25,14 +25,16 @@ export default function Livestream() {
 
   useEffect(() => {
     if (meetingPeers.length === 1 && !deductionStarted) {
-      console.log("We are deducting credits");
       setDeductionStarted(true);
       const intervalId = setInterval(() => {
         handleCreditsDeduction(creditsDeductionIntervalSecs);
       }, creditsDeductionIntervalSecs * 1000);
 
       // Clear the interval when the component unmounts or when `localPeer?.roleName` changes
-      return () => clearInterval(intervalId);
+      return () => {
+        clearInterval(intervalId);
+        setDeductionStarted(false);
+      };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [peers]);

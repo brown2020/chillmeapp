@@ -31,6 +31,7 @@ const calculateDeductableCredits = (seconds: number) => {
   const { conferencing } = getUsagePricing({ perSecond: true });
   return conferencing * seconds;
 };
+
 export {
   toPlainObject,
   getUsagePricing,
