@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import MeetingControls from "./MeetingControls";
 import MeetingMemberStream from "./MeetingMemberStream";
 import MeetingChatWidget from "./MeetingChatWidget";
@@ -21,10 +21,12 @@ export default function Livestream() {
   } = useMeeting();
   const latestDominantSpeakerRef = useRef(dominantSpeaker);
   const meetingPeers = peers;
+  const [deductionStarted, setDeductionStarted] = useState<boolean>(false);
 
   useEffect(() => {
-    if (localPeer?.roleName === "host") {
-      console.log("Host has joined and now we are deducting credits");
+    if (meetingPeers.length === 1 && !deductionStarted) {
+      console.log("We are deducting credits");
+      setDeductionStarted(true);
       const intervalId = setInterval(() => {
         handleCreditsDeduction(creditsDeductionIntervalSecs);
       }, creditsDeductionIntervalSecs * 1000);
@@ -34,10 +36,6 @@ export default function Livestream() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [peers]);
-
-  useEffect(() => {
-    console.log(meetingNotification);
-  }, [meetingNotification]);
 
   useEffect(() => {
     if (!meetingNotification) {
