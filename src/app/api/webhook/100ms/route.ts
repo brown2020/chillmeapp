@@ -6,6 +6,7 @@ import {
   WebhookSessionCloseMeta,
 } from "@/types/entities";
 import { deductUserCredits } from "@/backend/services/user";
+import { parseISO, differenceInSeconds } from "date-fns";
 
 type EventTypes = "recording.success" | "session.close.success";
 
@@ -26,16 +27,18 @@ export async function POST(request: NextRequest) {
     if (!meetingInfo) {
       return;
     }
-    const lastDeductionTime = meetingInfo.last_credit_deduction_at;
-    const seconds =
-      Date.now() - (meetingInfo.last_credit_deduction_at?._seconds || 0) / 1000;
+    // Get the current time
+    const currentDate = new Date();
 
-    console.log({ seconds, lastDeductionTime });
-
+    const lastDeductionTime =
+      meetingInfo?.last_credit_deduction_at || currentDate.toISOString();
+    const parsedDate = parseISO(lastDeductionTime);
+    const secondsDifference = differenceInSeconds(currentDate, parsedDate);
+    console.log({ secondsDifference });
     await deductUserCredits(
       meetingInfo?.broadcaster as string,
       meetingInfo?.id as string,
-      seconds,
+      secondsDifference,
     );
     await updateMeeting({
       room_id: bodyJson.room_id,
