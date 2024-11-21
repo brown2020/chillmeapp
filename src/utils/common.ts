@@ -29,7 +29,7 @@ const calculateAvailableConferencingSeconds = (
 
 const calculateDeductableCredits = (seconds: number) => {
   const { conferencing } = getUsagePricing({ perSecond: true });
-  return conferencing * seconds;
+  return parseFloat((conferencing * seconds).toFixed(2));
 };
 
 export {
