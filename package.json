@@ -67,6 +67,7 @@
     "@types/node": "^22.7.3",
     "@types/react": "^18.3.9",
     "@types/react-dom": "^18",
+    "@types/testing-library__jest-dom": "^5.14.9",
     "@types/uuid": "^10.0.0",
     "@types/video.js": "^7.3.58",
     "autoprefixer": "^10.4.20",
