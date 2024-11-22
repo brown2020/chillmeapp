@@ -8,15 +8,19 @@ import {
   selectLocalPeer,
   selectHMSMessages,
   selectLocalPeerID,
+  selectRoomID,
+  HMSLogLevel,
 } from "@100mslive/react-sdk";
 import { getAppToken } from "@/backend/services/broadcasting";
 import { getMeetingInfo } from "@backend/services/meeting";
+import { deductUserCredits } from "@backend/services/user";
 import { useCallback } from "react";
 import useMeetingStore from "../zustand/useMeetingStore";
 import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useHMSNotifications } from "@100mslive/react-sdk";
 import { toast } from "@frontend/hooks/useToast";
+import { useAuthStore } from "../zustand/useAuthStore";
 
 const useMeeting = () => {
   const hmsActions = useHMSActions();
@@ -32,6 +36,13 @@ const useMeeting = () => {
   const dominantSpeaker = useHMSStore(selectDominantSpeaker);
   const messages = useHMSStore(selectHMSMessages);
   const localPeerId = useHMSStore(selectLocalPeerID);
+  const roomId = useHMSStore(selectRoomID);
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    hmsActions.setLogLevel(HMSLogLevel.NONE);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateHMSMediaStore = useCallback(async () => {
     await Promise.all([
@@ -93,6 +104,12 @@ const useMeeting = () => {
     }
   };
 
+  const handleCreditsDeduction = useCallback(
+    (secondsGap: number) =>
+      deductUserCredits(user?.uid as string, roomId, secondsGap),
+    [roomId, user?.uid],
+  );
+
   return {
     mediaStatus,
     isConnected,
@@ -111,6 +128,7 @@ const useMeeting = () => {
     sendBroadcastMessage,
     messages,
     localPeerId,
+    handleCreditsDeduction,
   };
 };
 

@@ -30,12 +30,10 @@ export default function MeetingChatWidget() {
   };
 
   const scrollToBottom = () => {
-    console.log(messagesCardRef.current);
     messagesCardRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
     });
-    console.log("Scrolling to bottom");
   };
 
   useEffect(() => {

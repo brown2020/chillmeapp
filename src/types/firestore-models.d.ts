@@ -20,6 +20,7 @@ type MeetingSession = {
   recording_storage_path?: string; // Optional for the same reason
   room_id?: string; // Optional as it is present in only one instance
   session_duration?: number; // Optional as it is present in only one instance
+  last_credit_deduction_at: string | null;
 };
 
 type MeetingSessions = MeetingSession[];
