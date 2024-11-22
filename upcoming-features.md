@@ -58,3 +58,6 @@
 
 ## 16. Resources Setup
 - [ ] Add script to auto create resources across multiple services
+
+## 17. Unit Testing
+- [ ] Setup unit tests
