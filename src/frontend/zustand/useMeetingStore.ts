@@ -11,24 +11,26 @@ type MeetingStore = {
 };
 
 const useMeetingStore = composeStore<MeetingStore>(
-  (set) => ({
-    mediaStatus: {
-      audio: true,
-      video: false,
-    },
-    showChatWidget: true,
-    setShowChatWidget: (payload: boolean) =>
-      set(() => ({
-        showChatWidget: payload,
-      })),
-    setMediaStatus: (update: Partial<MeetingStore["mediaStatus"]>) =>
-      set((state) => ({
-        mediaStatus: {
-          ...state.mediaStatus,
-          ...update, // Spread the update object here
-        },
-      })),
-  }),
+  (set) => {
+    return {
+      mediaStatus: {
+        audio: true,
+        video: false,
+      },
+      showChatWidget: true,
+      setShowChatWidget: (payload: boolean) =>
+        set(() => ({
+          showChatWidget: payload,
+        })),
+      setMediaStatus: (update: Partial<MeetingStore["mediaStatus"]>) =>
+        set((state) => ({
+          mediaStatus: {
+            ...state.mediaStatus,
+            ...update, // Spread the update object here
+          },
+        })),
+    };
+  },
   {
     name: "MeetingStore",
   },
