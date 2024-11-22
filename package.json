@@ -12,7 +12,8 @@
     "eslint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx .",
     "tunnel": "ssh -R chillme:80:localhost:3000 serveo.net",
     "tslint": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@100mslive/react-sdk": "^0.10.20",
