@@ -49,7 +49,7 @@
 
 ## 14. Credits-Based Payment System
 - [x] Implement a credits-based system allowing users to purchase 10,000 credits for $99.99.
-- [ ] Deduct credits based on 100ms usage and AI functionalities.
+- [x] Deduct credits based on 100ms usage and AI functionalities.
 - [ ] Create a dashboard for users to track remaining credits and usage history.
 
 ## 15. Project Maintenence
