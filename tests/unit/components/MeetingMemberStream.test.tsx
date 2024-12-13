@@ -6,6 +6,7 @@ import {
   useHMSStore,
   selectLocalPeer,
   selectDominantSpeaker,
+  HMSPeer,
 } from "@100mslive/react-sdk";
 import MeetingMemberStream from "@/frontend/components/MeetingMemberStream";
 
@@ -19,19 +20,32 @@ jest.mock("@100mslive/react-sdk", () => ({
 
 jest.mock("@frontend/components/ui", () => ({
   Icons: {
-    CircleUser: (props: any) => (
-      <div data-testid="circle-user-icon" {...props} />
-    ),
+    CircleUser: (props: {
+      width: number;
+      height: number;
+      className?: string;
+    }) => <div data-testid="circle-user-icon" {...props} />,
   },
 }));
 
 describe("MeetingMemberStream", () => {
-  const mockPeer = {
+  const mockPeer: HMSPeer = {
     id: "peer-1",
-    videoTrack: "track-1",
-    isLocal: false,
     name: "John Doe",
+    roleName: "participant",
+    isLocal: false,
+    isStarred: false,
+    videoTrack: "track-1",
+    audioTrack: "track-2",
+    auxiliaryTracks: [],
+    customerUserId: "12345",
+    metadata: '{"key": "value"}',
+    joinedAt: new Date(),
+    groups: ["group1"],
+    isHandRaised: false,
+    type: "regular" as HMSPeer["type"],
   };
+
   const mockLocalPeer = { id: "local-peer", isLocal: true };
   const mockDominantSpeaker = { id: "dominant-speaker" };
   const mockVideoRef = { current: null };
