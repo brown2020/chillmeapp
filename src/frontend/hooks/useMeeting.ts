@@ -18,6 +18,19 @@ import { useRouter } from "next/navigation";
 import { useHMSNotifications } from "@100mslive/react-sdk";
 import { toast } from "@frontend/hooks/useToast";
 
+const pickRoleFromRoomCodes = (
+  roomCodes: Array<{ role: string }> | undefined,
+  isHost: boolean,
+) => {
+  const roles = Array.from(
+    new Set((roomCodes ?? []).map((c) => c.role).filter(Boolean)),
+  );
+  if (roles.length === 0) return isHost ? "host" : "guest";
+  const hostRole = roles.includes("host") ? "host" : roles[0];
+  const guestRole = roles.includes("guest") ? "guest" : (roles[1] ?? roles[0]);
+  return isHost ? hostRole : guestRole;
+};
+
 const useMeeting = () => {
   const hmsActions = useHMSActions();
   const { mediaStatus, setMediaStatus, setShowChatWidget, showChatWidget } =
@@ -65,19 +78,27 @@ const useMeeting = () => {
   };
 
   useEffect(() => {
+    if (!isConnected) return;
     updateHMSMediaStore();
-  }, [updateHMSMediaStore]);
+  }, [isConnected, updateHMSMediaStore]);
 
   const joinRoom = async (roomId: string, userName: string, userId: string) => {
     try {
+      if (!roomId) throw new Error("Missing roomId");
       const roomInfo = await getMeetingInfo(roomId);
-      const role = userId === roomInfo?.broadcaster ? "host" : "guest";
-      const tokenResponse = await getAppToken(roomId, userName, role);
+      const isHost = Boolean(userId) && userId === roomInfo?.broadcaster;
+      const role = pickRoleFromRoomCodes(
+        (roomInfo as unknown as { room_codes?: Array<{ role: string }> })
+          ?.room_codes,
+        isHost,
+      );
+      const tokenResponse = await getAppToken(roomId, userId, role);
       // Step 3: Join the room
       await hmsActions.join({
         userName: userName,
         authToken: tokenResponse.appToken.token,
       });
+      await updateHMSMediaStore();
     } catch (err) {
       const error = err as { description: string } | Error;
 
@@ -86,7 +107,7 @@ const useMeeting = () => {
         description:
           "description" in error
             ? error.description
-            : "room not available to join",
+            : (error?.message ?? "room not available to join"),
         variant: "error",
       });
       router.push("/");

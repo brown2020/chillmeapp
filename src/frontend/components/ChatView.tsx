@@ -37,7 +37,7 @@ export default function ChatView() {
       {messages.map((message, index) => (
         <div key={index} className="mb-2">
           <div className="flex items-start">
-            <div className="bg-black bg-opacity-50 p-2 rounded-lg text-white text-xs w-full break-words">
+            <div className="bg-black/50 p-2 rounded-lg text-white text-xs w-full break-words">
               {message.message}
             </div>
           </div>
