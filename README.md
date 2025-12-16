@@ -36,22 +36,23 @@ Check out the live demo of **Chill.me** [here](https://chill.me).
 
 ## Technologies Used
 
-- **Next.js 14**: Framework for server-rendered React applications.
+- **Next.js 16**: Framework for server-rendered React applications.
 - **100ms Video SDK**: Powers the real-time video communication.
 - **Stripe**: Handles credit purchases for users without their own API keys.
 - **Firebase**: Manages user authentication, profiles, and credits.
 - **Zustand**: Local state management, synced with Firebase.
-- **Tailwind CSS**: Utility-first CSS framework for styling.
+- **Tailwind CSS v4**: Utility-first CSS framework for styling.
 - **TypeScript**: Adds static types for more reliable code.
 - **Lucide Icons**: Modern iconography for the user interface.
-- **React** & **React DOM**: Core libraries for building the UI.
+- **React 18**: Core UI library (pinned for `@100mslive/react-sdk` compatibility).
+- **ESLint v9 (flat config)** + **Prettier**: Linting/formatting.
 
 ## Installation
 
 ### Prerequisites
 
-- **Node.js**: Version 14.x or later
-- **npm**: Version 6.x or later
+- **Node.js**: Version 18+ recommended
+- **npm**: Version 9+ recommended
 - **100ms Account**: Sign up at [100ms](https://www.100ms.live/) for your API credentials.
 - **Stripe Account**: Sign up at [Stripe](https://stripe.com/) for managing payments (optional if using your own API keys).
 
@@ -79,8 +80,10 @@ cp .env.example .env
 Open the `.env` file and fill in the required credentials for **100ms**, **Firebase**, and **Stripe** (if needed):
 
 ```plaintext
-APP_SECRET=your_app_secret
-APP_ACCESS_KEY=your_app_access_key
+# 100ms (server-side SDK)
+LIVE100MS_APP_SECRET=your_100ms_app_secret
+LIVE100MS_APP_ACCESS_KEY=your_100ms_app_access_key
+
 NEXT_PUBLIC_BASE_URL=https://chill.me
 
 # Firebase Server Config
@@ -107,7 +110,7 @@ Visit `http://localhost:3000` in your browser to use **Chill.me** locally.
 
 Environment variables are used to manage API keys and Firebase configurations:
 
-- **100ms Config**: `APP_SECRET`, `APP_ACCESS_KEY`
+- **100ms Config**: `LIVE100MS_APP_SECRET`, `LIVE100MS_APP_ACCESS_KEY`
 - **Firebase Config**: `FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL`
 - **Stripe Config**: `NEXT_PUBLIC_STRIPE_KEY`, `STRIPE_SECRET_KEY` (required only for credit purchases)
 
@@ -126,9 +129,9 @@ Guests can join by clicking the shared link and entering their details.
 
 ## Server Actions
 
-Chill.me uses **Next.js 14 server actions** to handle payments and live streaming features. Unlike traditional API routes, server actions in Next.js 14 allow you to run server-side code directly within your components without the need for creating separate API routes. This approach simplifies the codebase and improves performance by removing the need for client-server network requests in many cases.
+Chill.me uses **Server Actions** to handle payments and live streaming features. Unlike traditional API routes, server actions allow you to run server-side code directly within your components without the need for creating separate API routes. This approach simplifies the codebase and improves performance by removing the need for client-server network requests in many cases.
 
-### Benefits of Next.js 14 Server Actions
+### Benefits of Server Actions
 
 - **Simplified Code**: Server actions are used within components, eliminating the need for a separate API route in many cases.
 - **Performance**: By running the server code directly in the component, you avoid unnecessary round-trip requests between the client and server.
@@ -150,8 +153,23 @@ Powered by **100ms**, the following actions manage room creation and authenticat
 
 Server action logic is contained within:
 
-- `app/services/payment.ts`
-- `app/services/broadcasting.ts`
+- `src/frontend/services/payment.ts`
+- `src/frontend/services/broadcasting.ts`
+
+## 100ms Notes / Troubleshooting
+
+- **Roles must exist in your 100ms template**: joining will fail if you generate an auth token with a role name that doesn’t exist. The app now creates **room codes** on room creation and uses those discovered roles for token generation. See the 100ms React quickstart for the expected join/token flow: [100ms React Quickstart](https://www.100ms.live/docs/javascript/v2/quickstart/react-quickstart).
+- **React version**: `@100mslive/react-sdk@0.11.0` peers `react < 19`, so this repo pins **React 18**.
+
+## Scripts
+
+```sh
+npm run dev     # start dev server
+npm run build   # production build
+npm start       # start production server
+npm run lint    # eslint (flat config)
+npm run tslint  # typecheck (tsc)
+```
 
 ## Profile Management
 
@@ -225,6 +243,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [100ms SDK Documentation](https://docs.100ms.live/)
 - [Stripe API Documentation](https://stripe.com/docs)
-- [Next.js 14 Documentation](https://nextjs.org/docs)
+- [Next.js Documentation](https://nextjs.org/docs)
 - [Firebase Documentation](https://firebase.google.com/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
