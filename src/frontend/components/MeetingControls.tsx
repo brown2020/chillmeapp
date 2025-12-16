@@ -60,8 +60,8 @@ export default function MeetingControls() {
         </Button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="outline-none">
-            <Button size="icon" variant={"outline"}>
+          <DropdownMenuTrigger asChild>
+            <Button size="icon" variant={"outline"} className="outline-none">
               <Icons.MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>

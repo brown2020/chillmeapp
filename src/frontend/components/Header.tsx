@@ -42,7 +42,7 @@ export default function Header({ peer }: HeaderProps) {
         </div>
       </button>
 
-      <button className="bg-black bg-opacity-30 text-white rounded px-4 py-2">
+      <button className="bg-black/30 text-white rounded px-4 py-2">
         {peer.name} {peer.isLocal ? "(You)" : ""}
       </button>
 
@@ -59,7 +59,7 @@ export default function Header({ peer }: HeaderProps) {
 const ErrorMessage: React.FC<{ onAllowAudio: () => void }> = ({
   onAllowAudio,
 }) => (
-  <div className="fixed bg-black bg-opacity-50 w-3/4 p-4 rounded mx-auto text-white top-1/3 z-50">
+  <div className="fixed bg-black/50 w-3/4 p-4 rounded mx-auto text-white top-1/3 z-50">
     <h5 className="text-lg font-semibold">Audio Autoplay</h5>
     <p className="text-sm mb-4">
       The browser wants us to get a confirmation for playing the Audio. Please

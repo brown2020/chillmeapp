@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config "../../../tailwind.config.ts";
+@import "tailwindcss";
 
 
 /* @layer base {
@@ -156,7 +155,7 @@
     @apply mr-auto py-2 px-3 bg-orange-500 text-black rounded-md cursor-pointer disabled:opacity-50 hover:opacity-50;
   }
   .response {
-    @apply p-3 bg-orange-500 bg-opacity-20 my-3 rounded-md whitespace-pre-wrap;
+    @apply p-3 bg-orange-500/20 my-3 rounded-md whitespace-pre-wrap;
   }
 
   .form-input {

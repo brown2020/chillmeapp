@@ -110,7 +110,14 @@ const CreateMeetingForm: React.FC = () => {
         setIsLoading(false);
         return;
       }
-      await saveMeeting(authStore.user?.uid as string, roomResponse.room);
+      await saveMeeting(
+        authStore.user?.uid as string,
+        {
+          ...roomResponse.room,
+          // Persist room codes so we can reliably pick a valid role later.
+          room_codes: roomResponse.roomCodes ?? [],
+        } as never,
+      );
       router.push(`/live/${roomId}`);
     },
     [authStore.user?.uid, router, shouldRecord],

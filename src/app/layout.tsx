@@ -11,15 +11,15 @@ export const metadata: Metadata = {
   description: "100ms Video SDK Example",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <HMSProvider>
-      <html lang="en">
-        <body>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <HMSProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
@@ -30,8 +30,8 @@ export default async function RootLayout({
               <Layout>{children}</Layout>
             </AuthGuard>
           </ThemeProvider>
-        </body>
-      </html>
-    </HMSProvider>
+        </HMSProvider>
+      </body>
+    </html>
   );
 }

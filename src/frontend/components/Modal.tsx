@@ -23,7 +23,7 @@ const Modal: React.FC<ModalProps> = ({ roomName, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
       id="exampleModal"
       tabIndex={-1}
       aria-labelledby="exampleModalLabel"

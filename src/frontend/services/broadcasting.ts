@@ -24,7 +24,14 @@ export async function createRoom(shouldRecord: boolean) {
         enabled: shouldRecord,
       },
     });
-    return { room }; // Ensure you return the room ID correctly
+    // Create room codes for all roles so we can discover the actual role names
+    // configured in the 100ms template for this room.
+    const roomCodes = await hms.roomCodes.create(room.id);
+    console.log(
+      "Created room codes for roles:",
+      roomCodes.map((c) => c.role),
+    );
+    return { room, roomCodes };
   } catch (err: unknown) {
     const error = err as Error;
     console.error("Error creating room:", error);
@@ -39,6 +46,19 @@ export async function getAppToken(
   userId: string,
   role: string,
 ) {
-  const appToken = await hms.auth.getAuthToken({ roomId, role, userId });
-  return { appToken };
+  try {
+    if (!roomId) throw new Error("Missing roomId");
+    if (!role) throw new Error("Missing role");
+    const appToken = await hms.auth.getAuthToken({ roomId, role, userId });
+    return { appToken };
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error("Error generating auth token:", {
+      message: error?.message,
+      roomId,
+      role,
+      hasUserId: Boolean(userId),
+    });
+    throw error;
+  }
 }
