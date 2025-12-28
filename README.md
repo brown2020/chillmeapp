@@ -65,8 +65,10 @@ cd chillmeapp
 
 ### Install Dependencies
 
+This repo includes a `package-lock.json` (lockfileVersion 3). For reproducible installs, prefer `npm ci`:
+
 ```sh
-npm install
+npm ci
 ```
 
 ### Configure Environment Variables
@@ -232,7 +234,9 @@ For any questions or support, contact [info@ignitechannel.com](mailto:info@ignit
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. See [`LICENSE.md`](LICENSE.md).
+
+> If you run a modified version of this app on a network, AGPL generally requires you to provide the corresponding source code to users interacting with it. Read section 13 in `LICENSE.md` for details.
 
 ## Security Recommendations
 
