@@ -1,20 +1,26 @@
 # Chill.me - Real-Time Video Chat Platform
 
-**Chill.me** is a real-time video chat platform powered by **100ms Video SDK** for seamless communication. Users can create rooms, invite guests via unique URLs, and engage in high-quality video chats. The platform also supports a credit-based system for users who do not have their own API keys, allowing them to purchase credits and access the platform’s API services.
+<p align="center">
+  <img src="src/frontend/assets/banner.png" alt="Chill.me Banner" width="600" />
+</p>
+
+**Chill.me** is a modern real-time video chat platform powered by **LiveKit** for seamless, high-quality communication. Users can create rooms, invite guests via unique URLs, and engage in video chats with built-in chat functionality. The platform features a credit-based system for users who want to access premium API services.
 
 ## Table of Contents
 
 - [Features](#features)
 - [Demo](#demo)
-- [Technologies Used](#technologies-used)
+- [Tech Stack](#tech-stack)
 - [Installation](#installation)
 - [Environment Variables](#environment-variables)
 - [Getting Started](#getting-started)
-- [Server Actions](#server-actions)
-  - [Payment Actions](#payment-actions)
-  - [Live Stream Actions](#live-stream-actions)
+- [Project Structure](#project-structure)
+- [Architecture](#architecture)
+  - [Server Actions](#server-actions)
+  - [LiveKit Integration](#livekit-integration)
+  - [State Management](#state-management)
+- [Scripts](#scripts)
 - [Profile Management](#profile-management)
-- [Usage](#usage)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
 - [Support](#support)
@@ -22,30 +28,40 @@
 
 ## Features
 
-- **Real-Time Video Chat**: High-quality, low-latency video communication powered by 100ms SDK.
-- **Dynamic Room Creation**: Users can create video chat rooms and manage guests through unique URLs.
-- **Guest Invitations**: Invite guests by sharing a room URL, allowing them to join directly.
-- **API Key or Credit System**: Users can either use their own API keys (100ms, OpenAI, Stability) for free or purchase credits to use the platform’s API keys.
-- **Dark Mode Interface**: Designed with a sleek, user-friendly dark mode.
-- **Responsive Design**: Optimized for desktop and mobile devices.
-- **Firebase Integration**: Real-time syncing of user profiles, API keys, and credits with Firebase.
+- **Real-Time Video Chat**: High-quality, low-latency video communication powered by LiveKit
+- **Dynamic Room Creation**: Create video chat rooms with unique URLs for easy sharing
+- **Guest Invitations**: Invite guests by sharing a room link—no account required to join
+- **In-Call Chat**: Real-time text chat during video calls
+- **Meeting History**: View past meetings and recordings
+- **Credit System**: Purchase credits via Stripe for premium features
+- **Dark Mode**: Sleek, modern dark mode interface with theme persistence
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Firebase Integration**: Real-time syncing of user profiles, meetings, and data
+- **Google Authentication**: One-click sign-in with Google
 
 ## Demo
 
-Check out the live demo of **Chill.me** [here](https://chill.me).
+Check out the live demo of **Chill.me** at [chill.me](https://chill.me)
 
-## Technologies Used
+## Tech Stack
 
-- **Next.js 16**: Framework for server-rendered React applications.
-- **100ms Video SDK**: Powers the real-time video communication.
-- **Stripe**: Handles credit purchases for users without their own API keys.
-- **Firebase**: Manages user authentication, profiles, and credits.
-- **Zustand**: Local state management, synced with Firebase.
-- **Tailwind CSS v4**: Utility-first CSS framework for styling.
-- **TypeScript**: Adds static types for more reliable code.
-- **Lucide Icons**: Modern iconography for the user interface.
-- **React 18**: Core UI library (pinned for `@100mslive/react-sdk` compatibility).
-- **ESLint v9 (flat config)** + **Prettier**: Linting/formatting.
+| Category | Technology | Version |
+|----------|------------|---------|
+| **Framework** | [Next.js](https://nextjs.org/) (App Router) | ^16.0.10 |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) | ^5.x |
+| **UI Library** | [React](https://react.dev/) | ^19.2.4 |
+| **Video** | [LiveKit](https://livekit.io/) | ^2.17.0 |
+| **LiveKit React** | [@livekit/components-react](https://docs.livekit.io/reference/components/react/) | ^2.9.19 |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) | ^4.1.18 |
+| **UI Components** | [Radix UI](https://www.radix-ui.com/) | Various |
+| **State Management** | [Zustand](https://zustand-demo.pmnd.rs/) | ^5.0.0 |
+| **Authentication** | [Firebase Auth](https://firebase.google.com/docs/auth) | ^12.6.0 |
+| **Database** | [Firebase Firestore](https://firebase.google.com/docs/firestore) | ^12.6.0 |
+| **Payments** | [Stripe](https://stripe.com/) | ^20.0.0 |
+| **Icons** | [Lucide React](https://lucide.dev/) | ^0.563.0 |
+| **Forms** | [React Hook Form](https://react-hook-form.com/) | ^7.53.1 |
+| **Linting** | [ESLint](https://eslint.org/) (Flat Config) | ^9.39.2 |
+| **Formatting** | [Prettier](https://prettier.io/) | ^3.7.4 |
 
 ## Installation
 
@@ -53,200 +69,394 @@ Check out the live demo of **Chill.me** [here](https://chill.me).
 
 - **Node.js**: Version 18+ recommended
 - **npm**: Version 9+ recommended
-- **100ms Account**: Sign up at [100ms](https://www.100ms.live/) for your API credentials.
-- **Stripe Account**: Sign up at [Stripe](https://stripe.com/) for managing payments (optional if using your own API keys).
+- **LiveKit Account**: Sign up at [LiveKit Cloud](https://cloud.livekit.io/) for your API credentials
+- **Firebase Project**: Create a project at [Firebase Console](https://console.firebase.google.com/)
+- **Stripe Account** (optional): Sign up at [Stripe](https://stripe.com/) for payment processing
 
 ### Clone the Repository
 
-```sh
+```bash
 git clone https://github.com/brown2020/chillmeapp.git
 cd chillmeapp
 ```
 
 ### Install Dependencies
 
-This repo includes a `package-lock.json` (lockfileVersion 3). For reproducible installs, prefer `npm ci`:
+This repo uses `package-lock.json` (lockfileVersion 3). For reproducible installs:
 
-```sh
+```bash
 npm ci
+```
+
+Or for a fresh install:
+
+```bash
+npm install
 ```
 
 ### Configure Environment Variables
 
-Create a `.env` file in the root directory based on the provided `.env.example`:
+Create a `.env` file in the root directory:
 
-```sh
+```bash
 cp .env.example .env
 ```
 
-Open the `.env` file and fill in the required credentials for **100ms**, **Firebase**, and **Stripe** (if needed):
-
-```plaintext
-# 100ms (server-side SDK)
-LIVE100MS_APP_SECRET=your_100ms_app_secret
-LIVE100MS_APP_ACCESS_KEY=your_100ms_app_access_key
-
-NEXT_PUBLIC_BASE_URL=https://chill.me
-
-# Firebase Server Config
-FIREBASE_PRIVATE_KEY=your_private_key
-FIREBASE_CLIENT_EMAIL=your_client_email
-
-# Firebase Client Config
-NEXT_PUBLIC_FIREBASE_APIKEY=your_firebase_api_key
-
-# Stripe Config (optional if using API keys)
-NEXT_PUBLIC_STRIPE_KEY=your_stripe_key
-STRIPE_SECRET_KEY=your_stripe_secret_key
-```
+Fill in your credentials (see [Environment Variables](#environment-variables) section).
 
 ### Run the Application
 
-```sh
+```bash
 npm run dev
 ```
 
-Visit `http://localhost:3000` in your browser to use **Chill.me** locally.
+Visit `http://localhost:3000` in your browser.
 
 ## Environment Variables
 
-Environment variables are used to manage API keys and Firebase configurations:
+Create a `.env` file with the following variables:
 
-- **100ms Config**: `LIVE100MS_APP_SECRET`, `LIVE100MS_APP_ACCESS_KEY`
-- **Firebase Config**: `FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL`
-- **Stripe Config**: `NEXT_PUBLIC_STRIPE_KEY`, `STRIPE_SECRET_KEY` (required only for credit purchases)
+### LiveKit Configuration
 
-Refer to the `.env.example` file for all required variables.
+```env
+LIVEKIT_API_KEY=your_livekit_api_key
+LIVEKIT_API_SECRET=your_livekit_api_secret
+LIVEKIT_URL=wss://your-project.livekit.cloud
+NEXT_PUBLIC_LIVEKIT_URL=wss://your-project.livekit.cloud
+```
+
+### Firebase Server Configuration
+
+```env
+FIREBASE_TYPE=service_account
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_PRIVATE_KEY_ID=your_private_key_id
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+FIREBASE_CLIENT_EMAIL=your_client_email
+FIREBASE_CLIENT_ID=your_client_id
+FIREBASE_AUTH_URI=https://accounts.google.com/o/oauth2/auth
+FIREBASE_TOKEN_URI=https://oauth2.googleapis.com/token
+FIREBASE_AUTH_PROVIDER_X509_CERT_URL=https://www.googleapis.com/oauth2/v1/certs
+FIREBASE_CLIENT_CERTS_URL=your_client_certs_url
+FIREBASE_UNIVERSE_DOMAIN=googleapis.com
+```
+
+### Firebase Client Configuration
+
+```env
+NEXT_PUBLIC_FIREBASE_APIKEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTHDOMAIN=your_firebase_auth_domain
+NEXT_PUBLIC_FIREBASE_PROJECTID=your_firebase_project_id
+NEXT_PUBLIC_FIREBASE_STORAGEBUCKET=your_firebase_storage_bucket
+NEXT_PUBLIC_FIREBASE_MESSAGINGSENDERID=your_firebase_messaging_sender_id
+NEXT_PUBLIC_FIREBASE_APPID=your_firebase_app_id
+NEXT_PUBLIC_FIREBASE_MEASUREMENTID=your_firebase_measurement_id
+```
+
+### Stripe Configuration (Optional)
+
+```env
+NEXT_PUBLIC_STRIPE_KEY=your_stripe_publishable_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+NEXT_PUBLIC_STRIPE_PRODUCT_NAME=chillme_demo_credits
+NEXT_PUBLIC_CREDITS_PER_IMAGE=5
+```
+
+### Other
+
+```env
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+NEXT_PUBLIC_COOKIE_NAME=chillmeAuthToken
+```
 
 ## Getting Started
 
-To create a video room:
+### Creating a Video Room
 
-1. Enter your name in the "Your name" field.
-2. Enter a room name if you're a broadcaster.
-3. Click **Join** to create or enter a room.
-4. Share the generated room URL to invite guests directly.
+1. Sign in with your Google account or create an account
+2. Enter your name and a room name on the home page
+3. Click **Create Meeting** to generate a new room
+4. Share the room URL with participants
 
-Guests can join by clicking the shared link and entering their details.
+### Joining a Room
 
-## Server Actions
+1. Click on a shared room link
+2. Enter your display name
+3. Allow camera/microphone permissions
+4. Click **Join** to enter the meeting
 
-Chill.me uses **Server Actions** to handle payments and live streaming features. Unlike traditional API routes, server actions allow you to run server-side code directly within your components without the need for creating separate API routes. This approach simplifies the codebase and improves performance by removing the need for client-server network requests in many cases.
+### During a Meeting
 
-### Benefits of Server Actions
+- Toggle camera and microphone using the control bar
+- Open the chat panel to send messages
+- Leave the meeting using the end call button
 
-- **Simplified Code**: Server actions are used within components, eliminating the need for a separate API route in many cases.
-- **Performance**: By running the server code directly in the component, you avoid unnecessary round-trip requests between the client and server.
-- **Security**: Server actions provide better security since sensitive logic remains on the server and never reaches the client.
+## Project Structure
 
-### Payment Actions
+```
+src/
+├── app/                           # Next.js App Router
+│   ├── api/webhook/livekit/       # LiveKit webhook endpoint
+│   ├── auth/                      # Authentication pages
+│   │   ├── signin/
+│   │   ├── signup/
+│   │   └── signout/
+│   ├── live/[roomId]/             # Dynamic meeting room
+│   ├── past-meetings/             # Meeting history
+│   ├── profile/                   # User profile
+│   ├── privacy/                   # Privacy policy
+│   ├── terms/                     # Terms of service
+│   ├── recording/                 # Recording page
+│   ├── layout.tsx                 # Root layout with providers
+│   └── page.tsx                   # Home page
+├── frontend/
+│   ├── components/                # React components
+│   │   ├── ui/                    # Reusable UI (Radix-based)
+│   │   │   ├── Avatar.tsx
+│   │   │   ├── Button.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── Chat/              # Chat components
+│   │   │   ├── DropdownMenu.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Popover.tsx
+│   │   │   ├── Switch.tsx
+│   │   │   ├── Toast.tsx
+│   │   │   └── Tooltip.tsx
+│   │   ├── Forms/                 # Form components
+│   │   │   ├── AuthForm.tsx
+│   │   │   ├── CreateMeetingForm.tsx
+│   │   │   └── SignupForm.tsx
+│   │   ├── AuthGuard.tsx          # Route protection
+│   │   ├── ErrorBoundary.tsx      # Error handling
+│   │   ├── Home.tsx               # Home component
+│   │   ├── Livestream.tsx         # Video stream component
+│   │   ├── MeetingCard.tsx        # Meeting display card
+│   │   ├── MeetingChatWidget.tsx  # In-call chat
+│   │   ├── MeetingControls.tsx    # Video/audio controls
+│   │   └── MeetingMemberStream.tsx # Participant streams
+│   ├── hooks/                     # Custom hooks
+│   │   ├── useAuth.ts             # Authentication hook
+│   │   ├── useMeeting.ts          # Meeting controls hook
+│   │   └── useToast.ts            # Toast notifications
+│   ├── zustand/                   # State stores
+│   │   ├── useAuthStore.ts        # Auth state
+│   │   └── useMeetingStore.ts     # Meeting state
+│   ├── services/                  # API services
+│   │   ├── auth.ts                # Auth operations
+│   │   ├── broadcasting.ts        # LiveKit room management
+│   │   ├── meeting.ts             # Meeting operations
+│   │   ├── payment.ts             # Stripe payments
+│   │   └── user.ts                # User operations
+│   ├── providers/                 # React providers
+│   │   ├── LiveKitProvider.tsx    # LiveKit context
+│   │   └── ThemeProvider.tsx      # Theme context
+│   ├── layout/                    # Layout components
+│   │   ├── ContentWrapper.tsx
+│   │   ├── Navbar.tsx
+│   │   └── index.tsx
+│   ├── lib/firebase.ts            # Client Firebase config
+│   └── styles/globals.css         # Global styles
+├── backend/
+│   ├── services/                  # Server-side services
+│   │   ├── auth.ts
+│   │   ├── meeting.ts
+│   │   └── storage.ts
+│   └── lib/firebase.ts            # Firebase Admin SDK
+├── types/                         # TypeScript definitions
+│   ├── entities.d.ts
+│   ├── firestore-models.d.ts
+│   ├── menu.d.ts
+│   └── user.d.ts
+└── utils/                         # Utility functions
+    ├── classUtils.ts              # cn() class merger
+    ├── convertToSubcurrency.ts
+    ├── dateUtils.ts
+    └── roomCodeGenerator.ts
+```
 
-Managed through **Stripe**, the server actions related to payments include:
+### Path Aliases
 
-- **createPaymentIntent**: Initializes a payment intent for credit purchases.
-- **validatePaymentIntent**: Confirms the payment status by validating the payment intent.
+```typescript
+@/*          → ./src/*
+@chill-ui    → ./src/frontend/components/ui
+@frontend/*  → ./src/frontend/*
+@backend/*   → ./src/backend/*
+```
 
-### Live Stream Actions
+## Architecture
 
-Powered by **100ms**, the following actions manage room creation and authentication:
+### Server Actions
 
-- **createRoom**: Creates a live stream room.
-- **getAppToken**: Generates an authentication token for users to join the room.
+Chill.me uses Next.js Server Actions for secure server-side operations:
 
-Server action logic is contained within:
+**`src/frontend/services/broadcasting.ts`** - LiveKit Operations:
+- `createRoom()` - Creates a new LiveKit room
+- `getAccessToken()` - Generates participant access tokens
 
-- `src/frontend/services/payment.ts`
-- `src/frontend/services/broadcasting.ts`
+**`src/frontend/services/payment.ts`** - Stripe Operations:
+- `createPaymentIntent()` - Initializes payment for credits
+- `validatePaymentIntent()` - Confirms payment status
 
-## 100ms Notes / Troubleshooting
+### LiveKit Integration
 
-- **Roles must exist in your 100ms template**: joining will fail if you generate an auth token with a role name that doesn’t exist. The app now creates **room codes** on room creation and uses those discovered roles for token generation. See the 100ms React quickstart for the expected join/token flow: [100ms React Quickstart](https://www.100ms.live/docs/javascript/v2/quickstart/react-quickstart).
-- **React version**: `@100mslive/react-sdk@0.11.0` peers `react < 19`, so this repo pins **React 18**.
+LiveKit powers all real-time video functionality:
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    App Layout                        │
+│  ┌───────────────────────────────────────────────┐  │
+│  │              LiveKitProvider                   │  │
+│  │  (App-wide context, no room connection)       │  │
+│  │  ┌─────────────────────────────────────────┐  │  │
+│  │  │         LiveKitRoomWrapper              │  │  │
+│  │  │  (Active room connection)               │  │  │
+│  │  │  ┌───────────────────────────────────┐  │  │  │
+│  │  │  │     Meeting Components            │  │  │  │
+│  │  │  │  - MeetingMemberStream            │  │  │  │
+│  │  │  │  - MeetingControls                │  │  │  │
+│  │  │  │  - MeetingChatWidget              │  │  │  │
+│  │  │  └───────────────────────────────────┘  │  │  │
+│  │  └─────────────────────────────────────────┘  │  │
+│  └───────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────┘
+```
+
+Key hooks:
+- `useMeeting()` - Video/audio controls (requires `LiveKitRoomWrapper`)
+- `useMeetingStore` - Meeting state (works anywhere)
+
+### State Management
+
+Zustand stores manage application state:
+
+**`useAuthStore`**
+- `user` - Current Firebase user object
+- `isAuthenticating` - Loading state
+
+**`useMeetingStore`**
+- `mediaStatus` - Camera/microphone states
+- `chatWidgetVisible` - Chat panel visibility
 
 ## Scripts
 
-```sh
-npm run dev     # start dev server
-npm run build   # production build
-npm start       # start production server
-npm run lint    # eslint (flat config)
-npm run tslint  # typecheck (tsc)
+```bash
+# Development
+npm run dev          # Start dev server (clears .next cache)
+
+# Production
+npm run build        # Create production build
+npm start            # Start production server
+
+# Code Quality
+npm run lint         # Run ESLint
+npm run eslint:fix   # Auto-fix ESLint issues
+npm run tslint       # TypeScript type checking
+
+# Utilities
+npm run tunnel       # Create SSH tunnel for testing
+npm run prepare      # Setup Husky git hooks
 ```
 
 ## Profile Management
 
-Users can manage their profiles, including API keys and credits, through the profile page:
+Users can manage their profiles through the profile page:
 
-- **Profile Store**: Stores user information such as API keys, display name, credits, and profile photo.
-- **API Key Management**: Users can enter their own API keys (100ms, Fireworks, OpenAI, Stability) or use platform credits.
-- **Credit System**: Users can purchase credits via Stripe if they don't have their own API keys.
+- **Display Name**: Customize your name shown in meetings
+- **Profile Photo**: Upload a profile picture
+- **Credit Balance**: View and purchase credits
+- **Meeting History**: Access past meetings
 
-The profile information is stored and synced with **Firebase**, ensuring real-time updates.
-
-## Usage
-
-### Components Overview
-
-- **JoinForm.tsx**: Handles creating or joining rooms.
-- **Livestream.tsx**: Manages the video chat and communication.
-- **PaymentCheckoutPage.tsx**: Handles credit purchases through Stripe.
-- **ProfileComponent.tsx**: Manages user API keys and credit preferences.
-- **SuccessPage.tsx**: Redirect page after successful payments.
-- **ChatView.tsx**: Displays real-time chat messages during video calls.
-- **Header.tsx**: Controls for user settings and room navigation.
-- **Footer.tsx**: Audio/video/chat controls for live stream rooms.
-
-### Guest Invitations
-
-Guests can be invited by sharing the room URL. They can join by clicking the link and entering their name.
+Profile data syncs in real-time with Firebase Firestore.
 
 ## Deployment
 
-To deploy **Chill.me**, follow these steps:
+### Vercel (Recommended)
 
-1. Build the project for production:
+1. Push your code to GitHub
+2. Import the repository in [Vercel](https://vercel.com/)
+3. Configure environment variables in Vercel dashboard
+4. Deploy
 
-   ```sh
-   npm run build
-   ```
+### Manual Deployment
 
-2. Start the production server:
+```bash
+# Build for production
+npm run build
 
-   ```sh
-   npm start
-   ```
+# Start production server
+npm start
+```
 
-Alternatively, you can deploy the application to platforms like **Vercel** or **Netlify**, which support Node.js applications.
+### Docker
+
+```dockerfile
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:18-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+EXPOSE 3000
+CMD ["npm", "start"]
+```
 
 ## Contributing
 
-We welcome contributions to improve **Chill.me**! To contribute:
+We welcome contributions! To contribute:
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-branch`).
-3. Make your changes and commit (`git commit -m "Description of changes"`).
-4. Push to the branch (`git push origin feature-branch`).
-5. Open a Pull Request.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run linting (`npm run lint`)
+5. Commit your changes (`git commit -m "Add amazing feature"`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+### Code Style
+
+- ESLint v9 with flat config (`eslint.config.mjs`)
+- Prettier for formatting
+- Husky pre-commit hooks for quality enforcement
 
 ## Support
 
-For any questions or support, contact [info@ignitechannel.com](mailto:info@ignitechannel.com).
+For questions or support:
+- Open an [issue](https://github.com/brown2020/chillmeapp/issues)
+- Email: [info@ignitechannel.com](mailto:info@ignitechannel.com)
 
 ## License
 
-This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. See [`LICENSE.md`](LICENSE.md).
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
-> If you run a modified version of this app on a network, AGPL generally requires you to provide the corresponding source code to users interacting with it. Read section 13 in `LICENSE.md` for details.
+See [`LICENSE.md`](LICENSE.md) for full details.
 
-## Security Recommendations
+> **Note**: If you run a modified version of this app on a network, AGPL requires you to provide the corresponding source code to users interacting with it. See section 13 in `LICENSE.md`.
 
-- Avoid exposing sensitive environment variables publicly.
-- Use a secure environment management tool like `.env` files, or external services such as **AWS Secrets Manager** or **Google Secret Manager**.
+## Security
+
+- Never commit `.env` files or expose sensitive credentials
+- Use environment variables for all secrets
+- Consider using secret management services (AWS Secrets Manager, Google Secret Manager) for production
 
 ## Additional Resources
 
-- [100ms SDK Documentation](https://docs.100ms.live/)
-- [Stripe API Documentation](https://stripe.com/docs)
+- [LiveKit Documentation](https://docs.livekit.io/)
+- [LiveKit React Components](https://docs.livekit.io/reference/components/react/)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Firebase Documentation](https://firebase.google.com/docs)
+- [Stripe Documentation](https://stripe.com/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Zustand Documentation](https://docs.pmnd.rs/zustand/getting-started/introduction)
+- [Radix UI Documentation](https://www.radix-ui.com/docs/primitives/overview/introduction)
+
+---
+
+<p align="center">
+  Made with ❤️ by the Chill.me team
+</p>
