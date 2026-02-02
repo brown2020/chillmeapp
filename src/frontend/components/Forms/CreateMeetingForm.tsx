@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
+// Note: useCallback is still used for handleSubmit and toggleMediaTrack
 import { createRoom } from "@/frontend/services/broadcasting";
 import { saveMeeting } from "@/frontend/services/meeting";
 import { useAuthStore } from "@/frontend/zustand/useAuthStore";
@@ -23,61 +24,72 @@ const CreateMeetingForm: React.FC = () => {
   const authStore = useAuthStore();
   const router = useRouter();
 
-  const startWebcamStream = useCallback(() => {
-    if (!mediaStatus.video) {
-      return;
-    }
-    navigator.mediaDevices
-      .getUserMedia({
-        video: true,
-      })
-      .then((stream) => {
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+  const [webcamError, setWebcamError] = useState<string | null>(null);
+
+  // Single consolidated effect for webcam management
+  useEffect(() => {
+    let isCancelled = false;
+
+    const manageWebcam = async () => {
+      // If video is disabled, stop the stream
+      if (!mediaStatus.video) {
+        if (streamRef.current) {
+          streamRef.current.getVideoTracks().forEach((track) => track.stop());
+          streamRef.current = null;
         }
-      })
-      .catch((err) => {
-        console.error("Failed to access webcam:", err);
-      });
+        if (videoRef.current) {
+          videoRef.current.srcObject = null;
+        }
+        return;
+      }
+
+      // If video is enabled and we don't have a stream, start one
+      if (!streamRef.current) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          if (isCancelled) {
+            stream.getVideoTracks().forEach((track) => track.stop());
+            return;
+          }
+          streamRef.current = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+          setWebcamError(null);
+        } catch (err) {
+          if (!isCancelled) {
+            console.error("Failed to access webcam:", err);
+            setWebcamError(
+              "Unable to access camera. Please check permissions.",
+            );
+          }
+        }
+      } else {
+        // Stream exists, just update the video element
+        if (videoRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+        }
+      }
+    };
+
+    manageWebcam();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [mediaStatus.video]);
 
-  const stopWebcamStream = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getVideoTracks().forEach((track) => {
-        track.stop();
-      });
-      streamRef.current = null;
-    }
-  }, []);
-
-  const toggleVideoStream = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => {
-        if (track.kind === "video") {
-          if (videoRef.current) {
-            videoRef.current.srcObject = mediaStatus.video
-              ? streamRef.current
-              : null;
-          }
-          track.enabled = mediaStatus.video;
-        }
-      });
-    } else {
-      startWebcamStream();
-    }
-  }, [mediaStatus.video, startWebcamStream]);
-
+  // Cleanup on unmount
   useEffect(() => {
-    toggleVideoStream();
-  }, [toggleVideoStream]);
-
-  useEffect(() => {
-    startWebcamStream();
     return () => {
-      stopWebcamStream();
+      if (streamRef.current) {
+        streamRef.current.getVideoTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
     };
-  }, [startWebcamStream, stopWebcamStream]);
+  }, []);
 
   const toggleMediaTrack = (type: MediaType) => {
     setMediaStatus({
@@ -120,18 +132,27 @@ const CreateMeetingForm: React.FC = () => {
 
   return (
     <>
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        playsInline
-        className="border border-slate-800 bg-slate-700 rounded-xl w-full max-w-4xl"
-        style={{
-          transform: "scaleX(-1)",
-          height: 300,
-          objectFit: "cover",
-        }}
-      />
+      <div className="relative w-full max-w-4xl">
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          className="border border-slate-800 bg-slate-700 rounded-xl w-full"
+          style={{
+            transform: "scaleX(-1)",
+            height: 300,
+            objectFit: "cover",
+          }}
+        />
+        {webcamError && (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-800/80 rounded-xl">
+            <p className="text-amber-400 text-sm px-4 text-center">
+              {webcamError}
+            </p>
+          </div>
+        )}
+      </div>
       <div
         className="mt-4 text-right"
         style={{

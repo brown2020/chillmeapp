@@ -15,14 +15,26 @@ const PastMeetings = () => {
     const userId = authStore.user?.uid;
     if (!userId) return;
 
-    (async () => {
+    let isMounted = true;
+
+    const fetchMeetings = async () => {
       try {
         const data = await listUserMeetings(userId);
-        setMeetingsData(data);
+        if (isMounted) {
+          setMeetingsData(data);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-    })();
+    };
+
+    fetchMeetings();
+
+    return () => {
+      isMounted = false;
+    };
   }, [authStore.user?.uid]);
 
   if (isLoading) {

@@ -1,7 +1,6 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/frontend/providers/ThemeProvider";
-import { LiveKitProvider } from "@frontend/providers/LiveKitProvider";
 import Layout from "@/frontend/layout";
 import AuthGuard from "@/frontend/components/AuthGuard";
 import "../frontend/styles/globals.css";
@@ -19,18 +18,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <LiveKitProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <AuthGuard>
-              <Layout>{children}</Layout>
-            </AuthGuard>
-          </ThemeProvider>
-        </LiveKitProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthGuard>
+            <Layout>{children}</Layout>
+          </AuthGuard>
+        </ThemeProvider>
       </body>
     </html>
   );

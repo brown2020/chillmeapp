@@ -6,6 +6,11 @@ import {
   signOut,
   createAccountWithEmailAndPassword,
   signin,
+  sendPasswordResetEmail,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  getFirebaseErrorMessage,
 } from "../services/auth";
 import { useToast } from "@frontend/hooks";
 
@@ -61,7 +66,9 @@ export const useAuth = () => {
       }
       toast({
         title: "Error signing in with Google",
-        description: error.message || "An error occurred during sign in",
+        description: error.code
+          ? getFirebaseErrorMessage(error.code)
+          : "An error occurred during sign in",
         variant: "error",
       });
       throw err;
@@ -80,11 +87,12 @@ export const useAuth = () => {
         variant: "success",
       });
     } catch (err: unknown) {
-      const error = err as Error;
+      const error = err as { code?: string; message?: string };
       toast({
         title: "Error in creating account",
-        description:
-          error.message || "There is an error in creating an account for you",
+        description: error.code
+          ? getFirebaseErrorMessage(error.code)
+          : "There is an error in creating an account for you",
         variant: "error",
       });
     }
@@ -99,14 +107,111 @@ export const useAuth = () => {
         variant: "success",
       });
     } catch (err: unknown) {
-      const error = err as Error;
+      const error = err as { code?: string; message?: string };
       toast({
         title: "Error in signing in",
-        description:
-          error.message || "There is an error in creating an account for you",
+        description: error.code
+          ? getFirebaseErrorMessage(error.code)
+          : "Invalid email or password",
         variant: "error",
       });
     }
+  };
+
+  /**
+   * Send password reset email
+   */
+  const sendPasswordReset = async (email: string): Promise<boolean> => {
+    try {
+      await sendPasswordResetEmail(email);
+      toast({
+        title: "Password reset email sent",
+        description: "Check your inbox for the reset link",
+        variant: "success",
+      });
+      return true;
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string };
+      toast({
+        title: "Error sending reset email",
+        description: error.code
+          ? getFirebaseErrorMessage(error.code)
+          : "Unable to send password reset email",
+        variant: "error",
+      });
+      return false;
+    }
+  };
+
+  /**
+   * Send email link for passwordless sign-in
+   */
+  const sendLoginLink = async (email: string): Promise<boolean> => {
+    try {
+      await sendSignInLinkToEmail(email);
+      toast({
+        title: "Login link sent",
+        description: "Check your inbox for the sign-in link",
+        variant: "success",
+      });
+      return true;
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string };
+      toast({
+        title: "Error sending login link",
+        description: error.code
+          ? getFirebaseErrorMessage(error.code)
+          : "Unable to send login link",
+        variant: "error",
+      });
+      return false;
+    }
+  };
+
+  /**
+   * Complete email link sign-in
+   */
+  const completeEmailLinkSignIn = async (url: string): Promise<boolean> => {
+    // Check if this is a valid email link
+    if (!isSignInWithEmailLink(url)) {
+      return false;
+    }
+
+    // Get the email from localStorage
+    let email = window.localStorage.getItem("emailForSignIn");
+    if (!email) {
+      // If no email in storage, we can't complete sign-in
+      // The form should prompt for email
+      return false;
+    }
+
+    try {
+      const result = await signInWithEmailLink(email, url);
+      setLoggedInState(result.user);
+      toast({
+        title: "Signed in successfully",
+        description: "Welcome back!",
+        variant: "success",
+      });
+      return true;
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string };
+      toast({
+        title: "Error signing in",
+        description: error.code
+          ? getFirebaseErrorMessage(error.code)
+          : "Unable to complete sign-in",
+        variant: "error",
+      });
+      return false;
+    }
+  };
+
+  /**
+   * Check if URL is an email sign-in link
+   */
+  const checkIsEmailSignInLink = (url: string): boolean => {
+    return isSignInWithEmailLink(url);
   };
 
   return {
@@ -118,5 +223,9 @@ export const useAuth = () => {
     isLogged,
     createAccount,
     loginWithEmail,
+    sendPasswordReset,
+    sendLoginLink,
+    completeEmailLinkSignIn,
+    checkIsEmailSignInLink,
   };
 };

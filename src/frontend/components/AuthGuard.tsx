@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../hooks/useAuth";
 import { Loader2 } from "lucide-react";
@@ -10,6 +10,9 @@ const PUBLIC_ROUTES = [
   "/",
   "/auth/signin",
   "/auth/signup",
+  "/auth/signout",
+  "/auth/forgot-password",
+  "/auth/verify-email",
   "/terms",
   "/privacy",
 ];
@@ -28,12 +31,9 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
   );
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const isPublicRoute = useMemo(
-    () => PUBLIC_ROUTES.includes(routePath),
-    [routePath],
-  );
-
-  const isAuthRoute = useMemo(() => routePath.includes("/auth/"), [routePath]);
+  // Simplified - no need for useMemo for simple checks
+  const isPublicRoute = PUBLIC_ROUTES.includes(routePath);
+  const isAuthRoute = routePath.startsWith("/auth/");
 
   useEffect(() => {
     const unsubscribe = checkAuthState();
@@ -52,6 +52,14 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Clear timeout when auth completes to prevent it from firing after auth is done
+  useEffect(() => {
+    if (!isAuthenticating && timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, [isAuthenticating]);
 
   useEffect(() => {
     if (!isAuthenticating) {
