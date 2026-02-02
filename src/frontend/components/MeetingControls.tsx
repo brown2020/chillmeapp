@@ -4,7 +4,6 @@ import React from "react";
 import { useMeeting } from "../hooks";
 import {
   Button,
-  Icons,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -12,11 +11,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@frontend/components/ui";
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  MoreVertical,
+  Share2,
+} from "lucide-react";
 
 export default function MeetingControls() {
   const {
     mediaStatus,
-    setMediaStatus,
+    toggleVideo,
+    toggleAudio,
     isConnected,
     endMeeting,
     localPeerRole,
@@ -37,32 +45,32 @@ export default function MeetingControls() {
           variant={mediaStatus.audio ? "outline" : "danger"}
           size="icon"
           className={"mr-2"}
-          onClick={() => setMediaStatus({ audio: !mediaStatus.audio })}
+          onClick={toggleAudio}
         >
           {!mediaStatus.audio ? (
-            <Icons.MicOff className="h-4 w-4" />
+            <MicOff className="h-4 w-4" />
           ) : (
-            <Icons.MicIcon className="h-4 w-4" />
+            <Mic className="h-4 w-4" />
           )}
         </Button>
 
         <Button
           size="icon"
           variant={mediaStatus.video ? "outline" : "danger"}
-          onClick={() => setMediaStatus({ video: !mediaStatus.video })}
+          onClick={toggleVideo}
           className="mr-2"
         >
           {!mediaStatus.video ? (
-            <Icons.VideoOff className="h-4 w-4" />
+            <VideoOff className="h-4 w-4" />
           ) : (
-            <Icons.Video className="h-4 w-4" />
+            <Video className="h-4 w-4" />
           )}
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="icon" variant={"outline"} className="outline-none">
-              <Icons.MoreVertical className="h-4 w-4" />
+              <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -78,19 +86,24 @@ export default function MeetingControls() {
               </DropdownMenuItem>
             )}
             <DropdownMenuItem onClick={copyShareableUrl}>
-              <Icons.Share2 className="h-4 w-4" /> Copy Meeting URL
+              <Share2 className="h-4 w-4 mr-2" /> Copy Meeting URL
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              {isConnected && localPeerRole?.name == "host" ? (
-                <Button onClick={endMeeting} variant={"danger"}>
-                  End Meeting and Leave
-                </Button>
-              ) : isConnected ? (
-                <Button onClick={leaveMeeting} variant={"danger"}>
-                  Leave Meeting
-                </Button>
-              ) : null}
-            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {isConnected && localPeerRole?.name === "host" ? (
+              <DropdownMenuItem
+                onClick={endMeeting}
+                className="text-destructive focus:text-destructive"
+              >
+                End Meeting and Leave
+              </DropdownMenuItem>
+            ) : isConnected ? (
+              <DropdownMenuItem
+                onClick={leaveMeeting}
+                className="text-destructive focus:text-destructive"
+              >
+                Leave Meeting
+              </DropdownMenuItem>
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

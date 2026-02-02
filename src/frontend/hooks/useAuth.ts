@@ -32,7 +32,7 @@ export const useAuth = () => {
   };
 
   const setLoggedOutState = async () => {
-    signOut();
+    await signOut();
     clearAuthDetails();
   };
 
@@ -44,11 +44,28 @@ export const useAuth = () => {
   };
 
   const signinWithGoogle = async () => {
-    const googleAuthProvider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, googleAuthProvider);
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    setLoggedInState(result.user);
-    return credential;
+    try {
+      const googleAuthProvider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, googleAuthProvider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      setLoggedInState(result.user);
+      return credential;
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string };
+      // Ignore cancelled popup errors (user closed the popup)
+      if (
+        error.code === "auth/cancelled-popup-request" ||
+        error.code === "auth/popup-closed-by-user"
+      ) {
+        return null;
+      }
+      toast({
+        title: "Error signing in with Google",
+        description: error.message || "An error occurred during sign in",
+        variant: "error",
+      });
+      throw err;
+    }
   };
 
   const createAccount = async (

@@ -3,7 +3,7 @@ import PrivacyPage from "@/frontend/components/PrivacyPage";
 export default function page() {
   return (
     <PrivacyPage
-      companyName="Generate.me"
+      companyName="Chill.me"
       companyEmail="info@ignitechannel.com"
       companyAddress={"30765 Pacific Coast Hwy #354"}
       companyLocation={"Malibu, CA"}

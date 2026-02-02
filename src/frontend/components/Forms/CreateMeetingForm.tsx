@@ -1,27 +1,24 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { createRoom } from "@/frontend/services/broadcasting";
 import { saveMeeting } from "@/frontend/services/meeting";
 import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 import { useRouter } from "next/navigation";
-import { Button, Switch, Icons } from "@chill-ui";
-import { useMeeting } from "@frontend/hooks";
+import { Button, Switch } from "@chill-ui";
+import { Mic, MicOff, Video, VideoOff } from "lucide-react";
+import useMeetingStore from "@/frontend/zustand/useMeetingStore";
 import clsx from "clsx";
 
 type MediaType = "audio" | "video";
-
-let stream: MediaStream | null = null;
-
-const setStream = (mstream: MediaStream | null) => {
-  stream = mstream;
-};
 
 const CreateMeetingForm: React.FC = () => {
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [shouldRecord, setShouldRecord] = useState<boolean>(false);
-  const { mediaStatus, setMediaStatus } = useMeeting();
+  const { mediaStatus, setMediaStatus } = useMeetingStore();
+  const streamRef = useRef<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const authStore = useAuthStore();
   const router = useRouter();
@@ -33,35 +30,35 @@ const CreateMeetingForm: React.FC = () => {
     navigator.mediaDevices
       .getUserMedia({
         video: true,
-        // audio: true,
       })
       .then((stream) => {
-        setStream(stream);
-        const videoElem = document.querySelector("video");
-        if (videoElem) {
-          videoElem.srcObject = stream;
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
         }
+      })
+      .catch((err) => {
+        console.error("Failed to access webcam:", err);
       });
   }, [mediaStatus.video]);
 
   const stopWebcamStream = useCallback(() => {
-    if (stream) {
-      const tracks = stream.getVideoTracks();
-      tracks.map((track) => {
+    if (streamRef.current) {
+      streamRef.current.getVideoTracks().forEach((track) => {
         track.stop();
       });
-      setStream(null);
+      streamRef.current = null;
     }
   }, []);
 
   const toggleVideoStream = useCallback(() => {
-    if (stream) {
-      const videoElem = document.querySelector("video");
-
-      stream.getTracks().forEach((track) => {
-        if (track.kind == "video") {
-          if (videoElem) {
-            videoElem.srcObject = mediaStatus.video ? stream : null;
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => {
+        if (track.kind === "video") {
+          if (videoRef.current) {
+            videoRef.current.srcObject = mediaStatus.video
+              ? streamRef.current
+              : null;
           }
           track.enabled = mediaStatus.video;
         }
@@ -80,8 +77,7 @@ const CreateMeetingForm: React.FC = () => {
     return () => {
       stopWebcamStream();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [startWebcamStream, stopWebcamStream]);
 
   const toggleMediaTrack = (type: MediaType) => {
     setMediaStatus({
@@ -93,9 +89,8 @@ const CreateMeetingForm: React.FC = () => {
     async (e: React.FormEvent) => {
       e.preventDefault();
       setIsLoading(true);
-      setError(undefined); // Reset any previous error
+      setError(undefined);
 
-      // Step 1: Create a new room
       const roomResponse = await createRoom(shouldRecord);
       if (!roomResponse.room || roomResponse.error) {
         setError(`Problem creating room: ${roomResponse.error}`);
@@ -103,28 +98,40 @@ const CreateMeetingForm: React.FC = () => {
         return;
       }
 
-      const roomId = roomResponse.room?.id; // Get the roomId from the response
+      const roomId = roomResponse.room?.id;
 
       if (!roomId) {
         setError("Problem creating room: Room ID is undefined.");
         setIsLoading(false);
         return;
       }
-      await saveMeeting(
-        authStore.user?.uid as string,
-        {
-          ...roomResponse.room,
-          // Persist room codes so we can reliably pick a valid role later.
-          room_codes: roomResponse.roomCodes ?? [],
-        } as never,
-      );
+
+      // Save meeting to Firestore
+      await saveMeeting(authStore.user?.uid as string, {
+        id: roomResponse.room.id,
+        name: roomResponse.room.name,
+        created_at: roomResponse.room.created_at,
+      });
+
       router.push(`/live/${roomId}`);
     },
     [authStore.user?.uid, router, shouldRecord],
   );
 
-  const _renderMeetingControls = () => {
-    return (
+  return (
+    <>
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        playsInline
+        className="border border-slate-800 bg-slate-700 rounded-xl w-full max-w-4xl"
+        style={{
+          transform: "scaleX(-1)",
+          height: 300,
+          objectFit: "cover",
+        }}
+      />
       <div
         className="mt-4 text-right"
         style={{
@@ -140,9 +147,9 @@ const CreateMeetingForm: React.FC = () => {
           onClick={() => toggleMediaTrack("audio")}
         >
           {!mediaStatus.audio ? (
-            <Icons.MicOff className="h-4 w-4" />
+            <MicOff className="h-4 w-4" />
           ) : (
-            <Icons.MicIcon className="h-4 w-4" />
+            <Mic className="h-4 w-4" />
           )}
         </Button>
 
@@ -152,31 +159,15 @@ const CreateMeetingForm: React.FC = () => {
           onClick={() => toggleMediaTrack("video")}
         >
           {!mediaStatus.video ? (
-            <Icons.VideoOff className="h-4 w-4" />
+            <VideoOff className="h-4 w-4" />
           ) : (
-            <Icons.Video className="h-4 w-4" />
+            <Video className="h-4 w-4" />
           )}
         </Button>
       </div>
-    );
-  };
-
-  return (
-    <>
-      <video
-        autoPlay
-        className="border border-slate-800 bg-slate-700 rounded-xl"
-        style={{
-          transform: "scaleX(-1)",
-          height: 300,
-          width: "900px",
-          objectFit: "cover",
-        }}
-      ></video>
-      {_renderMeetingControls()}
       <form
         onSubmit={handleSubmit}
-        className="w-full flex gap-y-3 flex-col mt-4"
+        className="w-full flex gap-y-3 flex-col mt-4 max-w-4xl"
       >
         <div className="flex justify-between">
           <label htmlFor="record-session"> Record Session</label>

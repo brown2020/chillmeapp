@@ -1,14 +1,7 @@
-import AboutFooter from "@/frontend/components/AboutFooter";
-
-export default function RootLayout({
+export default function PrivacyLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 p-4">{children}</div>
-      <AboutFooter />
-    </div>
-  );
+  return <div className="max-w-4xl mx-auto px-4 py-8">{children}</div>;
 }

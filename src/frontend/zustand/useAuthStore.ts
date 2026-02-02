@@ -19,18 +19,16 @@ const defaultAuthState: AuthState = {
   isAuthenticating: true,
 };
 
-export const useAuthStore = create<AuthStore>((set, get) => ({
+export const useAuthStore = create<AuthStore>((set) => ({
   ...defaultAuthState,
 
-  setAuthDetails: async (details: Partial<AuthState>) => {
-    const { ...oldState } = get();
-    const newState = { ...oldState, ...details };
-    set(newState);
+  setAuthDetails: (details: Partial<AuthState>) => {
+    set((state) => ({ ...state, ...details }));
   },
 
-  clearAuthDetails: () => set({ ...defaultAuthState }),
+  clearAuthDetails: () => set({ ...defaultAuthState, isAuthenticating: false }),
 
   setIsAuthenticating: (authenticating: boolean) => {
-    set((state) => ({ ...state, isAuthenticating: authenticating }));
+    set({ isAuthenticating: authenticating });
   },
 }));

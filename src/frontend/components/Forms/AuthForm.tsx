@@ -50,7 +50,7 @@ const AuthForm = () => {
               required: "Password is required",
               pattern: {
                 value:
-                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
+                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
                 message:
                   "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character",
               },

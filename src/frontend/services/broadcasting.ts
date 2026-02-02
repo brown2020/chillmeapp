@@ -1,64 +1,94 @@
 "use server";
-// import * as dotenv from "dotenv";
-import * as HMS from "@100mslive/server-sdk"; // Correct wildcard import
+
+import { RoomServiceClient, AccessToken, VideoGrant } from "livekit-server-sdk";
 import { generateUniqueRoomCode } from "@/utils/roomCodeGenerator";
 
-// dotenv.config();
+const livekitHost = process.env.LIVEKIT_URL!;
+const apiKey = process.env.LIVEKIT_API_KEY!;
+const apiSecret = process.env.LIVEKIT_API_SECRET!;
 
-const app_secret = process.env["LIVE100MS_APP_SECRET"]!;
-const app_access_key = process.env["LIVE100MS_APP_ACCESS_KEY"]!;
+const roomService = new RoomServiceClient(livekitHost, apiKey, apiSecret);
 
-// Log environment variables to ensure they are loaded correctly
-console.log("Environment variables loaded:");
-console.log("APP_SECRET:", app_secret ? "Loaded" : "Missing");
-console.log("APP_ACCESS_KEY:", app_access_key ? "Loaded" : "Missing");
+export interface CreateRoomResult {
+  room?: {
+    id: string;
+    name: string;
+    created_at: string;
+    metadata?: string;
+  };
+  error?: string;
+}
 
-// Initialize the SDK with credentials
-const hms = new HMS.SDK(app_access_key, app_secret);
-
-export async function createRoom(shouldRecord: boolean) {
+export async function createRoom(
+  shouldRecord: boolean,
+): Promise<CreateRoomResult> {
   try {
-    const room = await hms.rooms.create({
-      name: generateUniqueRoomCode(),
-      recording_info: {
-        enabled: shouldRecord,
-      },
+    const roomName = generateUniqueRoomCode();
+
+    const room = await roomService.createRoom({
+      name: roomName,
+      emptyTimeout: 10 * 60, // 10 minutes
+      maxParticipants: 20,
+      metadata: JSON.stringify({ recording: shouldRecord }),
     });
-    // Create room codes for all roles so we can discover the actual role names
-    // configured in the 100ms template for this room.
-    const roomCodes = await hms.roomCodes.create(room.id);
-    console.log(
-      "Created room codes for roles:",
-      roomCodes.map((c) => c.role),
-    );
-    return { room, roomCodes };
+
+    return {
+      room: {
+        id: room.name,
+        name: room.name,
+        created_at: new Date().toISOString(),
+        metadata: room.metadata,
+      },
+    };
   } catch (err: unknown) {
     const error = err as Error;
-    console.error("Error creating room:", error);
+    console.error("Error creating room:", error.message);
     return {
       error: error?.message || "An error occurred while creating the room",
     };
   }
 }
 
-export async function getAppToken(
-  roomId: string,
-  userId: string,
-  role: string,
+export async function getAccessToken(
+  roomName: string,
+  participantIdentity: string,
+  isHost: boolean,
 ) {
   try {
-    if (!roomId) throw new Error("Missing roomId");
-    if (!role) throw new Error("Missing role");
-    const appToken = await hms.auth.getAuthToken({ roomId, role, userId });
-    return { appToken };
+    if (!roomName) throw new Error("Missing roomName");
+    if (!participantIdentity) throw new Error("Missing participantIdentity");
+
+    const at = new AccessToken(apiKey, apiSecret, {
+      identity: participantIdentity,
+      ttl: "2h",
+    });
+
+    const grant: VideoGrant = {
+      room: roomName,
+      roomJoin: true,
+      canPublish: true,
+      canSubscribe: true,
+      canPublishData: true, // For chat
+      roomAdmin: isHost, // Host can manage participants
+    };
+
+    at.addGrant(grant);
+    const token = await at.toJwt();
+
+    return { token };
   } catch (err: unknown) {
     const error = err as Error;
-    console.error("Error generating auth token:", {
-      message: error?.message,
-      roomId,
-      role,
-      hasUserId: Boolean(userId),
-    });
+    console.error("Error generating access token:", error.message);
+    throw error;
+  }
+}
+
+export async function deleteRoom(roomName: string) {
+  try {
+    await roomService.deleteRoom(roomName);
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error("Error deleting room:", error.message);
     throw error;
   }
 }

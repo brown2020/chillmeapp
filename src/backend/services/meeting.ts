@@ -17,6 +17,9 @@ const updateMeeting = async (payload: UpdatePayload) => {
     .where("id", "==", payload.room_id)
     .limit(1)
     .get();
+  if (doc.empty) {
+    throw new Error(`Meeting not found with room_id: ${payload.room_id}`);
+  }
   const docRef = doc.docs[0].ref;
   const updateResult = await docRef.update(payload as Partial<UpdatePayload>);
   return updateResult;

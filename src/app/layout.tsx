@@ -1,14 +1,14 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/frontend/providers/ThemeProvider";
-import { HMSProvider } from "@frontend/providers/HMSProvider";
+import { LiveKitProvider } from "@frontend/providers/LiveKitProvider";
 import Layout from "@/frontend/layout";
 import AuthGuard from "@/frontend/components/AuthGuard";
 import "../frontend/styles/globals.css";
 
 export const metadata: Metadata = {
   title: "Chill.me",
-  description: "100ms Video SDK Example",
+  description: "Real-time video chat powered by LiveKit",
 };
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <HMSProvider>
+        <LiveKitProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
@@ -30,7 +30,7 @@ export default function RootLayout({
               <Layout>{children}</Layout>
             </AuthGuard>
           </ThemeProvider>
-        </HMSProvider>
+        </LiveKitProvider>
       </body>
     </html>
   );
