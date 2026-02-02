@@ -24,6 +24,8 @@ export default function RoomClient({ roomId }: RoomClientProps) {
   useEffect(() => {
     if (!roomId || !user) return;
 
+    let isMounted = true;
+
     const fetchToken = async () => {
       try {
         setIsLoading(true);
@@ -32,8 +34,11 @@ export default function RoomClient({ roomId }: RoomClientProps) {
           user.displayName || "User",
           user.uid,
         );
-        setToken(joinToken);
+        if (isMounted) {
+          setToken(joinToken);
+        }
       } catch (err) {
+        if (!isMounted) return;
         const error = err as Error;
         console.error("Error joining room:", error);
         setError(error.message || "Failed to join room");
@@ -43,11 +48,17 @@ export default function RoomClient({ roomId }: RoomClientProps) {
           variant: "error",
         });
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchToken();
+
+    return () => {
+      isMounted = false;
+    };
   }, [roomId, user]);
 
   const handleConnected = useCallback(() => {

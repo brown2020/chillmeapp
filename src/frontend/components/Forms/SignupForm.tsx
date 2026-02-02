@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input } from "@chill-ui";
+import { Button, Input, PasswordInput } from "@chill-ui";
 import { useForm } from "react-hook-form";
 import clsx from "clsx";
 import { useAuth } from "@/frontend/hooks";
@@ -42,8 +42,7 @@ const SignupForm = () => {
             errorMessage={errors.email?.message}
           />
 
-          <Input
-            type="password"
+          <PasswordInput
             placeholder="Password"
             className={clsx("w-full")}
             {...register("password", {

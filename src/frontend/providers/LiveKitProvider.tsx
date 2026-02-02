@@ -38,11 +38,3 @@ export function LiveKitRoomWrapper({
     </LiveKitRoom>
   );
 }
-
-/**
- * Simple provider for app-wide LiveKit context.
- * The actual room connection happens in LiveKitRoomWrapper.
- */
-export function LiveKitProvider({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
-}

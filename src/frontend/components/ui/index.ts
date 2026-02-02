@@ -1,5 +1,6 @@
 export * from "./Button";
 export * from "./Input";
+export * from "./PasswordInput";
 export * from "./Toast";
 export * from "./Toaster";
 export * from "./Switch";

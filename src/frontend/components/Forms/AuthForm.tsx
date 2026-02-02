@@ -1,8 +1,9 @@
 "use client";
 
-import { Button, Input, GoogleIcon } from "@chill-ui";
+import { Button, Input, PasswordInput, GoogleIcon } from "@chill-ui";
 import { useAuth } from "@frontend/hooks";
 import { useForm } from "react-hook-form";
+import Link from "next/link";
 import clsx from "clsx";
 
 type FormVals = {
@@ -42,22 +43,25 @@ const AuthForm = () => {
             errorMessage={errors.email?.message}
           />
 
-          <Input
-            type="password"
-            placeholder="Password"
-            className={clsx("w-full")}
-            {...register("password", {
-              required: "Password is required",
-              pattern: {
-                value:
-                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                message:
-                  "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character",
-              },
-            })}
-            error={Boolean(errors.password)}
-            errorMessage={errors.password?.message}
-          />
+          <div>
+            <PasswordInput
+              placeholder="Password"
+              className={clsx("w-full")}
+              {...register("password", {
+                required: "Password is required",
+              })}
+              error={Boolean(errors.password)}
+              errorMessage={errors.password?.message}
+            />
+            <div className="text-right mt-1">
+              <Link
+                href="/auth/forgot-password"
+                className="text-xs text-muted-foreground hover:text-primary transition-colors"
+              >
+                Forgot password?
+              </Link>
+            </div>
+          </div>
 
           <Button disabled={isSubmitting} type="submit" className="w-full">
             Login with Email

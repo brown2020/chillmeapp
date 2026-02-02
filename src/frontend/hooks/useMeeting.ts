@@ -34,22 +34,6 @@ export async function getJoinToken(
 }
 
 /**
- * Basic meeting store hook - works outside of LiveKit room context.
- * Use this for components that need media status before joining a room.
- */
-export const useMeetingStore_ = () => {
-  const { mediaStatus, setMediaStatus, setShowChatWidget, showChatWidget } =
-    useMeetingStore();
-
-  return {
-    mediaStatus,
-    setMediaStatus,
-    showChatWidget,
-    setShowChatWidget,
-  };
-};
-
-/**
  * Full meeting hook - only works inside LiveKitRoom context.
  * Use this for components that are rendered inside an active meeting.
  */
@@ -138,6 +122,9 @@ export const useMeeting = () => {
 
   // End meeting (for hosts - disconnects everyone)
   const endMeeting = useCallback(async () => {
+    const delay = (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms));
+
     try {
       // Send a data message to notify all participants
       const encoder = new TextEncoder();
@@ -145,11 +132,10 @@ export const useMeeting = () => {
       await room.localParticipant.publishData(data, {
         reliable: true,
       });
-      // Disconnect after a short delay to allow message to be sent
-      setTimeout(async () => {
-        await room.disconnect();
-        router.push("/");
-      }, 500);
+      // Wait briefly to allow message to be sent before disconnecting
+      await delay(500);
+      await room.disconnect();
+      router.push("/");
     } catch {
       await room.disconnect();
       router.push("/");
@@ -164,6 +150,11 @@ export const useMeeting = () => {
           await sendChatMessage(text);
         } catch {
           console.error("Error sending message");
+          toast({
+            title: "Message failed",
+            description: "Unable to send your message. Please try again.",
+            variant: "error",
+          });
         }
       }
     },

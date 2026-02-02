@@ -22,9 +22,8 @@ const defaultAuthState: AuthState = {
 export const useAuthStore = create<AuthStore>((set) => ({
   ...defaultAuthState,
 
-  setAuthDetails: (details: Partial<AuthState>) => {
-    set((state) => ({ ...state, ...details }));
-  },
+  // Zustand does shallow merge by default, no need to spread state
+  setAuthDetails: (details: Partial<AuthState>) => set(details),
 
   clearAuthDetails: () => set({ ...defaultAuthState, isAuthenticating: false }),
 
