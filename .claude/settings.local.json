@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run tslint:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run eslint:fix:*)",
+      "Bash(npm run build:*)",
+      "Bash(timeout 15 npm run dev:*)",
+      "WebFetch(domain:docs.livekit.io)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm install:*)"
+    ]
+  }
+}

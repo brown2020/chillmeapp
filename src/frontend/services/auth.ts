@@ -21,7 +21,7 @@ const createAccountWithEmailAndPassword = async (
   email: string,
   password: string,
 ) => {
-  const result = createUserWithEmailAndPassword(auth, email, password);
+  const result = await createUserWithEmailAndPassword(auth, email, password);
   return result;
 };
 

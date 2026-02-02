@@ -1,138 +1,251 @@
+"use client";
+
 import {
-  useHMSActions,
-  useHMSStore,
-  selectIsConnectedToRoom,
-  selectLocalPeerRole,
-  selectPeers,
-  selectDominantSpeaker,
-  selectLocalPeer,
-  selectHMSMessages,
-  selectLocalPeerID,
-} from "@100mslive/react-sdk";
-import { getAppToken } from "@/frontend/services/broadcasting";
-import { getMeetingInfo } from "@backend/services/meeting";
-import { useCallback } from "react";
-import useMeetingStore from "../zustand/useMeetingStore";
-import { useEffect, useMemo } from "react";
+  useRoomContext,
+  useParticipants,
+  useLocalParticipant,
+  useChat,
+  useConnectionState,
+} from "@livekit/components-react";
+import { RoomEvent, ConnectionState, Track } from "livekit-client";
+import { useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useHMSNotifications } from "@100mslive/react-sdk";
+import useMeetingStore from "../zustand/useMeetingStore";
+import { getAccessToken } from "@/frontend/services/broadcasting";
+import { getMeetingInfo } from "@backend/services/meeting";
 import { toast } from "@frontend/hooks/useToast";
 
-const pickRoleFromRoomCodes = (
-  roomCodes: Array<{ role: string }> | undefined,
-  isHost: boolean,
-) => {
-  const roles = Array.from(
-    new Set((roomCodes ?? []).map((c) => c.role).filter(Boolean)),
-  );
-  if (roles.length === 0) return isHost ? "host" : "guest";
-  const hostRole = roles.includes("host") ? "host" : roles[0];
-  const guestRole = roles.includes("guest") ? "guest" : (roles[1] ?? roles[0]);
-  return isHost ? hostRole : guestRole;
-};
+/**
+ * Helper function to get access token for joining a room.
+ * Called before entering the LiveKit room context.
+ */
+export async function getJoinToken(
+  roomId: string,
+  userName: string,
+  userId: string,
+): Promise<string> {
+  if (!roomId) throw new Error("Missing roomId");
 
-const useMeeting = () => {
-  const hmsActions = useHMSActions();
+  const roomInfo = await getMeetingInfo(roomId);
+  const isHost = Boolean(userId) && userId === roomInfo?.broadcaster;
+
+  const { token } = await getAccessToken(roomId, userId, isHost);
+  return token;
+}
+
+/**
+ * Basic meeting store hook - works outside of LiveKit room context.
+ * Use this for components that need media status before joining a room.
+ */
+export const useMeetingStore_ = () => {
   const { mediaStatus, setMediaStatus, setShowChatWidget, showChatWidget } =
     useMeetingStore();
-  const isConnected = useHMSStore(selectIsConnectedToRoom);
-  const router = useRouter();
-  const notification = useHMSNotifications();
-  const meetingNotification = useMemo(() => notification, [notification]);
-  const localPeerRole = useHMSStore(selectLocalPeerRole);
-  const peers = useHMSStore(selectPeers);
-  const localPeer = useHMSStore(selectLocalPeer);
-  const dominantSpeaker = useHMSStore(selectDominantSpeaker);
-  const messages = useHMSStore(selectHMSMessages);
-  const localPeerId = useHMSStore(selectLocalPeerID);
-
-  const updateHMSMediaStore = useCallback(async () => {
-    await Promise.all([
-      hmsActions.setLocalVideoEnabled(mediaStatus.video),
-      // hmsActions.setLocalAudioEnabled(mediaStatus.audio),
-    ]);
-  }, [mediaStatus, hmsActions]);
-
-  const leaveMeeting = useCallback(async () => {
-    try {
-      await hmsActions.leave();
-    } finally {
-      router.push("/");
-    }
-  }, [hmsActions, router]);
-
-  const endMeeting = useCallback(async () => {
-    try {
-      await hmsActions.endRoom(true, "meeting-finished");
-    } finally {
-      router.push("/");
-    }
-  }, [hmsActions, router]);
-
-  const sendBroadcastMessage = async (text: string) => {
-    try {
-      await hmsActions.sendBroadcastMessage(text);
-    } catch {
-      console.log("Error occured in sending message");
-    }
-  };
-
-  useEffect(() => {
-    if (!isConnected) return;
-    updateHMSMediaStore();
-  }, [isConnected, updateHMSMediaStore]);
-
-  const joinRoom = async (roomId: string, userName: string, userId: string) => {
-    try {
-      if (!roomId) throw new Error("Missing roomId");
-      const roomInfo = await getMeetingInfo(roomId);
-      const isHost = Boolean(userId) && userId === roomInfo?.broadcaster;
-      const role = pickRoleFromRoomCodes(
-        (roomInfo as unknown as { room_codes?: Array<{ role: string }> })
-          ?.room_codes,
-        isHost,
-      );
-      const tokenResponse = await getAppToken(roomId, userId, role);
-      // Step 3: Join the room
-      await hmsActions.join({
-        userName: userName,
-        authToken: tokenResponse.appToken.token,
-      });
-      await updateHMSMediaStore();
-    } catch (err) {
-      const error = err as { description: string } | Error;
-
-      toast({
-        title: "Error in joining room",
-        description:
-          "description" in error
-            ? error.description
-            : (error?.message ?? "room not available to join"),
-        variant: "error",
-      });
-      router.push("/");
-    }
-  };
 
   return {
     mediaStatus,
-    isConnected,
-    meetingNotification,
-    localPeerRole,
-    peers,
-    localPeer,
-    dominantSpeaker,
     setMediaStatus,
-    joinRoom,
-    updateHMSMediaStore,
-    leaveMeeting,
-    endMeeting,
-    setShowChatWidget,
     showChatWidget,
-    sendBroadcastMessage,
-    messages,
-    localPeerId,
+    setShowChatWidget,
   };
 };
 
-export { useMeeting };
+/**
+ * Full meeting hook - only works inside LiveKitRoom context.
+ * Use this for components that are rendered inside an active meeting.
+ */
+export const useMeeting = () => {
+  const room = useRoomContext();
+  const participants = useParticipants();
+  const { localParticipant } = useLocalParticipant();
+  const connectionState = useConnectionState();
+  const { send: sendChatMessage, chatMessages } = useChat();
+  const router = useRouter();
+  const { mediaStatus, setMediaStatus, setShowChatWidget, showChatWidget } =
+    useMeetingStore();
+
+  const isConnected = connectionState === ConnectionState.Connected;
+
+  // Determine if current user is host based on permissions
+  // Check if user can publish and has elevated permissions
+  const isHost =
+    (localParticipant?.permissions as { roomAdmin?: boolean } | undefined)
+      ?.roomAdmin ?? false;
+  const localPeerRole = { name: isHost ? "host" : "guest" };
+
+  // Find the currently speaking participant
+  const dominantSpeaker = participants.find((p) => p.isSpeaking) ?? null;
+
+  // Get local participant info
+  const localPeer = localParticipant
+    ? {
+        id: localParticipant.identity,
+        name: localParticipant.name || localParticipant.identity,
+        isLocal: true,
+        videoTrack: localParticipant.getTrackPublication(Track.Source.Camera)
+          ?.trackSid,
+        audioTrack: localParticipant.getTrackPublication(
+          Track.Source.Microphone,
+        )?.trackSid,
+      }
+    : null;
+
+  // Map participants to a consistent format
+  const peers = participants.map((p) => ({
+    id: p.identity,
+    name: p.name || p.identity,
+    isLocal: p.isLocal,
+    videoTrack: p.getTrackPublication(Track.Source.Camera)?.trackSid,
+    audioTrack: p.getTrackPublication(Track.Source.Microphone)?.trackSid,
+    isSpeaking: p.isSpeaking,
+    participant: p, // Keep original for video rendering
+  }));
+
+  // Map chat messages to a consistent format
+  const messages = chatMessages.map((msg) => ({
+    id: msg.id,
+    message: msg.message,
+    sender: msg.from?.identity,
+    senderName: msg.from?.name || msg.from?.identity,
+    time: msg.timestamp,
+  }));
+
+  // Toggle local video
+  const toggleVideo = useCallback(async () => {
+    if (localParticipant) {
+      const newState = !localParticipant.isCameraEnabled;
+      await localParticipant.setCameraEnabled(newState);
+      setMediaStatus({ video: newState });
+    }
+  }, [localParticipant, setMediaStatus]);
+
+  // Toggle local audio
+  const toggleAudio = useCallback(async () => {
+    if (localParticipant) {
+      const newState = !localParticipant.isMicrophoneEnabled;
+      await localParticipant.setMicrophoneEnabled(newState);
+      setMediaStatus({ audio: newState });
+    }
+  }, [localParticipant, setMediaStatus]);
+
+  // Leave meeting (for guests)
+  const leaveMeeting = useCallback(async () => {
+    try {
+      await room.disconnect();
+    } finally {
+      router.push("/");
+    }
+  }, [room, router]);
+
+  // End meeting (for hosts - disconnects everyone)
+  const endMeeting = useCallback(async () => {
+    try {
+      // Send a data message to notify all participants
+      const encoder = new TextEncoder();
+      const data = encoder.encode(JSON.stringify({ type: "meeting-ended" }));
+      await room.localParticipant.publishData(data, {
+        reliable: true,
+      });
+      // Disconnect after a short delay to allow message to be sent
+      setTimeout(async () => {
+        await room.disconnect();
+        router.push("/");
+      }, 500);
+    } catch {
+      await room.disconnect();
+      router.push("/");
+    }
+  }, [room, router]);
+
+  // Send chat message
+  const sendBroadcastMessage = useCallback(
+    async (text: string) => {
+      if (sendChatMessage && text.trim()) {
+        try {
+          await sendChatMessage(text);
+        } catch {
+          console.error("Error sending message");
+        }
+      }
+    },
+    [sendChatMessage],
+  );
+
+  // Sync initial media status with LiveKit when connected
+  useEffect(() => {
+    if (isConnected && localParticipant) {
+      localParticipant.setCameraEnabled(mediaStatus.video);
+      localParticipant.setMicrophoneEnabled(mediaStatus.audio);
+    }
+  }, [isConnected, localParticipant, mediaStatus.video, mediaStatus.audio]);
+
+  // Listen for room disconnect events
+  useEffect(() => {
+    const handleDisconnected = () => {
+      toast({
+        title: "Disconnected",
+        description: "You have been disconnected from the meeting",
+        variant: "default",
+      });
+    };
+
+    const handleDataReceived = (payload: Uint8Array) => {
+      try {
+        const decoder = new TextDecoder();
+        const data = JSON.parse(decoder.decode(payload));
+        if (data.type === "meeting-ended") {
+          toast({
+            title: "Meeting ended",
+            description: "The host has ended the meeting",
+            variant: "default",
+          });
+          room.disconnect();
+          router.push("/");
+        }
+      } catch {
+        // Not a JSON message, ignore
+      }
+    };
+
+    room.on(RoomEvent.Disconnected, handleDisconnected);
+    room.on(RoomEvent.DataReceived, handleDataReceived);
+
+    return () => {
+      room.off(RoomEvent.Disconnected, handleDisconnected);
+      room.off(RoomEvent.DataReceived, handleDataReceived);
+    };
+  }, [room, router]);
+
+  return {
+    // Connection state
+    isConnected,
+
+    // Participants
+    peers,
+    localPeer,
+    localPeerId: localParticipant?.identity,
+    localPeerRole,
+    dominantSpeaker,
+    participants, // Raw LiveKit participants for video rendering
+
+    // Media controls
+    mediaStatus,
+    setMediaStatus,
+    toggleVideo,
+    toggleAudio,
+
+    // Meeting actions
+    leaveMeeting,
+    endMeeting,
+
+    // Chat
+    messages,
+    sendBroadcastMessage,
+
+    // UI state
+    showChatWidget,
+    setShowChatWidget,
+
+    // For backward compatibility with notification checks
+    meetingNotification: null,
+  };
+};

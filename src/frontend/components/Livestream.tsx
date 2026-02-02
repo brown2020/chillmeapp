@@ -8,26 +8,9 @@ import clsx from "clsx";
 import { useMeeting } from "@frontend/hooks";
 
 export default function Livestream() {
-  const {
-    meetingNotification,
-    peers,
-    localPeer,
-    dominantSpeaker,
-    leaveMeeting,
-    showChatWidget,
-  } = useMeeting();
+  const { peers, localPeer, dominantSpeaker, showChatWidget } = useMeeting();
   const latestDominantSpeakerRef = useRef(dominantSpeaker);
   const meetingPeers = peers;
-
-  useEffect(() => {
-    if (!meetingNotification) {
-      return;
-    }
-    if (meetingNotification.type === "ROOM_ENDED") {
-      leaveMeeting();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meetingNotification]);
 
   // Calculate columns based on peers count
   function calcColumns() {
@@ -55,14 +38,18 @@ export default function Livestream() {
 
   // Track changes in the dominant speaker
   useEffect(() => {
-    if (dominantSpeaker && dominantSpeaker !== localPeer) {
+    if (dominantSpeaker && dominantSpeaker.identity !== localPeer?.id) {
       latestDominantSpeakerRef.current = dominantSpeaker;
     }
   }, [dominantSpeaker, localPeer]);
 
   return (
     <div className="grid grid-cols-12 gap-5">
-      <div className={clsx(showChatWidget ? "col-span-9" : "col-span-12")}>
+      <div
+        className={clsx(
+          showChatWidget ? "col-span-12 lg:col-span-9" : "col-span-12",
+        )}
+      >
         <div className="flex flex-col w-full justify-between h-[80vh]">
           <div
             className={clsx(`grid gap-4`)}
@@ -74,7 +61,7 @@ export default function Livestream() {
               if (peer) {
                 return (
                   <MeetingMemberStream
-                    key={index}
+                    key={peer.id || index}
                     height={calcHeight()}
                     peer={peer}
                     totalPeers={peers.length}
@@ -87,7 +74,7 @@ export default function Livestream() {
         </div>
       </div>
       {showChatWidget && (
-        <div className="col-span-3">
+        <div className="hidden lg:block lg:col-span-3">
           <MeetingChatWidget />
         </div>
       )}

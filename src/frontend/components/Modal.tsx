@@ -1,4 +1,8 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import React from "react";
+import { X } from "lucide-react";
+import { Button } from "@chill-ui";
 
 interface ModalProps {
   roomName?: string;
@@ -6,67 +10,69 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ roomName, onClose }) => {
-  const [baseUrl, setBaseUrl] = useState<string>("https://chill.me");
+  const baseUrl =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : process.env.NEXT_PUBLIC_BASE_URL || "https://chill.me";
 
-  useEffect(() => {
-    // Fetch the base URL from environment variables or use a default
-    const envBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-    if (envBaseUrl) {
-      setBaseUrl(envBaseUrl);
+  const inviteLink = roomName ? `${baseUrl}/live/${roomName}` : "";
+
+  const copyToClipboard = async () => {
+    if (inviteLink) {
+      await navigator.clipboard.writeText(inviteLink);
     }
-  }, []);
-
-  // Function to handle closing the modal
-  const handleClose = () => {
-    onClose();
   };
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
-      id="exampleModal"
-      tabIndex={-1}
-      aria-labelledby="exampleModalLabel"
-      aria-hidden="true"
-      aria-modal="true"
       role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      onClick={onClose}
     >
-      {/* Modal content area */}
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
-        <div className="border-b p-4 flex justify-between items-center">
+      <div
+        className="bg-card rounded-lg shadow-lg w-full max-w-md"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="border-b border-border p-4 flex justify-between items-center">
           <h5
-            className="text-lg font-semibold text-black"
-            id="exampleModalLabel"
+            id="modal-title"
+            className="text-lg font-semibold text-card-foreground"
           >
-            Livestream: {roomName}
+            Invite to Meeting
           </h5>
-          {/* Close button that triggers the onClose function */}
           <button
             type="button"
-            className="text-black"
-            onClick={handleClose}
+            className="text-muted-foreground hover:text-foreground"
+            onClick={onClose}
             aria-label="Close"
           >
-            ✕
+            <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="p-4 text-black">
-          <p>Invitation Link</p>
-          {roomName ? (
-            <p>{`${baseUrl}/live/${roomName}`}</p>
-          ) : (
-            <p>No room name provided.</p>
-          )}
+        <div className="p-4 space-y-4">
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">
+              Share this link to invite others:
+            </p>
+            {roomName ? (
+              <div className="flex items-center gap-2">
+                <code className="flex-1 p-2 bg-muted rounded text-sm break-all">
+                  {inviteLink}
+                </code>
+                <Button size="sm" onClick={copyToClipboard}>
+                  Copy
+                </Button>
+              </div>
+            ) : (
+              <p className="text-muted-foreground">No room name provided.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-// Memoize the component
-const MemoizedModal = React.memo(Modal);
-
-// Set the display name for debugging purposes
-MemoizedModal.displayName = "Modal";
-
-export default MemoizedModal;
+export default Modal;
