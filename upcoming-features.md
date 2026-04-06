@@ -11,8 +11,8 @@
 ## 3. Password Protection
 - [ ] Add functionality for password-protected sessions.
   
-## 4. Real-time Video and Audio (100ms)
-- [x] Integrate 100ms for high-quality real-time video and audio streaming.
+## 4. Real-time Video and Audio (LiveKit)
+- [x] Integrate LiveKit for high-quality real-time video and audio streaming.
   
 ## 5. Recording and Playback
 - [x] Implement session recording with cloud storage.
@@ -48,7 +48,7 @@
 
 ## 14. Credits-Based Payment System
 - [ ] Implement a credits-based system allowing users to purchase 10,000 credits for $99.99.
-- [ ] Deduct credits based on 100ms usage and AI functionalities.
+- [ ] Deduct credits based on LiveKit usage and AI functionalities.
 - [ ] Create a dashboard for users to track remaining credits and usage history.
 
 ## 15. Project Maintenence
