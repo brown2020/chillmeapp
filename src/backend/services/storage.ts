@@ -40,7 +40,7 @@ function uploadRecordingToStorage(
       resolve(file);
     });
 
-    uploadStream.on("error", (error) => {
+    uploadStream.on("error", (error: any) => {
       reject(error);
     });
   });
