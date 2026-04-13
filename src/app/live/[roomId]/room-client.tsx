@@ -62,11 +62,10 @@ export default function RoomClient({ roomId }: RoomClientProps) {
   }, [roomId, user]);
 
   const handleConnected = useCallback(() => {
-    console.log("Connected to LiveKit room");
+    // Connection established
   }, []);
 
   const handleDisconnected = useCallback(() => {
-    console.log("Disconnected from LiveKit room");
     router.push("/");
   }, [router]);
 

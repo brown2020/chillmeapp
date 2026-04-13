@@ -14,8 +14,7 @@ const Signout = () => {
       router.push("/auth/signin");
     };
     performLogout();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setLoggedOutState, router]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center">

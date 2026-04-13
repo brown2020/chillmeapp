@@ -39,8 +39,7 @@ class CustomButton extends Button {
     link.download = `${v4()}.mp4`; // Set a default filename for download
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link); // Clean up the element
-    console.log("Download button clicked!");
+    document.body.removeChild(link);
   }
 }
 

@@ -19,8 +19,12 @@ const MeetingCard = ({ data }: Props) => {
 
   useEffect(() => {
     const aggregateMeetingData = async () => {
-      const result = await getUserById(data.broadcaster);
-      setHostDisplayName(result.displayName || "Unknown");
+      try {
+        const result = await getUserById(data.broadcaster);
+        setHostDisplayName(result.displayName || "Unknown");
+      } catch {
+        setHostDisplayName("Unknown");
+      }
 
       if (!data.recording_info?.enabled) {
         setRecordingStatus("not-available");
@@ -37,11 +41,15 @@ const MeetingCard = ({ data }: Props) => {
         return;
       }
 
-      const recordingFileUrl = await fetchRecording(
-        data.recording_info.recording_storage_path,
-      );
-      setRecordingUrl(recordingFileUrl);
-      setRecordingStatus("available");
+      try {
+        const recordingFileUrl = await fetchRecording(
+          data.recording_info.recording_storage_path,
+        );
+        setRecordingUrl(recordingFileUrl);
+        setRecordingStatus("available");
+      } catch {
+        setRecordingStatus("not-available");
+      }
     };
 
     aggregateMeetingData();
@@ -70,7 +78,7 @@ const MeetingCard = ({ data }: Props) => {
           {recordingUrl ? (
             <button
               onClick={() => viewRecording(recordingUrl)}
-              className="mt-1 text-sm font-medium text-primary hover:underline"
+              className="mt-1 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
             >
               Watch Recording
             </button>
