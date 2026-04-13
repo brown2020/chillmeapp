@@ -51,8 +51,7 @@ export default function VerifyEmailPage() {
     };
 
     verifyEmail();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [checkIsEmailSignInLink, completeEmailLinkSignIn, router]);
 
   const onSubmit = async (data: FormVals) => {
     // Store email and retry

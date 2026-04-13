@@ -8,43 +8,40 @@ function uploadRecordingToStorage(
   fileUrl: string,
   destinationFolder: string,
 ): Promise<File> {
-  const result = new Promise(async (resolve, reject) => {
-    // Get the file as a stream
-    const response = await axios({
-      url: fileUrl,
-      method: "GET",
-      responseType: "stream",
-    });
+  return new Promise((resolve, reject) => {
+    (async () => {
+      try {
+        const response = await axios({
+          url: fileUrl,
+          method: "GET",
+          responseType: "stream",
+        });
 
-    // Create a PassThrough stream to pipe the download stream to Firebase upload
-    const passThroughStream = new stream.PassThrough();
+        const passThroughStream = new stream.PassThrough();
+        const filename = `${v4()}.mp4`;
+        const storagePath = `${destinationFolder}${filename}`;
+        const file = adminBucket.file(storagePath, {});
 
-    // Pipe the response stream to PassThrough stream
-    response.data.pipe(passThroughStream);
+        const uploadStream = file.createWriteStream({
+          metadata: {
+            contentType: response.headers["content-type"],
+            contentDisposition: `attachment; filename="${filename}"`,
+          },
+        });
 
-    const filename = `${v4()}.mp4`;
-    const storagePath = `${destinationFolder}${filename}`;
-    // Upload to Firebase Storage
-    const file = adminBucket.file(storagePath, {});
+        response.data.on("error", (error: Error) => reject(error));
+        passThroughStream.on("error", (error: Error) => reject(error));
 
-    const uploadStream = file.createWriteStream({
-      metadata: {
-        contentType: response.headers["content-type"],
-        contentDisposition: `attachment; filename="${filename}"`,
-      },
-    });
+        response.data.pipe(passThroughStream);
+        passThroughStream.pipe(uploadStream);
 
-    passThroughStream.pipe(uploadStream);
-
-    uploadStream.on("finish", () => {
-      resolve(file);
-    });
-
-    uploadStream.on("error", (error: any) => {
-      reject(error);
-    });
+        uploadStream.on("finish", () => resolve(file));
+        uploadStream.on("error", (error: Error) => reject(error));
+      } catch (error) {
+        reject(error);
+      }
+    })();
   });
-  return result as Promise<File>;
 }
 
 export { uploadRecordingToStorage };

@@ -36,7 +36,7 @@ const getMeetingInfo = async (
   if (snap.empty) {
     return null;
   }
-  const docs = snap.docs.map((doc: any) => doc.data());
+  const docs = snap.docs.map((doc) => doc.data());
   return docs.length > 0
     ? (JSON.parse(JSON.stringify(docs[0])) as MeetingSession)
     : null;

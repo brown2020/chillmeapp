@@ -178,7 +178,7 @@ export const useAuth = () => {
     }
 
     // Get the email from localStorage
-    let email = window.localStorage.getItem("emailForSignIn");
+    const email = window.localStorage.getItem("emailForSignIn");
     if (!email) {
       // If no email in storage, we can't complete sign-in
       // The form should prompt for email
