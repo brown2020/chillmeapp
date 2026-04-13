@@ -38,9 +38,7 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
   useEffect(() => {
     const unsubscribe = checkAuthState();
 
-    // Set a timeout to stop waiting for auth if it takes too long
     timeoutRef.current = setTimeout(() => {
-      console.warn("Auth timeout - Firebase did not respond in time");
       setIsAuthenticating(false);
     }, AUTH_TIMEOUT_MS);
 
@@ -50,8 +48,7 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
         clearTimeout(timeoutRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [checkAuthState, setIsAuthenticating]);
 
   // Clear timeout when auth completes to prevent it from firing after auth is done
   useEffect(() => {

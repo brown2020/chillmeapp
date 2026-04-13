@@ -1,8 +1,7 @@
 import * as React from "react";
 import { cn } from "@/utils/classUtils";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface ChatMessageListProps extends React.HTMLAttributes<HTMLDivElement> {}
+type ChatMessageListProps = React.HTMLAttributes<HTMLDivElement>;
 
 const ChatMessageList = React.forwardRef<HTMLDivElement, ChatMessageListProps>(
   ({ className, children, ...props }, ref) => (

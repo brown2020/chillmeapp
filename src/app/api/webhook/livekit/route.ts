@@ -21,8 +21,6 @@ export async function POST(request: NextRequest) {
 
     const event = await receiver.receive(body, authHeader);
 
-    console.log("Received LiveKit webhook event:", event.event);
-
     switch (event.event) {
       case "room_finished": {
         // Room has ended - update meeting with duration
@@ -63,22 +61,10 @@ export async function POST(request: NextRequest) {
         break;
       }
 
-      case "participant_joined": {
-        console.log(
-          `Participant ${event.participant?.identity} joined room ${event.room?.name}`,
-        );
-        break;
-      }
-
-      case "participant_left": {
-        console.log(
-          `Participant ${event.participant?.identity} left room ${event.room?.name}`,
-        );
-        break;
-      }
-
+      case "participant_joined":
+      case "participant_left":
       default:
-        console.log("Unhandled webhook event:", event.event);
+        break;
     }
 
     return Response.json({ status: "ok" });

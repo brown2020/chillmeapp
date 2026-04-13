@@ -2,8 +2,7 @@ import * as React from "react";
 import { Textarea } from "../Textarea";
 import { cn } from "@/utils/classUtils";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface ChatInputProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+type ChatInputProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 const ChatInput = React.forwardRef<HTMLTextAreaElement, ChatInputProps>(
   ({ className, ...props }, ref) => (
