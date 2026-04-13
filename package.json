@@ -55,7 +55,6 @@
     "@types/video.js": "^7.3.58",
     "autoprefixer": "^10.4.27",
     "eslint": "^10.2.0",
-    "eslint-config-next": "^16.2.3",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "husky": "^9.1.7",
