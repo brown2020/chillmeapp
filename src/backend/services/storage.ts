@@ -22,9 +22,11 @@ function uploadRecordingToStorage(
         const storagePath = `${destinationFolder}${filename}`;
         const file = adminBucket.file(storagePath, {});
 
+        const contentType = response.headers["content-type"];
         const uploadStream = file.createWriteStream({
           metadata: {
-            contentType: response.headers["content-type"],
+            contentType:
+              typeof contentType === "string" ? contentType : undefined,
             contentDisposition: `attachment; filename="${filename}"`,
           },
         });
