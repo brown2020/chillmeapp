@@ -41,7 +41,7 @@
     "stripe": "^22.0.2",
     "tailwind-merge": "^3.5.0",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^14.0.0",
+    "uuid": "14.0.0",
     "video.js": "^8.23.8",
     "zustand": "^5.0.12"
   },
@@ -66,5 +66,8 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "typescript-eslint": "^8.31.0"
+  },
+  "overrides": {
+    "uuid": "14.0.0"
   }
 }
