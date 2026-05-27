@@ -27,9 +27,11 @@ function uploadRecordingToStorage(
     // Upload to Firebase Storage
     const file = adminBucket.file(storagePath, {});
 
+    const contentType = response.headers["content-type"];
     const uploadStream = file.createWriteStream({
       metadata: {
-        contentType: response.headers["content-type"],
+        contentType:
+          typeof contentType === "string" ? contentType : "video/mp4",
         contentDisposition: `attachment; filename="${filename}"`,
       },
     });

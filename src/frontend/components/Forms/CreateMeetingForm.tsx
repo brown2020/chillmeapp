@@ -100,6 +100,8 @@ const CreateMeetingForm: React.FC = () => {
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      if (isLoading) return;
+
       setIsLoading(true);
       setError(undefined);
 
@@ -127,7 +129,7 @@ const CreateMeetingForm: React.FC = () => {
 
       router.push(`/live/${roomId}`);
     },
-    [authStore.user?.uid, router, shouldRecord],
+    [authStore.user?.uid, router, shouldRecord, isLoading],
   );
 
   return (

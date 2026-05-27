@@ -2,6 +2,11 @@
 
 import { RoomServiceClient, AccessToken, VideoGrant } from "livekit-server-sdk";
 import { generateUniqueRoomCode } from "@/utils/roomCodeGenerator";
+import { getMeetingInfo } from "@/backend/services/meeting";
+import {
+  requireServerUser,
+  UnauthorizedError,
+} from "@/backend/services/server-auth";
 
 const livekitHost = process.env.LIVEKIT_URL!;
 const apiKey = process.env.LIVEKIT_API_KEY!;
@@ -23,6 +28,8 @@ export async function createRoom(
   shouldRecord: boolean,
 ): Promise<CreateRoomResult> {
   try {
+    await requireServerUser();
+
     const roomName = generateUniqueRoomCode();
 
     const room = await roomService.createRoom({
@@ -41,6 +48,10 @@ export async function createRoom(
       },
     };
   } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return { error: "You must be signed in to create a meeting." };
+    }
+
     const error = err as Error;
     console.error("Error creating room:", error.message);
     return {
@@ -49,17 +60,22 @@ export async function createRoom(
   }
 }
 
-export async function getAccessToken(
-  roomName: string,
-  participantIdentity: string,
-  isHost: boolean,
-) {
+export async function getAccessToken(roomName: string, displayName?: string) {
   try {
+    const { uid } = await requireServerUser();
+
     if (!roomName) throw new Error("Missing roomName");
-    if (!participantIdentity) throw new Error("Missing participantIdentity");
+
+    const roomInfo = await getMeetingInfo(roomName);
+    if (!roomInfo) {
+      throw new Error("Meeting not found");
+    }
+
+    const isHost = uid === roomInfo.broadcaster;
 
     const at = new AccessToken(apiKey, apiSecret, {
-      identity: participantIdentity,
+      identity: uid,
+      name: displayName?.trim() || uid,
       ttl: "2h",
     });
 
@@ -68,8 +84,8 @@ export async function getAccessToken(
       roomJoin: true,
       canPublish: true,
       canSubscribe: true,
-      canPublishData: true, // For chat
-      roomAdmin: isHost, // Host can manage participants
+      canPublishData: true,
+      roomAdmin: isHost,
     };
 
     at.addGrant(grant);
@@ -85,6 +101,7 @@ export async function getAccessToken(
 
 export async function deleteRoom(roomName: string) {
   try {
+    await requireServerUser();
     await roomService.deleteRoom(roomName);
   } catch (err: unknown) {
     const error = err as Error;

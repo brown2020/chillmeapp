@@ -1,5 +1,6 @@
 // app/layout.tsx
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ThemeProvider } from "@/frontend/providers/ThemeProvider";
 import Layout from "@/frontend/layout";
 import AuthGuard from "@/frontend/components/AuthGuard";
@@ -24,9 +25,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthGuard>
-            <Layout>{children}</Layout>
-          </AuthGuard>
+          <Suspense fallback={null}>
+            <AuthGuard>
+              <Layout>{children}</Layout>
+            </AuthGuard>
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>
