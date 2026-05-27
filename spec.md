@@ -60,9 +60,9 @@ Chill.me is a Next.js 16 single-repo web application. Authenticated users land o
 | A/V controls | **Shipped** | Pre-join preview + in-call toggles |
 | Host end meeting | **Shipped** | Data message + disconnect; `roomAdmin` grant |
 | In-call chat | **Shipped** | LiveKit chat; temporary (no persistence) |
-| Session recording | **Partial** | UI toggle + webhook handler; egress not started on create; `recording_info` not written at create time |
+| Session recording | **Shipped** | Egress starts on create when enabled; webhook uploads to Firebase Storage |
 | Past meetings | **Shipped** | Lists sessions with `session_duration` only |
-| Recording playback | **Partial** | Depends on egress + Firebase Storage path alignment |
+| Recording playback | **Shipped** | Past meetings link to `/recording` via Firebase download URL |
 | Profile | **Minimal** | Display name, email, uid — no credits UI |
 | Stripe credits | **Backend stub** | Server actions only; no checkout UI |
 | Password-protected rooms | **Not implemented** | Listed in legacy planning doc only |
@@ -112,7 +112,7 @@ Chill.me is a Next.js 16 single-repo web application. Authenticated users land o
 
 ### Known limitations
 
-1. **Recording pipeline incomplete** — `shouldRecord` sets LiveKit room metadata but does not start egress; Firestore `recording_info.enabled` is not set on create; `uploadRecordingToStorage` is unused
+1. **Recording pipeline** — ~~incomplete~~ **Resolved in Milestone 2**; requires LiveKit egress enabled on the project
 2. **No guest access** — ~~product copy and original MVP spec implied link-only guest join; code requires authentication~~ **Resolved in Milestone 1**
 3. **Credits / Stripe** — no user-facing purchase or balance display despite `UserSnapshot.credits` type and payment server actions
 4. **Profile** — no photo upload, display name edit, or account management beyond auth provider
@@ -146,18 +146,22 @@ Ordered by product impact and dependency. Each item is sized for one clean commi
 
 ---
 
-### Milestone 2 — Complete session recording end-to-end
+### Milestone 2 — Complete session recording end-to-end ✅
+
+**Status:** Complete (dev, May 2026)
 
 **User value:** Hosts who enable “Record Session” receive a playable recording in past meetings.
 
 **Acceptance criteria:**
 
-- Creating a room with record enabled starts LiveKit egress (or equivalent)
-- Firestore meeting doc stores `recording_info.enabled: true` at creation
-- `egress_ended` webhook path produces a Storage path that `fetchRecording` can resolve
-- `MeetingCard` shows “Watch Recording” for completed egress; `/recording` plays file
+- [x] Creating a room with record enabled starts LiveKit egress (or equivalent)
+- [x] Firestore meeting doc stores `recording_info.enabled: true` at creation
+- [x] `egress_ended` webhook path produces a Storage path that `fetchRecording` can resolve
+- [x] `MeetingCard` shows “Watch Recording” for completed egress; `/recording` plays file
 
-**Implementation intent:** Add egress start in `createRoom` or post-create server action; align webhook storage path with Firebase Storage; optionally wire `uploadRecordingToStorage` if egress URL is external.
+**Implementation note:** `createRoom()` starts `RoomComposite` egress when recording is enabled; `CreateMeetingForm` persists `recording_info.enabled` on create; `egress_ended` webhook downloads the LiveKit file URL and uploads to Firebase Storage via `uploadRecordingToStorage`, then stores the bucket-relative path on the meeting doc.
+
+**Follow-up (not in scope):** Surface recording-start failures in UI copy beyond the create-room error; add retry when egress completes without a download URL.
 
 ---
 
@@ -268,7 +272,7 @@ Ordered by product impact and dependency. Each item is sized for one clean commi
 Migration from 100ms to LiveKit is **complete** for real-time media. Remaining legacy artifacts:
 
 - `MeetingSession` type fields (`app_id`, `template_id`, `room_codes`, etc.)
-- Unused `uploadRecordingToStorage` from earlier recording approach
+- Unused `uploadRecordingToStorage` from earlier recording approach — **now used by egress webhook**
 
 Operational verification checklist (manual):
 

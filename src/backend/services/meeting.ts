@@ -21,7 +21,17 @@ const updateMeeting = async (payload: UpdatePayload) => {
     throw new Error(`Meeting not found with room_id: ${payload.room_id}`);
   }
   const docRef = doc.docs[0].ref;
-  const updateResult = await docRef.update(payload as Partial<UpdatePayload>);
+  const fieldsToUpdate: Omit<UpdatePayload, "room_id"> = {};
+
+  if (payload.session_duration !== undefined) {
+    fieldsToUpdate.session_duration = payload.session_duration;
+  }
+
+  if (payload.recording_info) {
+    fieldsToUpdate.recording_info = payload.recording_info;
+  }
+
+  const updateResult = await docRef.update(fieldsToUpdate);
   return updateResult;
 };
 
