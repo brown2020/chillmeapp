@@ -125,6 +125,14 @@ const CreateMeetingForm: React.FC = () => {
         id: roomResponse.room.id,
         name: roomResponse.room.name,
         created_at: roomResponse.room.created_at,
+        ...(shouldRecord
+          ? {
+              recording_info: {
+                enabled: true,
+                is_recording_ready: false,
+              },
+            }
+          : {}),
       });
 
       router.push(`/live/${roomId}`);
