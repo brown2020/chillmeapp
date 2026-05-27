@@ -63,8 +63,8 @@ Chill.me is a Next.js 16 single-repo web application. Authenticated users land o
 | Session recording | **Shipped** | Egress starts on create when enabled; webhook uploads to Firebase Storage |
 | Past meetings | **Shipped** | Lists sessions with `session_duration` only |
 | Recording playback | **Shipped** | Past meetings link to `/recording` via Firebase download URL |
-| Profile | **Minimal** | Display name, email, uid — no credits UI |
-| Stripe credits | **Backend stub** | Server actions only; no checkout UI |
+| Profile | **Shipped** | Account details plus Firestore credit balance |
+| Stripe credits | **Shipped** | Profile checkout via Stripe Elements; credits applied server-side after payment |
 | Password-protected rooms | **Shipped** | Optional password on create; scrypt hash stored server-side; validated before token issue |
 | Session lock | **Not implemented** | — |
 | AI transcription / summaries | **Not implemented** | Legacy planning only |
@@ -114,7 +114,7 @@ Chill.me is a Next.js 16 single-repo web application. Authenticated users land o
 
 1. **Recording pipeline** — ~~incomplete~~ **Resolved in Milestone 2**; requires LiveKit egress enabled on the project
 2. **No guest access** — ~~product copy and original MVP spec implied link-only guest join; code requires authentication~~ **Resolved in Milestone 1**
-3. **Credits / Stripe** — no user-facing purchase or balance display despite `UserSnapshot.credits` type and payment server actions
+3. **Credits / Stripe** — ~~no user-facing purchase or balance display~~ **Resolved in Milestone 4**
 4. **Profile** — no photo upload, display name edit, or account management beyond auth provider
 5. **Mobile UX** — meeting grid and chat layout work on desktop-first breakpoints; chat hidden on small screens when sidebar layout applies
 6. **No automated tests** — regressions caught manually or via CI lint/build only
@@ -184,18 +184,22 @@ Ordered by product impact and dependency. Each item is sized for one clean commi
 
 ---
 
-### Milestone 4 — Profile credits and Stripe checkout
+### Milestone 4 — Profile credits and Stripe checkout ✅
+
+**Status:** Complete (dev, May 2026)
 
 **User value:** Users see credit balance and can purchase credits for premium usage.
 
 **Acceptance criteria:**
 
-- Profile shows credits from Firestore `users` document
-- Purchase flow uses existing `createPaymentIntent` / `validatePaymentIntent`
-- Successful payment increments credits server-side
-- Graceful empty state when Stripe env vars missing
+- [x] Profile shows credits from Firestore `users` document
+- [x] Purchase flow uses existing `createPaymentIntent` / `validatePaymentIntent`
+- [x] Successful payment increments credits server-side
+- [x] Graceful empty state when Stripe env vars missing
 
-**Implementation intent:** Profile UI + Stripe Elements; server action to credit user after validated payment; reuse `@stripe/react-stripe-js` dependency.
+**Implementation note:** Profile loads `getCreditsCheckoutState()`; checkout uses Stripe Payment Element with `completeCreditsPurchase()` applying idempotent Firestore credit increments via `users/{uid}/payment_events/{paymentIntentId}`.
+
+**Follow-up (not in scope):** Configurable credit packages and purchase history on profile.
 
 ---
 
