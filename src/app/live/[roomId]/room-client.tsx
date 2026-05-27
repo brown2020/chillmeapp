@@ -32,7 +32,6 @@ export default function RoomClient({ roomId }: RoomClientProps) {
         const joinToken = await getJoinToken(
           roomId,
           user.displayName || "User",
-          user.uid,
         );
         if (isMounted) {
           setToken(joinToken);

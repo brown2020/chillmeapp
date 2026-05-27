@@ -1,17 +1,31 @@
 "use client";
-import React from "react";
-import VideoPlayer from "@/frontend/components/VideoPlayer";
-import { useSearchParams, redirect } from "next/navigation";
 
-const Page = () => {
+import React, { Suspense, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import VideoPlayer from "@/frontend/components/VideoPlayer";
+
+function RecordingContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const videoSourceEncoded = searchParams.get("source");
 
+  useEffect(() => {
+    if (!videoSourceEncoded) {
+      router.replace("/");
+    }
+  }, [router, videoSourceEncoded]);
+
   if (!videoSourceEncoded) {
-    return redirect("/");
+    return null;
   }
 
-  const videoSource = atob(videoSourceEncoded);
+  let videoSource: string;
+  try {
+    videoSource = atob(videoSourceEncoded);
+  } catch {
+    router.replace("/");
+    return null;
+  }
 
   const videoJsOptions = {
     autoplay: true,
@@ -29,10 +43,14 @@ const Page = () => {
     ],
   };
 
+  return <VideoPlayer options={videoJsOptions} />;
+}
+
+const Page = () => {
   return (
-    <>
-      <VideoPlayer options={videoJsOptions} />
-    </>
+    <Suspense fallback={null}>
+      <RecordingContent />
+    </Suspense>
   );
 };
 

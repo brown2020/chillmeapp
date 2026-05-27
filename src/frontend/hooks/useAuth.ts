@@ -13,6 +13,10 @@ import {
   getFirebaseErrorMessage,
 } from "../services/auth";
 import { useToast } from "@frontend/hooks";
+import {
+  clearSessionCookie,
+  syncSessionCookie,
+} from "@/frontend/services/session-client";
 
 export const useAuth = () => {
   const {
@@ -26,24 +30,36 @@ export const useAuth = () => {
   const { toast } = useToast();
 
   const checkAuthState = () => {
-    const unsubscribe = handleAuth((user) => {
-      if (user?.uid) {
-        setLoggedInState(user);
-        return;
-      }
-      setIsAuthenticating(false);
+    const unsubscribe = handleAuth((authUser) => {
+      void (async () => {
+        if (authUser?.uid) {
+          await setLoggedInState(authUser);
+          return;
+        }
+
+        await clearSessionCookie();
+        setIsAuthenticating(false);
+      })();
     });
     return unsubscribe;
   };
 
   const setLoggedOutState = async () => {
+    await clearSessionCookie();
     await signOut();
     clearAuthDetails();
   };
 
-  const setLoggedInState = (user: User) => {
+  const setLoggedInState = async (authUser: User) => {
+    try {
+      const idToken = await authUser.getIdToken();
+      await syncSessionCookie(idToken);
+    } catch (error) {
+      console.error("Failed to sync session cookie:", error);
+    }
+
     setAuthDetails({
-      user: user,
+      user: authUser,
       isAuthenticating: false,
     });
   };
@@ -53,7 +69,7 @@ export const useAuth = () => {
       const googleAuthProvider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, googleAuthProvider);
       const credential = GoogleAuthProvider.credentialFromResult(result);
-      setLoggedInState(result.user);
+      await setLoggedInState(result.user);
       return credential;
     } catch (err: unknown) {
       const error = err as { code?: string; message?: string };
@@ -187,7 +203,7 @@ export const useAuth = () => {
 
     try {
       const result = await signInWithEmailLink(email, url);
-      setLoggedInState(result.user);
+      await setLoggedInState(result.user);
       toast({
         title: "Signed in successfully",
         description: "Welcome back!",
