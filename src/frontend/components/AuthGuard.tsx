@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { useAuthStore } from "@frontend/zustand/useAuthStore";
 import {
   isAuthRoute,
+  isGuestJoinRoute,
   isPublicRoute,
   normalizePathname,
 } from "@/utils/auth-routes";
@@ -25,7 +26,7 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
   );
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const isPublic = isPublicRoute(routePath);
+  const isPublic = isPublicRoute(routePath) || isGuestJoinRoute(routePath);
   const isAuth = isAuthRoute(routePath);
 
   useEffect(() => {

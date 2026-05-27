@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Livestream from "@/frontend/components/Livestream";
+import GuestJoinForm from "@/frontend/components/Forms/GuestJoinForm";
 import { getJoinToken } from "@/frontend/hooks/useMeeting";
 import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 import { LiveKitRoomWrapper } from "@/frontend/providers/LiveKitProvider";
@@ -14,63 +15,94 @@ type RoomClientProps = {
 };
 
 export default function RoomClient({ roomId }: RoomClientProps) {
-  const { user } = useAuthStore();
+  const { user, isAuthenticating } = useAuthStore();
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isJoining, setIsJoining] = useState(false);
+  const hasAutoJoinedRef = useRef(false);
   const router = useRouter();
 
-  // Get the join token when component mounts
-  useEffect(() => {
-    if (!roomId || !user) return;
+  const joinMeeting = useCallback(
+    async (displayName: string) => {
+      if (!roomId || isJoining) return;
 
-    let isMounted = true;
+      setIsJoining(true);
+      setError(null);
 
-    const fetchToken = async () => {
       try {
-        setIsLoading(true);
-        const joinToken = await getJoinToken(
-          roomId,
-          user.displayName || "User",
-        );
-        if (isMounted) {
-          setToken(joinToken);
-        }
+        const joinToken = await getJoinToken(roomId, displayName);
+        setToken(joinToken);
       } catch (err) {
-        if (!isMounted) return;
-        const error = err as Error;
-        console.error("Error joining room:", error);
-        setError(error.message || "Failed to join room");
+        const joinError = err as Error;
+        const message = joinError.message || "Failed to join the meeting";
+        setError(message);
         toast({
           title: "Error joining room",
-          description: error.message || "Failed to join the meeting",
+          description: message,
           variant: "error",
         });
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        setIsJoining(false);
       }
-    };
+    },
+    [roomId, isJoining],
+  );
 
-    fetchToken();
+  useEffect(() => {
+    if (!roomId || !user || token || isJoining || hasAutoJoinedRef.current) {
+      return;
+    }
 
-    return () => {
-      isMounted = false;
-    };
-  }, [roomId, user]);
-
-  const handleConnected = useCallback(() => {
-    console.log("Connected to LiveKit room");
-  }, []);
+    hasAutoJoinedRef.current = true;
+    void joinMeeting(user.displayName || "User");
+  }, [roomId, user, token, isJoining, joinMeeting]);
 
   const handleDisconnected = useCallback(() => {
-    console.log("Disconnected from LiveKit room");
-    router.push("/");
-  }, [router]);
+    router.push(user ? "/live" : "/");
+  }, [router, user]);
 
-  // Show loading state
-  if (isLoading) {
+  if (isAuthenticating) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-64px)]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user && !token) {
+    return (
+      <GuestJoinForm
+        roomId={roomId}
+        onJoin={joinMeeting}
+        isJoining={isJoining}
+        error={error}
+      />
+    );
+  }
+
+  if (error && !token) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-64px)] px-4">
+        <div className="flex flex-col items-center gap-4 text-center max-w-md">
+          <p className="text-red-500" role="alert">
+            {error}
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push(user ? "/live" : "/")}
+            className="text-primary underline"
+          >
+            {user ? "Back to meetings" : "Back to home"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isJoining || (!token && user)) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-64px)]">
         <div className="flex flex-col items-center gap-4">
@@ -81,35 +113,12 @@ export default function RoomClient({ roomId }: RoomClientProps) {
     );
   }
 
-  // Show error state
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-64px)]">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-red-500">{error}</p>
-          <button
-            onClick={() => router.push("/live")}
-            className="text-primary underline"
-          >
-            Back to meetings
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Show nothing if no token yet
   if (!token) {
     return null;
   }
 
-  // Render the LiveKit room
   return (
-    <LiveKitRoomWrapper
-      token={token}
-      onConnected={handleConnected}
-      onDisconnected={handleDisconnected}
-    >
+    <LiveKitRoomWrapper token={token} onDisconnected={handleDisconnected}>
       <Livestream />
     </LiveKitRoomWrapper>
   );

@@ -41,6 +41,13 @@ export function isAuthRoute(pathname: string): boolean {
   return normalizePathname(pathname).startsWith("/auth/");
 }
 
+/** Shared meeting links: /live/{roomId} — public for guests; /live alone stays protected. */
+export function isGuestJoinRoute(pathname: string): boolean {
+  const normalized = normalizePathname(pathname);
+  const match = normalized.match(/^\/live\/([^/]+)$/);
+  return Boolean(match?.[1]);
+}
+
 export function isPublicApiRoute(pathname: string): boolean {
   const normalized = normalizePathname(pathname);
   return PUBLIC_API_ROUTE_PREFIXES.some(
@@ -51,6 +58,7 @@ export function isPublicApiRoute(pathname: string): boolean {
 export function isProtectedRoute(pathname: string): boolean {
   const normalized = normalizePathname(pathname);
   if (isPublicRoute(normalized)) return false;
+  if (isGuestJoinRoute(normalized)) return false;
   if (normalized.startsWith("/api/")) return false;
   return true;
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { RoomServiceClient, AccessToken, VideoGrant } from "livekit-server-sdk";
+import { v4 as uuidv4 } from "uuid";
 import { generateUniqueRoomCode } from "@/utils/roomCodeGenerator";
 import { getMeetingInfo } from "@/backend/services/meeting";
 import {
@@ -22,6 +23,43 @@ export interface CreateRoomResult {
     metadata?: string;
   };
   error?: string;
+}
+
+function normalizeDisplayName(displayName?: string): string {
+  const trimmed = displayName?.trim() ?? "";
+  if (trimmed.length < 1 || trimmed.length > 64) {
+    throw new Error("Display name must be between 1 and 64 characters");
+  }
+  return trimmed;
+}
+
+async function resolveParticipant(
+  roomName: string,
+  displayName?: string,
+): Promise<{ identity: string; name: string; isHost: boolean }> {
+  const roomInfo = await getMeetingInfo(roomName);
+  if (!roomInfo) {
+    throw new Error("Meeting not found");
+  }
+
+  try {
+    const { uid } = await requireServerUser();
+    return {
+      identity: uid,
+      name: normalizeDisplayName(displayName || uid),
+      isHost: uid === roomInfo.broadcaster,
+    };
+  } catch (error) {
+    if (!(error instanceof UnauthorizedError)) {
+      throw error;
+    }
+
+    return {
+      identity: `guest-${uuidv4()}`,
+      name: normalizeDisplayName(displayName),
+      isHost: false,
+    };
+  }
 }
 
 export async function createRoom(
@@ -62,20 +100,13 @@ export async function createRoom(
 
 export async function getAccessToken(roomName: string, displayName?: string) {
   try {
-    const { uid } = await requireServerUser();
-
     if (!roomName) throw new Error("Missing roomName");
 
-    const roomInfo = await getMeetingInfo(roomName);
-    if (!roomInfo) {
-      throw new Error("Meeting not found");
-    }
-
-    const isHost = uid === roomInfo.broadcaster;
+    const participant = await resolveParticipant(roomName, displayName);
 
     const at = new AccessToken(apiKey, apiSecret, {
-      identity: uid,
-      name: displayName?.trim() || uid,
+      identity: participant.identity,
+      name: participant.name,
       ttl: "2h",
     });
 
@@ -85,7 +116,7 @@ export async function getAccessToken(roomName: string, displayName?: string) {
       canPublish: true,
       canSubscribe: true,
       canPublishData: true,
-      roomAdmin: isHost,
+      roomAdmin: participant.isHost,
     };
 
     at.addGrant(grant);
