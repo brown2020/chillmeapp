@@ -24,7 +24,7 @@ Chill.me helps people start and join video meetings quickly, with reliable real-
 
 1. **Sign up / sign in** — Email/password, Google, password reset, or email magic link
 2. **Create meeting** — Preview camera, toggle record option, create LiveKit room, persist session in Firestore
-3. **Join meeting** — Open shared `/live/[roomId]` URL while signed in; receive LiveKit token; enter call
+3. **Join meeting** — Open shared `/live/[roomId]` URL; guests enter a display name, signed-in users auto-join
 4. **In-call** — Mute/unmute, camera on/off, chat, copy link, leave (guest) or end (host)
 5. **Review history** — Past meetings list shows completed sessions with duration; open recording when ready
 
@@ -55,8 +55,8 @@ Chill.me is a Next.js 16 single-repo web application. Authenticated users land o
 | Home landing | **Shipped** | Marketing hero; CTAs to sign up or `/live` |
 | Create meeting | **Shipped** | LiveKit room + Firestore `meeting_sessions` doc |
 | Shareable room URL | **Shipped** | `/live/[roomId]`; copy from controls |
-| Join meeting | **Shipped, auth-gated** | Requires signed-in Firebase user |
-| Guest join without account | **Not implemented** | README claims guests can join; `AuthGuard` blocks `/live/[roomId]` |
+| Join meeting | **Shipped** | Authenticated users auto-join; signed-in hosts retain admin grants |
+| Guest join without account | **Shipped** | `/live/[roomId]` public; guest name form; non-admin LiveKit token |
 | A/V controls | **Shipped** | Pre-join preview + in-call toggles |
 | Host end meeting | **Shipped** | Data message + disconnect; `roomAdmin` grant |
 | In-call chat | **Shipped** | LiveKit chat; temporary (no persistence) |
@@ -74,8 +74,9 @@ Chill.me is a Next.js 16 single-repo web application. Authenticated users land o
 ### Current user flows
 
 ```
-[Guest]  / → Sign up → /live → Create → /live/{room} → In call → Leave → /
-[Host]   End meeting → / (guests notified via data message)
+[Guest]  /live/{room} → enter name → In call → Leave → /
+[Signed-in guest/host]  /live/{room} → auto-join → In call
+[Host]   Create at /live → /live/{room} → End meeting → /
 [User]   /past-meetings → MeetingCard → /recording?source=… (if recording ready)
 ```
 
@@ -112,7 +113,7 @@ Chill.me is a Next.js 16 single-repo web application. Authenticated users land o
 ### Known limitations
 
 1. **Recording pipeline incomplete** — `shouldRecord` sets LiveKit room metadata but does not start egress; Firestore `recording_info.enabled` is not set on create; `uploadRecordingToStorage` is unused
-2. **No guest access** — product copy and original MVP spec implied link-only guest join; code requires authentication
+2. **No guest access** — ~~product copy and original MVP spec implied link-only guest join; code requires authentication~~ **Resolved in Milestone 1**
 3. **Credits / Stripe** — no user-facing purchase or balance display despite `UserSnapshot.credits` type and payment server actions
 4. **Profile** — no photo upload, display name edit, or account management beyond auth provider
 5. **Mobile UX** — meeting grid and chat layout work on desktop-first breakpoints; chat hidden on small screens when sidebar layout applies
@@ -126,18 +127,22 @@ Chill.me is a Next.js 16 single-repo web application. Authenticated users land o
 
 Ordered by product impact and dependency. Each item is sized for one clean commit sequence on `dev`.
 
-### Milestone 1 — Guest join via meeting link
+### Milestone 1 — Guest join via meeting link ✅
+
+**Status:** Complete (dev, May 2026)
 
 **User value:** Hosts share a link; guests enter a display name and join without creating an account — matching core product promise.
 
 **Acceptance criteria:**
 
-- `/live/[roomId]` accessible without Firebase auth (or via lightweight guest identity)
-- Guest receives LiveKit token with non-admin grants
-- Host retention of `roomAdmin` unchanged
-- Auth-required pages (`/past-meetings`, `/profile`) remain protected
+- [x] `/live/[roomId]` accessible without Firebase auth (or via lightweight guest identity)
+- [x] Guest receives LiveKit token with non-admin grants
+- [x] Host retention of `roomAdmin` unchanged
+- [x] Auth-required pages (`/past-meetings`, `/profile`) remain protected
 
-**Implementation intent:** Extend `AuthGuard` public routes or add guest flow in `room-client.tsx`; pass guest display name to `getAccessToken`; gate Firestore writes to host only.
+**Implementation note:** Added `isGuestJoinRoute()` for proxy/AuthGuard; guest tokens use `guest-{uuid}` identities via `getAccessToken()` when no session cookie; `GuestJoinForm` collects display name on `/live/[roomId]`.
+
+**Follow-up (not in scope):** Persist guest display names across reconnects within the same browser session.
 
 ---
 

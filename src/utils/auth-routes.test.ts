@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildSignInUrl,
   isAuthRoute,
+  isGuestJoinRoute,
   isProtectedRoute,
   isPublicApiRoute,
   isPublicRoute,
@@ -20,6 +21,12 @@ describe("auth-routes", () => {
     expect(isPublicRoute("/live")).toBe(false);
   });
 
+  it("identifies guest join routes", () => {
+    expect(isGuestJoinRoute("/live/abc-def-ghi-jkl")).toBe(true);
+    expect(isGuestJoinRoute("/live")).toBe(false);
+    expect(isGuestJoinRoute("/live/room/extra")).toBe(false);
+  });
+
   it("identifies auth routes", () => {
     expect(isAuthRoute("/auth/signin")).toBe(true);
     expect(isAuthRoute("/live")).toBe(false);
@@ -27,7 +34,8 @@ describe("auth-routes", () => {
 
   it("identifies protected routes", () => {
     expect(isProtectedRoute("/live")).toBe(true);
-    expect(isProtectedRoute("/live/abc-def-ghi-jkl")).toBe(true);
+    expect(isProtectedRoute("/live/abc-def-ghi-jkl")).toBe(false);
+    expect(isProtectedRoute("/past-meetings")).toBe(true);
     expect(isProtectedRoute("/")).toBe(false);
     expect(isProtectedRoute("/api/webhook/livekit")).toBe(false);
   });
