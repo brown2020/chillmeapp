@@ -3,10 +3,9 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 // Note: useCallback is still used for handleSubmit and toggleMediaTrack
 import { createRoom } from "@/frontend/services/broadcasting";
-import { saveMeeting } from "@/frontend/services/meeting";
-import { useAuthStore } from "@/frontend/zustand/useAuthStore";
+import { saveMeetingSession } from "@/backend/services/meeting";
 import { useRouter } from "next/navigation";
-import { Button, Switch } from "@chill-ui";
+import { Button, Switch, PasswordInput } from "@chill-ui";
 import { Mic, MicOff, Video, VideoOff } from "lucide-react";
 import useMeetingStore from "@/frontend/zustand/useMeetingStore";
 import clsx from "clsx";
@@ -17,11 +16,12 @@ const CreateMeetingForm: React.FC = () => {
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [shouldRecord, setShouldRecord] = useState<boolean>(false);
+  const [passwordProtect, setPasswordProtect] = useState<boolean>(false);
+  const [meetingPassword, setMeetingPassword] = useState<string>("");
   const { mediaStatus, setMediaStatus } = useMeetingStore();
   const streamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const authStore = useAuthStore();
   const router = useRouter();
 
   const [webcamError, setWebcamError] = useState<string | null>(null);
@@ -120,24 +120,33 @@ const CreateMeetingForm: React.FC = () => {
         return;
       }
 
-      // Save meeting to Firestore
-      await saveMeeting(authStore.user?.uid as string, {
-        id: roomResponse.room.id,
-        name: roomResponse.room.name,
-        created_at: roomResponse.room.created_at,
-        ...(shouldRecord
-          ? {
-              recording_info: {
-                enabled: true,
-                is_recording_ready: false,
-              },
-            }
-          : {}),
-      });
+      if (passwordProtect && meetingPassword.trim().length < 4) {
+        setError("Meeting password must be at least 4 characters.");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        await saveMeetingSession({
+          id: roomResponse.room.id,
+          name: roomResponse.room.name,
+          created_at: roomResponse.room.created_at,
+          recordingEnabled: shouldRecord,
+          password: passwordProtect ? meetingPassword : undefined,
+        });
+      } catch (saveError) {
+        const message =
+          saveError instanceof Error
+            ? saveError.message
+            : "Failed to save meeting details.";
+        setError(message);
+        setIsLoading(false);
+        return;
+      }
 
       router.push(`/live/${roomId}`);
     },
-    [authStore.user?.uid, router, shouldRecord, isLoading],
+    [router, shouldRecord, isLoading, passwordProtect, meetingPassword],
   );
 
   return (
@@ -207,6 +216,30 @@ const CreateMeetingForm: React.FC = () => {
             onCheckedChange={(checked) => setShouldRecord(checked)}
           />
         </div>
+
+        <div className="flex justify-between">
+          <label htmlFor="password-protect">Password protect meeting</label>
+          <Switch
+            id="password-protect"
+            checked={passwordProtect}
+            onCheckedChange={setPasswordProtect}
+          />
+        </div>
+
+        {passwordProtect ? (
+          <div>
+            <label htmlFor="meeting-password" className="sr-only">
+              Meeting password
+            </label>
+            <PasswordInput
+              id="meeting-password"
+              placeholder="Meeting password (min. 4 characters)"
+              value={meetingPassword}
+              onChange={(event) => setMeetingPassword(event.target.value)}
+              autoComplete="new-password"
+            />
+          </div>
+        ) : null}
 
         <Button disabled={isLoading}>
           {isLoading ? "Joining..." : "Join"}

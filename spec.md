@@ -65,7 +65,7 @@ Chill.me is a Next.js 16 single-repo web application. Authenticated users land o
 | Recording playback | **Shipped** | Past meetings link to `/recording` via Firebase download URL |
 | Profile | **Minimal** | Display name, email, uid — no credits UI |
 | Stripe credits | **Backend stub** | Server actions only; no checkout UI |
-| Password-protected rooms | **Not implemented** | Listed in legacy planning doc only |
+| Password-protected rooms | **Shipped** | Optional password on create; scrypt hash stored server-side; validated before token issue |
 | Session lock | **Not implemented** | — |
 | AI transcription / summaries | **Not implemented** | Legacy planning only |
 | Dark mode | **Shipped** | `next-themes`, default dark |
@@ -165,18 +165,22 @@ Ordered by product impact and dependency. Each item is sized for one clean commi
 
 ---
 
-### Milestone 3 — Password-protected meetings
+### Milestone 3 — Password-protected meetings ✅
+
+**Status:** Complete (dev, May 2026)
 
 **User value:** Hosts restrict access to invited people who know the room password.
 
 **Acceptance criteria:**
 
-- Optional password field on create-meeting form
-- Join flow prompts for password before token issue when room is protected
-- Incorrect password shows clear error; correct password proceeds to LiveKit join
-- Password stored hashed server-side (Firestore or room metadata via server only)
+- [x] Optional password field on create-meeting form
+- [x] Join flow prompts for password before token issue when room is protected
+- [x] Incorrect password shows clear error; correct password proceeds to LiveKit join
+- [x] Password stored hashed server-side (Firestore or room metadata via server only)
 
-**Implementation intent:** Server-side validation before `getAccessToken`; never embed secrets in client bundle.
+**Implementation note:** `saveMeetingSession()` hashes passwords with scrypt via Admin Firestore writes; `getAccessToken()` validates passwords before issuing tokens (hosts bypass); `getMeetingJoinRequirements()` drives join UI for guests and signed-in participants.
+
+**Follow-up (not in scope):** Allow hosts to rotate or remove meeting passwords after creation.
 
 ---
 

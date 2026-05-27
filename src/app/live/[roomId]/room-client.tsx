@@ -6,6 +6,7 @@ import GuestJoinForm from "@/frontend/components/Forms/GuestJoinForm";
 import { getJoinToken } from "@/frontend/hooks/useMeeting";
 import { useAuthStore } from "@/frontend/zustand/useAuthStore";
 import { LiveKitRoomWrapper } from "@/frontend/providers/LiveKitProvider";
+import { getMeetingJoinRequirements } from "@/backend/services/meeting";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/frontend/hooks/useToast";
@@ -19,18 +20,50 @@ export default function RoomClient({ roomId }: RoomClientProps) {
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isJoining, setIsJoining] = useState(false);
+  const [passwordRequired, setPasswordRequired] = useState(false);
+  const [requirementsLoaded, setRequirementsLoaded] = useState(false);
   const hasAutoJoinedRef = useRef(false);
   const router = useRouter();
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadRequirements = async () => {
+      try {
+        const requirements = await getMeetingJoinRequirements(roomId);
+        if (isMounted) {
+          setPasswordRequired(requirements.passwordRequired);
+        }
+      } catch (loadError) {
+        if (!isMounted) return;
+        const message =
+          loadError instanceof Error
+            ? loadError.message
+            : "Unable to load meeting details";
+        setError(message);
+      } finally {
+        if (isMounted) {
+          setRequirementsLoaded(true);
+        }
+      }
+    };
+
+    void loadRequirements();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [roomId]);
+
   const joinMeeting = useCallback(
-    async (displayName: string) => {
+    async (displayName: string, roomPassword?: string) => {
       if (!roomId || isJoining) return;
 
       setIsJoining(true);
       setError(null);
 
       try {
-        const joinToken = await getJoinToken(roomId, displayName);
+        const joinToken = await getJoinToken(roomId, displayName, roomPassword);
         setToken(joinToken);
       } catch (err) {
         const joinError = err as Error;
@@ -49,19 +82,35 @@ export default function RoomClient({ roomId }: RoomClientProps) {
   );
 
   useEffect(() => {
-    if (!roomId || !user || token || isJoining || hasAutoJoinedRef.current) {
+    if (
+      !requirementsLoaded ||
+      passwordRequired ||
+      !roomId ||
+      !user ||
+      token ||
+      isJoining ||
+      hasAutoJoinedRef.current
+    ) {
       return;
     }
 
     hasAutoJoinedRef.current = true;
     void joinMeeting(user.displayName || "User");
-  }, [roomId, user, token, isJoining, joinMeeting]);
+  }, [
+    roomId,
+    user,
+    token,
+    isJoining,
+    joinMeeting,
+    passwordRequired,
+    requirementsLoaded,
+  ]);
 
   const handleDisconnected = useCallback(() => {
     router.push(user ? "/live" : "/");
   }, [router, user]);
 
-  if (isAuthenticating) {
+  if (isAuthenticating || !requirementsLoaded) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-64px)]">
         <div className="flex flex-col items-center gap-4">
@@ -72,13 +121,18 @@ export default function RoomClient({ roomId }: RoomClientProps) {
     );
   }
 
-  if (!user && !token) {
+  const shouldShowJoinForm = !token && (!user || passwordRequired);
+
+  if (shouldShowJoinForm) {
     return (
       <GuestJoinForm
         roomId={roomId}
         onJoin={joinMeeting}
         isJoining={isJoining}
         error={error}
+        passwordRequired={passwordRequired}
+        defaultDisplayName={user?.displayName || ""}
+        showDisplayNameField={!user}
       />
     );
   }

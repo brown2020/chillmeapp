@@ -21,10 +21,11 @@ import { toast } from "@frontend/hooks/useToast";
 export async function getJoinToken(
   roomId: string,
   userName: string,
+  roomPassword?: string,
 ): Promise<string> {
   if (!roomId) throw new Error("Missing roomId");
 
-  const { token } = await getAccessToken(roomId, userName);
+  const { token } = await getAccessToken(roomId, userName, roomPassword);
   return token;
 }
 
