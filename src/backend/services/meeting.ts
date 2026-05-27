@@ -1,5 +1,12 @@
 "use server";
+
 import { adminDb as db } from "@/backend/lib/firebase";
+import {
+  hashMeetingPassword,
+  isMeetingPasswordProtected,
+  normalizeMeetingPassword,
+} from "@/utils/meeting-password";
+import { requireServerUser } from "@/backend/services/server-auth";
 
 interface UpdatePayload {
   room_id: string;
@@ -9,6 +16,14 @@ interface UpdatePayload {
     is_recording_ready: boolean;
     recording_storage_path: string;
   };
+}
+
+interface SaveMeetingSessionInput {
+  id: string;
+  name: string;
+  created_at: string;
+  recordingEnabled?: boolean;
+  password?: string;
 }
 
 const updateMeeting = async (payload: UpdatePayload) => {
@@ -52,4 +67,48 @@ const getMeetingInfo = async (
     : null;
 };
 
-export { updateMeeting, getMeetingInfo };
+const saveMeetingSession = async (input: SaveMeetingSessionInput) => {
+  const { uid } = await requireServerUser();
+
+  const meetingDoc: Record<string, unknown> = {
+    id: input.id,
+    name: input.name,
+    broadcaster: uid,
+    created_at: input.created_at,
+  };
+
+  if (input.recordingEnabled) {
+    meetingDoc.recording_info = {
+      enabled: true,
+      is_recording_ready: false,
+    };
+  }
+
+  if (input.password?.trim()) {
+    normalizeMeetingPassword(input.password);
+    meetingDoc.password_protected = true;
+    meetingDoc.password_hash = hashMeetingPassword(input.password);
+  }
+
+  await db.collection("meeting_sessions").add(meetingDoc);
+};
+
+const getMeetingJoinRequirements = async (
+  roomId: string,
+): Promise<{ passwordRequired: boolean }> => {
+  const meeting = await getMeetingInfo(roomId);
+  if (!meeting) {
+    throw new Error("Meeting not found");
+  }
+
+  return {
+    passwordRequired: isMeetingPasswordProtected(meeting),
+  };
+};
+
+export {
+  updateMeeting,
+  getMeetingInfo,
+  saveMeetingSession,
+  getMeetingJoinRequirements,
+};

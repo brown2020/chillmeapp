@@ -15,6 +15,7 @@ import {
   requireServerUser,
   UnauthorizedError,
 } from "@/backend/services/server-auth";
+import { assertMeetingPasswordAccess } from "@/utils/meeting-password";
 
 const livekitHost = process.env.LIVEKIT_URL!;
 const apiKey = process.env.LIVEKIT_API_KEY!;
@@ -55,6 +56,7 @@ async function startRoomRecording(roomName: string): Promise<void> {
 async function resolveParticipant(
   roomName: string,
   displayName?: string,
+  roomPassword?: string,
 ): Promise<{ identity: string; name: string; isHost: boolean }> {
   const roomInfo = await getMeetingInfo(roomName);
   if (!roomInfo) {
@@ -63,21 +65,25 @@ async function resolveParticipant(
 
   try {
     const { uid } = await requireServerUser();
-    return {
+    const participant = {
       identity: uid,
       name: normalizeDisplayName(displayName || uid),
       isHost: uid === roomInfo.broadcaster,
     };
+    assertMeetingPasswordAccess(roomInfo, roomPassword, participant.isHost);
+    return participant;
   } catch (error) {
     if (!(error instanceof UnauthorizedError)) {
       throw error;
     }
 
-    return {
+    const participant = {
       identity: `guest-${uuidv4()}`,
       name: normalizeDisplayName(displayName),
       isHost: false,
     };
+    assertMeetingPasswordAccess(roomInfo, roomPassword, participant.isHost);
+    return participant;
   }
 }
 
@@ -130,11 +136,19 @@ export async function createRoom(
   }
 }
 
-export async function getAccessToken(roomName: string, displayName?: string) {
+export async function getAccessToken(
+  roomName: string,
+  displayName?: string,
+  roomPassword?: string,
+) {
   try {
     if (!roomName) throw new Error("Missing roomName");
 
-    const participant = await resolveParticipant(roomName, displayName);
+    const participant = await resolveParticipant(
+      roomName,
+      displayName,
+      roomPassword,
+    );
 
     const at = new AccessToken(apiKey, apiSecret, {
       identity: participant.identity,

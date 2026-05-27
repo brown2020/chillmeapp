@@ -1,14 +1,17 @@
 "use client";
 
-import { Button, Input } from "@chill-ui";
+import { Button, Input, PasswordInput } from "@chill-ui";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 type GuestJoinFormProps = {
   roomId: string;
-  onJoin: (displayName: string) => Promise<void>;
+  onJoin: (displayName: string, roomPassword?: string) => Promise<void>;
   isJoining: boolean;
   error: string | null;
+  passwordRequired?: boolean;
+  defaultDisplayName?: string;
+  showDisplayNameField?: boolean;
 };
 
 export default function GuestJoinForm({
@@ -16,15 +19,21 @@ export default function GuestJoinForm({
   onJoin,
   isJoining,
   error,
+  passwordRequired = false,
+  defaultDisplayName = "",
+  showDisplayNameField = true,
 }: GuestJoinFormProps) {
-  const [displayName, setDisplayName] = useState("");
+  const [displayName, setDisplayName] = useState(defaultDisplayName);
+  const [roomPassword, setRoomPassword] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isJoining) return;
 
-    const trimmedName = displayName.trim();
+    const trimmedName = (
+      showDisplayNameField ? displayName : defaultDisplayName
+    ).trim();
     if (!trimmedName) {
       setValidationError("Please enter your name to join the meeting.");
       return;
@@ -35,8 +44,13 @@ export default function GuestJoinForm({
       return;
     }
 
+    if (passwordRequired && !roomPassword.trim()) {
+      setValidationError("Please enter the meeting password.");
+      return;
+    }
+
     setValidationError(null);
-    await onJoin(trimmedName);
+    await onJoin(trimmedName, passwordRequired ? roomPassword : undefined);
   };
 
   const visibleError = validationError || error;
@@ -48,32 +62,53 @@ export default function GuestJoinForm({
           Join meeting
         </h1>
         <p className="mt-2 text-sm text-center text-muted-foreground">
-          Enter your name to join room{" "}
-          <span className="font-mono text-foreground">{roomId}</span>. No
-          account required.
+          {passwordRequired
+            ? "This meeting is password protected. Enter the details below to join room"
+            : "Enter your name to join room"}{" "}
+          <span className="font-mono text-foreground">{roomId}</span>
+          {!passwordRequired ? ". No account required." : "."}
         </p>
 
         <form
           onSubmit={handleSubmit}
           className="mt-6 flex flex-col gap-4"
-          aria-label="Join meeting as guest"
+          aria-label="Join meeting"
         >
-          <div>
-            <label htmlFor="guest-display-name" className="sr-only">
-              Your name
-            </label>
-            <Input
-              id="guest-display-name"
-              type="text"
-              placeholder="Your name"
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
-              autoComplete="name"
-              maxLength={64}
-              disabled={isJoining}
-              aria-describedby={visibleError ? "guest-join-error" : undefined}
-            />
-          </div>
+          {showDisplayNameField ? (
+            <div>
+              <label htmlFor="guest-display-name" className="sr-only">
+                Your name
+              </label>
+              <Input
+                id="guest-display-name"
+                type="text"
+                placeholder="Your name"
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
+                autoComplete="name"
+                maxLength={64}
+                disabled={isJoining}
+                aria-describedby={visibleError ? "guest-join-error" : undefined}
+              />
+            </div>
+          ) : null}
+
+          {passwordRequired ? (
+            <div>
+              <label htmlFor="guest-room-password" className="sr-only">
+                Meeting password
+              </label>
+              <PasswordInput
+                id="guest-room-password"
+                placeholder="Meeting password"
+                value={roomPassword}
+                onChange={(event) => setRoomPassword(event.target.value)}
+                autoComplete="current-password"
+                disabled={isJoining}
+                aria-describedby={visibleError ? "guest-join-error" : undefined}
+              />
+            </div>
+          ) : null}
 
           {visibleError ? (
             <p
