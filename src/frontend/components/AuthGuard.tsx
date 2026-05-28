@@ -1,39 +1,33 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "../hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { useAuthStore } from "@frontend/zustand/useAuthStore";
+import {
+  isAuthRoute,
+  isGuestJoinRoute,
+  isPublicRoute,
+  normalizePathname,
+} from "@/utils/auth-routes";
 
-const PUBLIC_ROUTES = [
-  "/",
-  "/auth/signin",
-  "/auth/signup",
-  "/auth/signout",
-  "/auth/forgot-password",
-  "/auth/verify-email",
-  "/terms",
-  "/privacy",
-];
-
-// Timeout to prevent infinite loading if Firebase doesn't respond
 const AUTH_TIMEOUT_MS = 5000;
 
 const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
   children,
 }) => {
   const router = useRouter();
-  const routePath = usePathname();
+  const routePath = normalizePathname(usePathname());
+  const searchParams = useSearchParams();
   const { checkAuthState, isAuthenticating, user } = useAuth();
   const setIsAuthenticating = useAuthStore(
     (state) => state.setIsAuthenticating,
   );
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Simplified - no need for useMemo for simple checks
-  const isPublicRoute = PUBLIC_ROUTES.includes(routePath);
-  const isAuthRoute = routePath.startsWith("/auth/");
+  const isPublic = isPublicRoute(routePath) || isGuestJoinRoute(routePath);
+  const isAuth = isAuthRoute(routePath);
 
   useEffect(() => {
     const unsubscribe = checkAuthState();
@@ -50,7 +44,6 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
     };
   }, [checkAuthState, setIsAuthenticating]);
 
-  // Clear timeout when auth completes to prevent it from firing after auth is done
   useEffect(() => {
     if (!isAuthenticating && timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -59,14 +52,33 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
   }, [isAuthenticating]);
 
   useEffect(() => {
-    if (!isAuthenticating) {
-      if (user?.uid && isAuthRoute) {
-        router.replace("/live");
-      } else if (!user?.uid && !isPublicRoute) {
-        router.replace("/auth/signin");
-      }
+    if (isAuthenticating) return;
+
+    if (user?.uid && isAuth && routePath !== "/auth/signout") {
+      const callbackUrl = searchParams.get("callbackUrl");
+      const safeCallback =
+        callbackUrl &&
+        callbackUrl.startsWith("/") &&
+        !callbackUrl.startsWith("//")
+          ? callbackUrl
+          : "/live";
+      router.replace(safeCallback);
+      return;
     }
-  }, [isAuthenticating, user, isPublicRoute, isAuthRoute, router]);
+
+    if (!user?.uid && !isPublic) {
+      const signInUrl = `/auth/signin?callbackUrl=${encodeURIComponent(routePath)}`;
+      router.replace(signInUrl);
+    }
+  }, [
+    isAuthenticating,
+    user,
+    isPublic,
+    isAuth,
+    routePath,
+    router,
+    searchParams,
+  ]);
 
   if (isAuthenticating) {
     return (
@@ -79,17 +91,14 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
     );
   }
 
-  // Allow public routes for everyone
-  if (isPublicRoute) {
+  if (isPublic) {
     return <>{children}</>;
   }
 
-  // Allow authenticated users on protected routes
   if (user?.uid) {
     return <>{children}</>;
   }
 
-  // Return null during redirect
   return null;
 };
 

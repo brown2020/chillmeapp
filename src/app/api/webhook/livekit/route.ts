@@ -1,6 +1,11 @@
 import { type NextRequest } from "next/server";
 import { WebhookReceiver } from "livekit-server-sdk";
 import { updateMeeting } from "@/backend/services/meeting";
+import { uploadRecordingToStorage } from "@/backend/services/storage";
+import {
+  extractEgressDownloadUrl,
+  getRecordingDestinationFolder,
+} from "@/utils/recording-paths";
 
 const receiver = new WebhookReceiver(
   process.env.LIVEKIT_API_KEY!,
@@ -23,7 +28,6 @@ export async function POST(request: NextRequest) {
 
     switch (event.event) {
       case "room_finished": {
-        // Room has ended - update meeting with duration
         const room = event.room;
         if (room) {
           const creationTime = room.creationTime
@@ -42,27 +46,45 @@ export async function POST(request: NextRequest) {
       }
 
       case "egress_ended": {
-        // Recording has completed
         const egress = event.egressInfo;
-        if (egress) {
-          // Check for file results in the egress info
-          const fileResults = egress.fileResults?.[0];
-          if (fileResults?.filename) {
-            await updateMeeting({
-              room_id: egress.roomName,
-              recording_info: {
-                enabled: true,
-                is_recording_ready: true,
-                recording_storage_path: fileResults.filename,
-              },
-            });
-          }
+        if (!egress?.roomName) {
+          break;
         }
+
+        const fileResult = egress.fileResults?.[0];
+        const downloadUrl = extractEgressDownloadUrl({
+          location: fileResult?.location,
+          filename: fileResult?.filename,
+        });
+
+        if (!downloadUrl) {
+          console.error(
+            "Egress completed without a downloadable URL for room:",
+            egress.roomName,
+          );
+          break;
+        }
+
+        const storagePath = await uploadRecordingToStorage(
+          downloadUrl,
+          getRecordingDestinationFolder(egress.roomName),
+        );
+
+        await updateMeeting({
+          room_id: egress.roomName,
+          recording_info: {
+            enabled: true,
+            is_recording_ready: true,
+            recording_storage_path: storagePath,
+          },
+        });
         break;
       }
 
       case "participant_joined":
       case "participant_left":
+        break;
+
       default:
         break;
     }
