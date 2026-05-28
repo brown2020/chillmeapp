@@ -6,6 +6,11 @@ interface Meeting {
   name: string;
   created_at: string;
   metadata?: string;
+  recording_info?: {
+    enabled: boolean;
+    is_recording_ready?: boolean;
+    recording_storage_path?: string;
+  };
 }
 
 /**

@@ -12,7 +12,6 @@ import { useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useMeetingStore from "../zustand/useMeetingStore";
 import { getAccessToken } from "@/frontend/services/broadcasting";
-import { getMeetingInfo } from "@backend/services/meeting";
 import { toast } from "@frontend/hooks/useToast";
 
 /**
@@ -22,14 +21,11 @@ import { toast } from "@frontend/hooks/useToast";
 export async function getJoinToken(
   roomId: string,
   userName: string,
-  userId: string,
+  roomPassword?: string,
 ): Promise<string> {
   if (!roomId) throw new Error("Missing roomId");
 
-  const roomInfo = await getMeetingInfo(roomId);
-  const isHost = Boolean(userId) && userId === roomInfo?.broadcaster;
-
-  const { token } = await getAccessToken(roomId, userId, isHost);
+  const { token } = await getAccessToken(roomId, userName, roomPassword);
   return token;
 }
 
