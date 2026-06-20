@@ -4,7 +4,7 @@ Single source of truth for autonomous and human agents working in this repositor
 
 ## Project overview
 
-Chill.me is a real-time video meeting web app. Authenticated users create LiveKit rooms, join via shareable URLs, use in-call audio/video/chat controls, and review past meetings (including recordings when available). Firebase handles auth and persistence; Stripe server actions exist for a credits-based payment model that is not yet wired into the UI.
+Chill.me is a real-time video meeting web app. Authenticated users create LiveKit rooms, join via shareable URLs, use in-call audio/video/chat controls, and review past meetings (including recordings when available). Firebase handles auth and persistence; Stripe server actions and profile checkout support a credits-based payment model.
 
 **License:** GNU AGPL-3.0. Network deployments of modified versions must provide corresponding source to users.
 
@@ -23,7 +23,7 @@ Deliver low-friction video meetings: sign in, start a room, share a link, collab
 | Auth | Firebase Auth (email/password, Google popup, password reset, email link sign-in) |
 | Database | Firestore (client SDK for user writes/reads; Admin SDK for webhooks/server) |
 | Storage | Firebase Storage (recording playback URLs) |
-| Payments | Stripe server actions only (`createPaymentIntent`, `validatePaymentIntent`) |
+| Payments | Stripe server actions + profile checkout (`createPaymentIntent`, `completeCreditsPurchase`, `validatePaymentIntent`) |
 | Package manager | **npm** (`package-lock.json`, lockfileVersion 3) — do not switch |
 
 ## Repository structure
@@ -98,7 +98,7 @@ LiveKit Cloud
 | Past meetings list | Working (completed sessions only) | `PastMeetings.tsx`, `listUserMeetings` filters `session_duration` |
 | Recording toggle UI | Partial | Toggle sets room metadata only; egress not started; `recording_info` not saved on create |
 | Recording playback | Partial | Webhook + `MeetingCard` + `/recording`; depends on egress + Firebase Storage path |
-| Stripe credits | Backend only | `payment.ts` — no purchase UI in profile |
+| Stripe credits | Working | `ProfileComponent.tsx`, `CreditsPurchaseForm.tsx`, `payment.ts` |
 | Profile | Minimal | Name, email, uid only |
 
 ## Important commands
@@ -111,6 +111,7 @@ npm start           # Production server
 npm run lint        # ESLint (flat config: eslint.config.mjs)
 npm run eslint:fix  # Auto-fix ESLint issues
 npm run tslint      # TypeScript check (tsc, no emit)
+npm run test        # Vitest unit tests (src/**/*.test.ts)
 ```
 
 ## Canonical validation command
@@ -118,17 +119,17 @@ npm run tslint      # TypeScript check (tsc, no emit)
 Run before committing on `dev`:
 
 ```bash
-npm run lint && npm run tslint && npm run build
+npm run lint && npm run tslint && npm run test && npm run build
 ```
 
-There is **no** test runner configured (`npm test` does not exist).
+Vitest is configured for unit tests under `src/**/*.test.ts`. There is no browser/E2E runner configured.
 
 ## Non-interactive testing rules
 
 - Never use watch mode (`--watch`).
 - Never open a headed browser or require manual login for validation.
 - Use CI-safe commands only; all commands above are non-interactive.
-- Do not rely on `.env` secrets being present for `lint`/`tslint`; `build` requires valid env for Firebase Admin and LiveKit at compile/runtime boundaries — document failures clearly if env is missing locally.
+- Do not rely on `.env` secrets being present for `lint`/`tslint`/`test`; `build` requires valid env for Firebase Admin and LiveKit at compile/runtime boundaries — document failures clearly if env is missing locally.
 - Manual meeting verification (two browsers, camera) is out of scope for autonomous runs unless explicitly requested.
 
 ## Development conventions
@@ -146,7 +147,7 @@ There is **no** test runner configured (`npm test` does not exist).
 
 - `strict: true` in `tsconfig.json`
 - ESLint 10 flat config with `@typescript-eslint/recommended`, Next.js core-web-vitals, Prettier integration
-- Husky pre-commit runs `npx lint-staged` (no `lint-staged` config block in `package.json` as of this writing — staged files may not run custom rules)
+- Husky pre-commit runs `npx lint-staged`; `package.json` config runs ESLint autofix for staged JS/TS files
 - Fix lint/type errors you introduce; do not drive large unrelated lint sweeps
 
 ## Server/client boundary guidance
@@ -187,9 +188,9 @@ There is no server-side session verification on API routes beyond LiveKit webhoo
 
 ## Testing expectations
 
-No Jest/Vitest/Playwright setup. Definition of done for code changes:
+Vitest covers utility-level behavior such as auth routes, credits config, meeting password hashing, and recording paths. There is no Playwright/browser automation setup. Definition of done for code changes:
 
-1. `npm run lint && npm run tslint && npm run build` pass
+1. `npm run lint && npm run tslint && npm run test && npm run build` pass
 2. Change is scoped and manually reasoned against affected user flows
 3. Do not add test infrastructure unless `spec.md` milestone or user explicitly requests it
 
@@ -230,7 +231,7 @@ Commit messages: concise, imperative, describe *why* when non-obvious.
 
 - [ ] On branch `dev`, synced with `origin/dev`
 - [ ] One focused, PR-sized change (even when committing directly to `dev`)
-- [ ] `npm run lint && npm run tslint && npm run build` pass (or documented env blocker)
+- [ ] `npm run lint && npm run tslint && npm run test && npm run build` pass (or documented env blocker)
 - [ ] No secrets committed
 - [ ] Server/client boundaries respected
 - [ ] User-visible behavior matches `spec.md` intent when touching product flows

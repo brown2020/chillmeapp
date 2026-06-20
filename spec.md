@@ -39,7 +39,7 @@ Chill.me helps people start and join video meetings quickly, with reliable real-
 
 ## 2. Current application state
 
-*Observations below are from codebase inspection (May 2026). Items marked **(inferred)** are conclusions not explicitly documented in code comments.*
+*Observations below are from codebase inspection (June 2026). Items marked **(inferred)** are conclusions not explicitly documented in code comments.*
 
 ### What the app currently does
 
@@ -90,7 +90,7 @@ Chill.me is a Next.js 16 single-repo web application. Authenticated users land o
 | **Firebase Auth** | Identity |
 | **Firestore** | `meeting_sessions` collection; `users` collection (read server-side; credits fields in types) |
 | **Firebase Storage** | Recording download URLs via client SDK |
-| **Stripe** | PaymentIntent create/validate server actions (unused by UI) |
+| **Stripe** | Profile checkout via Payment Element; server actions create PaymentIntents, validate ownership/amount, and apply credits idempotently |
 
 ### Current architecture summary
 
@@ -117,7 +117,7 @@ Chill.me is a Next.js 16 single-repo web application. Authenticated users land o
 3. **Credits / Stripe** — ~~no user-facing purchase or balance display~~ **Resolved in Milestone 4**
 4. **Profile** — no photo upload, display name edit, or account management beyond auth provider
 5. **Mobile UX** — meeting grid and chat layout work on desktop-first breakpoints; chat hidden on small screens when sidebar layout applies
-6. **No automated tests** — regressions caught manually or via CI lint/build only
+6. **Limited automated tests** — Vitest unit tests cover route/config/password/recording-path utilities; no component, browser, or meeting-flow automation
 7. **Navbar styling** — fixed light navbar (`bg-white`) may clash with dark theme **(inferred UX issue)**
 8. **Webhook recording path** — stores LiveKit egress filename; playback uses Firebase Storage `getDownloadURL` — paths must match bucket layout or playback fails **(inferred integration risk)**
 
@@ -284,7 +284,7 @@ Migration from 100ms to LiveKit is **complete** for real-time media. Remaining l
 
 Operational verification checklist (manual):
 
-1. `npm run build`
+1. `npm run lint && npm run tslint && npm run test && npm run build`
 2. Create room from `/live`
 3. Join from second browser session
 4. Verify A/V, chat, leave/end
