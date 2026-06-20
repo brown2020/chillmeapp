@@ -21,8 +21,8 @@ Preflighted `dev`, verified Git read/write authorization, created run-state scaf
 - Branch: `dev`
 - Upstream: `origin/dev`
 - Commit: `513892a42835210fee14cef19f3209b8d60e9a2f` at phase start
-- Pushed to: Pending phase checkpoint
-- Sync status: clean and synced before run reports; dry-run push succeeded
+- Pushed to: `origin/dev`
+- Sync status: pushed and clean at `db6ad95c4b226607ddbdd1710e955be6a9278c69`
 
 ## Loop
 
@@ -31,14 +31,14 @@ Preflighted `dev`, verified Git read/write authorization, created run-state scaf
 - Verify gate: plan/state/queue/report/docs updated; skill scaffold validates; lint and `git diff --check` pass before push
 - Stop condition: phase report and docs are committed/pushed, or unsafe local/Git state blocks the phase
 - Attempt: 1/1 planning; 1/2 docs sweep
-- Result: In progress pending quality gate and push
+- Result: Passed and pushed
 
 ## Run State
 
 - Current phase: Preflight and Repo Docs
 - Current task: T-001
 - Last pushed commit: `513892a42835210fee14cef19f3209b8d60e9a2f`
-- Next action: run docs-phase quality gate, inspect diff, commit, push
+- Next action: Baseline Validation
 - Blockers: None
 
 ## Commands Run
@@ -102,10 +102,10 @@ rg "CreditsPurchaseForm|completeCreditsPurchase|getCreditsCheckoutState|createPa
 
 - Status inspected: `AGENTS.md`, `spec.md`, and `agent-runs/2026-06-20-codebase-pass/` changed
 - Diff checked: `git diff --check` passed
-- Files staged: Pending
-- Dry-run push: Pending after commit
-- Push: Pending after commit
-- Post-push sync: Pending after push
+- Files staged: `AGENTS.md`, `spec.md`, `agent-runs/2026-06-20-codebase-pass/`
+- Dry-run push: passed (`513892a..db6ad95 dev -> dev`)
+- Push: passed (`513892a..db6ad95 dev -> dev`)
+- Post-push sync: local `dev` matched `origin/dev`
 
 ## Stabilization
 
@@ -124,4 +124,4 @@ rg "CreditsPurchaseForm|completeCreditsPurchase|getCreditsCheckoutState|createPa
 
 ## Recommended Next Step
 
-Run `npm run lint` and `git diff --check`, then commit and push the preflight/docs checkpoint.
+Run baseline validation and record the results in `02-baseline-validation.md`.
