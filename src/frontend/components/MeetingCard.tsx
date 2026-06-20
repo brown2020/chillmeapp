@@ -3,7 +3,7 @@
 import { MeetingSnapShot } from "@/types/entities";
 import { getUserById } from "@/backend/services/auth";
 import { useEffect, useState } from "react";
-import { formatSeconds } from "@/utils/dateUtils";
+import { formatMeetingCreatedAt, formatSeconds } from "@/utils/dateUtils";
 import { fetchRecording } from "@/frontend/services/meeting";
 import { useRouter } from "next/navigation";
 
@@ -94,7 +94,7 @@ const MeetingCard = ({ data }: Props) => {
         <div className="flex flex-col-reverse">
           <dt className="text-sm font-medium text-muted-foreground">Created</dt>
           <dd className="text-xs text-muted-foreground">
-            {new Date(data.created_at.seconds * 1000).toDateString()}
+            {formatMeetingCreatedAt(data.created_at)}
           </dd>
         </div>
 

@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
             ? Number(room.creationTime)
             : 0;
           const sessionDuration = creationTime
-            ? Math.floor((Date.now() / 1000 - creationTime) / 60)
+            ? Math.max(0, Math.floor(Date.now() / 1000 - creationTime))
             : 0;
 
           await updateMeeting({

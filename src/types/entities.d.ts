@@ -20,7 +20,7 @@ interface MeetingSnapShot {
   id: string;
   name: string;
   broadcaster: string;
-  created_at: { seconds: number };
+  created_at: string | { seconds: number };
   session_duration?: number;
   recording_info?: {
     enabled: boolean;
