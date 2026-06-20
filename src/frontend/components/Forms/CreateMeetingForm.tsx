@@ -102,8 +102,15 @@ const CreateMeetingForm: React.FC = () => {
       e.preventDefault();
       if (isLoading) return;
 
-      setIsLoading(true);
       setError(undefined);
+
+      const normalizedMeetingPassword = meetingPassword.trim();
+      if (passwordProtect && normalizedMeetingPassword.length < 4) {
+        setError("Meeting password must be at least 4 characters.");
+        return;
+      }
+
+      setIsLoading(true);
 
       const roomResponse = await createRoom(shouldRecord);
       if (!roomResponse.room || roomResponse.error) {
@@ -120,19 +127,13 @@ const CreateMeetingForm: React.FC = () => {
         return;
       }
 
-      if (passwordProtect && meetingPassword.trim().length < 4) {
-        setError("Meeting password must be at least 4 characters.");
-        setIsLoading(false);
-        return;
-      }
-
       try {
         await saveMeetingSession({
           id: roomResponse.room.id,
           name: roomResponse.room.name,
           created_at: roomResponse.room.created_at,
           recordingEnabled: shouldRecord,
-          password: passwordProtect ? meetingPassword : undefined,
+          password: passwordProtect ? normalizedMeetingPassword : undefined,
         });
       } catch (saveError) {
         const message =

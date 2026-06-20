@@ -11,23 +11,23 @@
 
 ## Current State
 
-- Phase: Package and Dead-Code Cleanup
-- Task: T-005 / F-003
+- Phase: Execute Fixes and Improvements
+- Task: T-009 / F-002
 - Status: Open
 - Last command: `npm run build`
 - Last result: Passed
-- Last pushed commit: 92640fa61d73dbb1a553bde68135192015f437f1
-- Branch sync: local `dev` matched `origin/dev` before package cleanup
-- Working tree: dirty with package-lock and package cleanup report updates
-- Next action: Commit and push package cleanup checkpoint
+- Last pushed commit: 85a0f1a67470fc85e11e64d326822e17b4453eb2
+- Branch sync: local `dev` matched `origin/dev` before F-002 source edit
+- Working tree: dirty with F-002 source and report updates
+- Next action: Commit and push F-002 checkpoint, then review/stabilize
 
 ## Dirty File Classification
 
 | Path | Classification | Owner/Reason |
 | --- | --- | --- |
-| `package-lock.json` | In-scope package cleanup | F-003 safe audit fix |
-| `agent-runs/2026-06-20-codebase-pass/04-execute-fixes-and-improvements.md` | Safe-to-commit | Backfilled F-001 push evidence |
-| `agent-runs/2026-06-20-codebase-pass/05-package-and-dead-code-cleanup.md` | Safe-to-commit | Package cleanup report |
+| `src/frontend/components/Forms/CreateMeetingForm.tsx` | In-scope source | F-002 invalid password lifecycle fix |
+| `agent-runs/2026-06-20-codebase-pass/04-execute-fixes-and-improvements.md` | Safe-to-commit | F-002 execution report |
+| `agent-runs/2026-06-20-codebase-pass/05-package-and-dead-code-cleanup.md` | Safe-to-commit | Backfilled package cleanup push evidence |
 | `agent-runs/2026-06-20-codebase-pass/run-state.md` | Safe-to-commit | Resume ledger update |
 | `agent-runs/2026-06-20-codebase-pass/task-queue.md` | Safe-to-commit | Task status update |
 
