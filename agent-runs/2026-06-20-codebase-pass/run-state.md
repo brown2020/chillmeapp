@@ -11,22 +11,21 @@
 
 ## Current State
 
-- Phase: Baseline Validation
-- Task: T-002
+- Phase: Findings Backlog
+- Task: T-003
 - Status: Open
-- Last command: `npm run build`
-- Last result: Passed
-- Last pushed commit: db6ad95c4b226607ddbdd1710e955be6a9278c69
-- Branch sync: local `dev` matched `origin/dev` before baseline report edits
-- Working tree: dirty only from baseline report updates
-- Next action: Commit and push baseline report, then create findings backlog
+- Last command: `npm outdated`
+- Last result: Completed with outdated package list (exit 1 expected when updates are available)
+- Last pushed commit: a7184bd993accae1cc26bea561b9e8265d0f10fe
+- Branch sync: local `dev` matched `origin/dev` before findings report edits
+- Working tree: dirty only from findings report updates
+- Next action: Commit and push findings backlog, then execute F-001
 
 ## Dirty File Classification
 
 | Path | Classification | Owner/Reason |
 | --- | --- | --- |
-| `agent-runs/2026-06-20-codebase-pass/01-preflight-and-repo-docs.md` | Safe-to-commit | Backfilled pushed checkpoint evidence |
-| `agent-runs/2026-06-20-codebase-pass/02-baseline-validation.md` | Safe-to-commit | Baseline validation report |
+| `agent-runs/2026-06-20-codebase-pass/03-findings-backlog.md` | Safe-to-commit | Findings backlog and architecture scorecard |
 | `agent-runs/2026-06-20-codebase-pass/run-state.md` | Safe-to-commit | Resume ledger update |
 | `agent-runs/2026-06-20-codebase-pass/task-queue.md` | Safe-to-commit | Task status update |
 
