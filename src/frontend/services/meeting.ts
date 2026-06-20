@@ -28,7 +28,7 @@ const listUserMeetings = async (uid: string) => {
   const results = querySnapshot.docs
     .map((doc) => {
       const data = doc.data() as MeetingSnapShot;
-      if (data?.session_duration) return data;
+      if (typeof data?.session_duration === "number") return data;
     })
     .filter(Boolean);
   return results as MeetingSnapShot[];

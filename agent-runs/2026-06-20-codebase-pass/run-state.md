@@ -11,21 +11,27 @@
 
 ## Current State
 
-- Phase: Findings Backlog
-- Task: T-003
+- Phase: Execute Fixes and Improvements
+- Task: T-004 / F-001
 - Status: Open
-- Last command: `npm outdated`
-- Last result: Completed with outdated package list (exit 1 expected when updates are available)
-- Last pushed commit: a7184bd993accae1cc26bea561b9e8265d0f10fe
-- Branch sync: local `dev` matched `origin/dev` before findings report edits
-- Working tree: dirty only from findings report updates
-- Next action: Commit and push findings backlog, then execute F-001
+- Last command: `npm run build`
+- Last result: Passed
+- Last pushed commit: e156a1715999c921093d41edd83a70ebbb8e318c
+- Branch sync: local `dev` matched `origin/dev` before F-001 source edits
+- Working tree: dirty with F-001 source/test changes and execution report updates
+- Next action: Commit and push F-001 fix checkpoint
 
 ## Dirty File Classification
 
 | Path | Classification | Owner/Reason |
 | --- | --- | --- |
-| `agent-runs/2026-06-20-codebase-pass/03-findings-backlog.md` | Safe-to-commit | Findings backlog and architecture scorecard |
+| `src/app/api/webhook/livekit/route.ts` | In-scope source | F-001 duration unit fix |
+| `src/frontend/components/MeetingCard.tsx` | In-scope source | F-001 created date rendering fix |
+| `src/frontend/services/meeting.ts` | In-scope source | F-001 completed-session filter fix |
+| `src/types/entities.d.ts` | In-scope source | F-001 runtime type shape |
+| `src/utils/dateUtils.ts` | In-scope source | F-001 shared date/duration formatting |
+| `src/utils/dateUtils.test.ts` | In-scope source | F-001 targeted tests |
+| `agent-runs/2026-06-20-codebase-pass/04-execute-fixes-and-improvements.md` | Safe-to-commit | Execution report |
 | `agent-runs/2026-06-20-codebase-pass/run-state.md` | Safe-to-commit | Resume ledger update |
 | `agent-runs/2026-06-20-codebase-pass/task-queue.md` | Safe-to-commit | Task status update |
 
