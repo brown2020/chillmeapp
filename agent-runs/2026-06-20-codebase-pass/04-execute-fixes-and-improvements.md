@@ -6,7 +6,7 @@ Name: Codex
 
 ## Scope
 
-Executed F-001 from the findings backlog: past-meeting metadata correctness for session duration, created date rendering, and completed-session filtering.
+Executed F-001 and F-002 from the findings backlog: past-meeting metadata correctness and invalid-password room lifecycle protection.
 
 ## Inputs
 
@@ -17,30 +17,31 @@ Executed F-001 from the findings backlog: past-meeting metadata correctness for 
 - `src/types/entities.d.ts`
 - `src/utils/dateUtils.ts`
 - Existing Vitest setup
+- `src/frontend/components/Forms/CreateMeetingForm.tsx`
 
 ## Branch and Push
 
 - Branch: `dev`
 - Upstream: `origin/dev`
-- Commit: `e156a1715999c921093d41edd83a70ebbb8e318c` at phase start
-- Pushed to: `origin/dev`
-- Sync status: pushed and clean at `92640fa61d73dbb1a553bde68135192015f437f1`
+- Commit: `85a0f1a67470fc85e11e64d326822e17b4453eb2` before F-002
+- Pushed to: Pending F-002 checkpoint
+- Sync status: clean and synced before F-002 source edit
 
 ## Loop
 
 - Name: Task Queue Loop, Fix Validation Loop
-- Goal: fix the highest-priority confirmed history metadata bug with a small, verified patch
+- Goal: fix confirmed history metadata and room lifecycle bugs with small, verified patches
 - Verify gate: targeted tests, lint, typecheck, full unit tests, and build pass
 - Stop condition: F-001 fixed and ready to push, or blocked by failing validation
-- Attempt: 1/3
+- Attempt: F-001 1/3; F-002 1/3
 - Result: Passed and pushed
 
 ## Run State
 
 - Current phase: Execute Fixes and Improvements
-- Current task: T-004 / F-001
-- Last pushed commit: `e156a1715999c921093d41edd83a70ebbb8e318c`
-- Next action: Package and Dead-Code Cleanup
+- Current task: T-009 / F-002
+- Last pushed commit: `85a0f1a67470fc85e11e64d326822e17b4453eb2`
+- Next action: commit and push F-002 checkpoint
 - Blockers: None
 
 ## Commands Run
@@ -62,6 +63,7 @@ git status --short --branch
 - F-001 fixed: meeting cards now render both ISO string `created_at` values and Firestore timestamp-like values.
 - F-001 fixed: completed meetings with `session_duration: 0` are included instead of filtered out as falsy.
 - While touching duration formatting, fixed singular/plural output such as `1 hour` and `1 second`.
+- F-002 fixed: invalid password-protected meeting creation now fails before creating a LiveKit room or starting recording.
 
 ## Changes Made
 
@@ -71,6 +73,7 @@ git status --short --branch
 - `src/types/entities.d.ts`: updated `MeetingSnapShot.created_at` to reflect current string and timestamp-like runtime shapes.
 - `src/utils/dateUtils.ts`: added robust meeting date formatting and duration pluralization.
 - `src/utils/dateUtils.test.ts`: added unit coverage for duration formatting and meeting creation date inputs.
+- `src/frontend/components/Forms/CreateMeetingForm.tsx`: moved password length validation before `createRoom()` and passed the trimmed password to persistence.
 
 ## Verification
 
@@ -84,6 +87,8 @@ git status --short --branch
 | `npm run build` | Passed | Next.js production build completed; same non-fatal Tailwind module-type warning as baseline. |
 | `git diff --check` | Passed | No whitespace errors. |
 
+F-002 re-ran `npm run lint`, `npm run tslint`, `npm run test`, `npm run build`, and `git diff --check`; all passed.
+
 ## Architecture and Lean Code Scorecard
 
 | Area | Status | Evidence | Action |
@@ -92,7 +97,7 @@ git status --short --branch
 | Module cohesion | Pass | Date/duration parsing moved into `dateUtils` rather than card-local parsing | None |
 | Public surface area | Pass | Added one shared date formatter used by one call site and covered by tests | None |
 | Data and side-effect flow | Pass | Webhook persisted unit now matches UI formatter; history filter checks field presence by type | None |
-| Async/cache/resource lifecycle | Watch | F-002 invalid password room creation remains queued | Execute or defer after this checkpoint |
+| Async/cache/resource lifecycle | Pass | Invalid password path now returns before LiveKit room creation | None |
 | Duplication and dead code | Watch | F-004 unused `deleteRoom()` remains deferred | Defer |
 | Dependency lean-ness | Watch | F-003 audit cleanup remains queued | Package cleanup phase |
 | Testability | Pass | Added utility tests for the changed data-shape behavior | None |
@@ -105,12 +110,12 @@ git status --short --branch
 
 ## Commit-Push Checkpoint
 
-- Status inspected: source and report files changed
+- Status inspected: F-002 source and report files changed
 - Diff checked: `git diff --check` passed
-- Files staged: F-001 source/test files and execution report updates
-- Dry-run push: passed (`e156a17..92640fa dev -> dev`)
-- Push: passed (`e156a17..92640fa dev -> dev`)
-- Post-push sync: local `dev` matched `origin/dev`
+- Files staged: Pending for F-002
+- Dry-run push: Pending for F-002
+- Push: Pending for F-002
+- Post-push sync: Pending for F-002
 
 ## Stabilization
 
@@ -129,4 +134,4 @@ git status --short --branch
 
 ## Recommended Next Step
 
-Run package/dead-code cleanup and defer only unsafe remaining items.
+Commit and push F-002, then run review/stabilization.
