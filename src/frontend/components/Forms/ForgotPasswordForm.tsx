@@ -5,8 +5,8 @@ import { useAuth } from "@frontend/hooks";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import Link from "next/link";
-import clsx from "clsx";
-import { ArrowLeft, Mail } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mail } from "lucide-react";
+import AuthShell from "./AuthShell";
 
 type FormVals = {
   email: string;
@@ -31,81 +31,93 @@ const ForgotPasswordForm = () => {
 
   if (emailSent) {
     return (
-      <div className="flex h-[80vh] w-full justify-center items-center p-4 sm:p-8">
-        <div className="flex flex-col gap-6 w-full max-w-md border border-zinc-700 rounded-lg p-8 sm:p-10 text-center">
+      <AuthShell
+        eyebrow="Password reset"
+        title="Check your email"
+        description="We sent password reset instructions to the email address you provided."
+      >
+        <div className="w-full max-w-md space-y-6 text-center">
           <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
             <Mail className="h-6 w-6 text-primary" />
           </div>
-          <h3 className="text-2xl sm:text-3xl font-semibold">
-            Check your email
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            We&apos;ve sent a password reset link to{" "}
+          <div className="rounded-lg border border-border bg-background p-4 text-sm text-muted-foreground">
+            Sent to{" "}
             <span className="font-medium text-foreground">
               {getValues("email")}
             </span>
-          </p>
+          </div>
           <p className="text-sm text-muted-foreground">
-            Didn&apos;t receive the email? Check your spam folder or{" "}
+            Didn&apos;t receive it? Check your spam folder or{" "}
             <button
+              type="button"
               onClick={() => setEmailSent(false)}
-              className="text-primary hover:underline"
+              className="font-medium text-foreground transition-colors hover:text-primary"
             >
               try again
             </button>
+            .
           </p>
-          <Link
-            href="/auth/signin"
-            className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to login
-          </Link>
+          <Button variant="outline" asChild className="h-11 w-full gap-2">
+            <Link href="/auth/signin">
+              <ArrowLeft className="h-4 w-4" />
+              Back to sign in
+            </Link>
+          </Button>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="flex h-[80vh] w-full justify-center items-center p-4 sm:p-8">
-      <div className="flex flex-col gap-6 w-full max-w-md border border-zinc-700 rounded-lg p-8 sm:p-10">
-        <h3 className="text-2xl sm:text-3xl font-semibold text-center">
-          Forgot password?
-        </h3>
-        <p className="text-sm text-center text-muted-foreground">
-          No worries, we&apos;ll send you reset instructions
-        </p>
+    <AuthShell
+      eyebrow="Password reset"
+      title="Reset your password"
+      description="Enter the email for your account and we will send a link to get you back in."
+    >
+      <div className="w-full max-w-md space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="space-y-2">
+            <label htmlFor="reset-email" className="text-sm font-medium">
+              Email
+            </label>
+            <Input
+              id="reset-email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              className="h-11 bg-background"
+              aria-invalid={Boolean(errors.email)}
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Please enter a valid email address",
+                },
+              })}
+              error={Boolean(errors.email)}
+              errorMessage={errors.email?.message}
+            />
+          </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-          <Input
-            type="email"
-            placeholder="Enter your email"
-            className={clsx("w-full")}
-            {...register("email", {
-              required: "Email is required",
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Please enter a valid email address",
-              },
-            })}
-            error={Boolean(errors.email)}
-            errorMessage={errors.email?.message}
-          />
-
-          <Button disabled={isSubmitting} type="submit" className="w-full">
-            {isSubmitting ? "Sending..." : "Reset password"}
+          <Button
+            disabled={isSubmitting}
+            type="submit"
+            className="h-11 w-full gap-2"
+          >
+            {isSubmitting ? "Sending..." : "Send reset link"}
+            {!isSubmitting && <ArrowRight className="h-4 w-4" />}
           </Button>
         </form>
 
         <Link
           href="/auth/signin"
-          className="text-sm text-center text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-2"
+          className="flex items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to login
+          Back to sign in
         </Link>
       </div>
-    </div>
+    </AuthShell>
   );
 };
 

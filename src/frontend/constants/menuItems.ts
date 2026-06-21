@@ -53,7 +53,7 @@ export const authenticatedNavItems: navItemType[] = [
     path: "/profile",
   },
   {
-    label: "Signout",
+    label: "Sign out",
     icon: KeyRound,
     path: "/auth/signout",
   },
@@ -61,12 +61,12 @@ export const authenticatedNavItems: navItemType[] = [
 
 export const guestNavItems: navItemType[] = [
   {
-    label: "Signin",
+    label: "Sign in",
     icon: KeyRound,
     path: "/auth/signin",
   },
   {
-    label: "Create Account",
+    label: "Create account",
     icon: CircleUserIcon,
     path: "/auth/signup",
   },
