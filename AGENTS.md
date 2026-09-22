@@ -124,6 +124,27 @@ npm run lint && npm run tslint && npm run test && npm run build
 
 Vitest is configured for unit tests under `src/**/*.test.ts`. There is no browser/E2E runner configured.
 
+## CI client env (GitHub Actions secrets)
+
+Wire all `NEXT_PUBLIC_*` values in `.github/workflows/ci.yml` via `${{ secrets.* }}` only — never commit literal Firebase/LiveKit/Stripe client values in workflow YAML (secret-scanning / currency defect).
+
+Required repository Actions secrets (names must match the workflow `env:` keys):
+
+- `NEXT_PUBLIC_BASE_URL`
+- `NEXT_PUBLIC_COOKIE_NAME`
+- `NEXT_PUBLIC_FIREBASE_APIKEY`
+- `NEXT_PUBLIC_FIREBASE_AUTHDOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECTID`
+- `NEXT_PUBLIC_FIREBASE_STORAGEBUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGINGSENDERID`
+- `NEXT_PUBLIC_FIREBASE_APPID`
+- `NEXT_PUBLIC_FIREBASE_MEASUREMENTID`
+- `NEXT_PUBLIC_LIVEKIT_URL`
+- `NEXT_PUBLIC_STRIPE_PRODUCT_NAME`
+- `NEXT_PUBLIC_CREDITS_PER_IMAGE`
+
+Populate them in the GitHub repo **Settings → Secrets and variables → Actions**. Local `.env` remains the source for `npm run build` on developer machines. Client Firebase init skips when `NEXT_PUBLIC_FIREBASE_APIKEY` is empty so CI can still compile/prerender before secrets are set.
+
 ## Non-interactive testing rules
 
 - Never use watch mode (`--watch`).
