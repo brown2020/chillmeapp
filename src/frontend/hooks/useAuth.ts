@@ -50,7 +50,7 @@ export const useAuth = () => {
           return;
         }
 
-        await clearSessionCookie();
+        clearAuthDetails();
         setIsAuthenticating(false);
       })();
     });
