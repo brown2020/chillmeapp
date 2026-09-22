@@ -10,26 +10,30 @@ jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
-      NEXT_PUBLIC_COOKIE_NAME: ${{ secrets.NEXT_PUBLIC_COOKIE_NAME }}
-      NEXT_PUBLIC_FIREBASE_APIKEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_APIKEY }}
-      NEXT_PUBLIC_FIREBASE_AUTHDOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTHDOMAIN }}
-      NEXT_PUBLIC_FIREBASE_PROJECTID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECTID }}
-      NEXT_PUBLIC_FIREBASE_STORAGEBUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGEBUCKET }}
-      NEXT_PUBLIC_FIREBASE_MESSAGINGSENDERID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGINGSENDERID }}
-      NEXT_PUBLIC_FIREBASE_APPID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APPID }}
-      NEXT_PUBLIC_FIREBASE_MEASUREMENTID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENTID }}
-      NEXT_PUBLIC_LIVEKIT_URL: ${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}
-      NEXT_PUBLIC_STRIPE_PRODUCT_NAME: ${{ secrets.NEXT_PUBLIC_STRIPE_PRODUCT_NAME }}
-      NEXT_PUBLIC_CREDITS_PER_IMAGE: ${{ secrets.NEXT_PUBLIC_CREDITS_PER_IMAGE }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
-      - run: npm ci
+      # Install without lifecycle scripts and without CI secrets in scope
+      # (react-doctor build-pipeline-secret-boundary).
+      - run: npm ci --ignore-scripts
       - run: npm run tslint
       - run: npm test
-      - run: npm run build
+      # Expose client config only for the production build step.
+      - name: Production build
+        env:
+          NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
+          NEXT_PUBLIC_COOKIE_NAME: ${{ secrets.NEXT_PUBLIC_COOKIE_NAME }}
+          NEXT_PUBLIC_FIREBASE_APIKEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_APIKEY }}
+          NEXT_PUBLIC_FIREBASE_AUTHDOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTHDOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECTID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECTID }}
+          NEXT_PUBLIC_FIREBASE_STORAGEBUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGEBUCKET }}
+          NEXT_PUBLIC_FIREBASE_MESSAGINGSENDERID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGINGSENDERID }}
+          NEXT_PUBLIC_FIREBASE_APPID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APPID }}
+          NEXT_PUBLIC_FIREBASE_MEASUREMENTID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENTID }}
+          NEXT_PUBLIC_LIVEKIT_URL: ${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}
+          NEXT_PUBLIC_STRIPE_PRODUCT_NAME: ${{ secrets.NEXT_PUBLIC_STRIPE_PRODUCT_NAME }}
+          NEXT_PUBLIC_CREDITS_PER_IMAGE: ${{ secrets.NEXT_PUBLIC_CREDITS_PER_IMAGE }}
+        run: npm run build
