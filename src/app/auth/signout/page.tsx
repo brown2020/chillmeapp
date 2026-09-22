@@ -1,13 +1,16 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@/frontend/hooks";
 import { Loader2 } from "lucide-react";
 
 const Signout = () => {
   const { setLoggedOutState } = useAuth();
+  const logoutStarted = useRef(false);
 
   useEffect(() => {
-    let cancelled = false;
+    if (logoutStarted.current) return;
+    logoutStarted.current = true;
+
     const performLogout = async () => {
       try {
         await Promise.race([
@@ -20,16 +23,14 @@ const Signout = () => {
           error instanceof Error ? error.message : "unknown",
         );
       } finally {
-        if (!cancelled) {
-          window.location.replace("/auth/signin");
-        }
+        window.location.replace("/auth/signin");
       }
     };
+
     void performLogout();
-    return () => {
-      cancelled = true;
-    };
-  }, [setLoggedOutState]);
+    // Run once — setLoggedOutState identity changes each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex h-screen w-full items-center justify-center">
