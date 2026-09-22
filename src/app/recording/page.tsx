@@ -1,29 +1,28 @@
 "use client";
 
-import React, { Suspense, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import VideoPlayer from "@/frontend/components/VideoPlayer";
 
 function RecordingContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const videoSourceEncoded = searchParams.get("source");
+  const [videoSource, setVideoSource] = useState<string | null>(null);
 
   useEffect(() => {
     if (!videoSourceEncoded) {
-      router.replace("/");
+      window.location.replace("/");
+      return;
     }
-  }, [router, videoSourceEncoded]);
 
-  if (!videoSourceEncoded) {
-    return null;
-  }
+    try {
+      setVideoSource(atob(videoSourceEncoded));
+    } catch {
+      window.location.replace("/");
+    }
+  }, [videoSourceEncoded]);
 
-  let videoSource: string;
-  try {
-    videoSource = atob(videoSourceEncoded);
-  } catch {
-    router.replace("/");
+  if (!videoSource) {
     return null;
   }
 

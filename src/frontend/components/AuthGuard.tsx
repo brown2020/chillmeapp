@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "../hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { useAuthStore } from "@frontend/zustand/useAuthStore";
@@ -14,17 +14,28 @@ import {
 
 const AUTH_TIMEOUT_MS = 5000;
 
+function safeInternalPath(candidate: string | null, fallback: string): string {
+  if (
+    candidate &&
+    candidate.startsWith("/") &&
+    !candidate.startsWith("//") &&
+    !candidate.includes("://")
+  ) {
+    return candidate;
+  }
+  return fallback;
+}
+
 const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
   children,
 }) => {
-  const router = useRouter();
   const routePath = normalizePathname(usePathname());
   const searchParams = useSearchParams();
   const { checkAuthState, isAuthenticating, user } = useAuth();
   const setIsAuthenticating = useAuthStore(
     (state) => state.setIsAuthenticating,
   );
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isPublic = isPublicRoute(routePath) || isGuestJoinRoute(routePath);
   const isAuth = isAuthRoute(routePath);
@@ -55,30 +66,16 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
     if (isAuthenticating) return;
 
     if (user?.uid && isAuth && routePath !== "/auth/signout") {
-      const callbackUrl = searchParams.get("callbackUrl");
-      const safeCallback =
-        callbackUrl &&
-        callbackUrl.startsWith("/") &&
-        !callbackUrl.startsWith("//")
-          ? callbackUrl
-          : "/live";
-      router.replace(safeCallback);
+      const next = safeInternalPath(searchParams.get("callbackUrl"), "/live");
+      window.location.replace(next);
       return;
     }
 
     if (!user?.uid && !isPublic) {
       const signInUrl = `/auth/signin?callbackUrl=${encodeURIComponent(routePath)}`;
-      router.replace(signInUrl);
+      window.location.replace(signInUrl);
     }
-  }, [
-    isAuthenticating,
-    user,
-    isPublic,
-    isAuth,
-    routePath,
-    router,
-    searchParams,
-  ]);
+  }, [isAuthenticating, user, isPublic, isAuth, routePath, searchParams]);
 
   if (isAuthenticating) {
     return (

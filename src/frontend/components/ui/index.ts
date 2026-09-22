@@ -1,4 +1,5 @@
 export * from "./Button";
+export { buttonVariants } from "./button-variants";
 export * from "./Input";
 export * from "./PasswordInput";
 export * from "./Toast";

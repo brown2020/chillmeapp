@@ -5,39 +5,42 @@ import { getUserById } from "@/backend/services/auth";
 import { useEffect, useState } from "react";
 import { formatMeetingCreatedAt, formatSeconds } from "@/utils/dateUtils";
 import { fetchRecording } from "@/frontend/services/meeting";
-import { useRouter } from "next/navigation";
 
 type Props = {
   data: MeetingSnapShot;
 };
 
 const MeetingCard = ({ data }: Props) => {
-  const router = useRouter();
   const [hostDisplayName, setHostDisplayName] = useState<string>("");
   const [recordingUrl, setRecordingUrl] = useState<string>("");
   const [recordingStatus, setRecordingStatus] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const aggregateMeetingData = async () => {
       try {
         const result = await getUserById(data.broadcaster);
-        setHostDisplayName(result.displayName || "Unknown");
+        if (!cancelled) {
+          setHostDisplayName(result.displayName || "Unknown");
+        }
       } catch {
-        setHostDisplayName("Unknown");
+        if (!cancelled) {
+          setHostDisplayName("Unknown");
+        }
       }
 
       if (!data.recording_info?.enabled) {
-        setRecordingStatus("not-available");
+        if (!cancelled) setRecordingStatus("not-available");
         return;
       }
 
       if (!data.recording_info?.is_recording_ready) {
-        setRecordingStatus("processing");
+        if (!cancelled) setRecordingStatus("processing");
         return;
       }
 
       if (!data.recording_info.recording_storage_path) {
-        setRecordingStatus("not-available");
+        if (!cancelled) setRecordingStatus("not-available");
         return;
       }
 
@@ -45,19 +48,24 @@ const MeetingCard = ({ data }: Props) => {
         const recordingFileUrl = await fetchRecording(
           data.recording_info.recording_storage_path,
         );
-        setRecordingUrl(recordingFileUrl);
-        setRecordingStatus("available");
+        if (!cancelled) {
+          setRecordingUrl(recordingFileUrl);
+          setRecordingStatus("available");
+        }
       } catch {
-        setRecordingStatus("not-available");
+        if (!cancelled) setRecordingStatus("not-available");
       }
     };
 
-    aggregateMeetingData();
+    void aggregateMeetingData();
+    return () => {
+      cancelled = true;
+    };
   }, [data.broadcaster, data.recording_info]);
 
   const viewRecording = (url: string) => {
     const encodedUrl = btoa(url);
-    router.push(`/recording?source=${encodedUrl}`);
+    window.location.assign(`/recording?source=${encodedUrl}`);
   };
 
   return (

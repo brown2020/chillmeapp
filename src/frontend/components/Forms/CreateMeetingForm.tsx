@@ -214,6 +214,7 @@ const CreateMeetingForm: React.FC = () => {
           <label htmlFor="record-session"> Record Session</label>
           <Switch
             id="record-session"
+            checked={shouldRecord}
             onCheckedChange={(checked) => setShouldRecord(checked)}
           />
         </div>

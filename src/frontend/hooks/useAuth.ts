@@ -18,6 +18,19 @@ import {
   syncSessionCookie,
 } from "@/frontend/services/session-client";
 
+function authCode(err: unknown): string | undefined {
+  if (err && typeof err === "object" && "code" in err) {
+    const code = (err as { code?: unknown }).code;
+    return typeof code === "string" ? code : undefined;
+  }
+  return undefined;
+}
+
+function logAuthFailure(context: string, err: unknown) {
+  const code = authCode(err) ?? "unknown";
+  console.warn(`[auth] ${context}: ${code}`);
+}
+
 export const useAuth = () => {
   const {
     setAuthDetails,
@@ -55,7 +68,7 @@ export const useAuth = () => {
       const idToken = await authUser.getIdToken();
       await syncSessionCookie(idToken);
     } catch (error) {
-      console.error("Failed to sync session cookie:", error);
+      logAuthFailure("session-sync", error);
     }
 
     setAuthDetails({
@@ -68,26 +81,26 @@ export const useAuth = () => {
     try {
       const googleAuthProvider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, googleAuthProvider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
       await setLoggedInState(result.user);
-      return credential;
+      return GoogleAuthProvider.credentialFromResult(result);
     } catch (err: unknown) {
-      const error = err as { code?: string; message?: string };
-      // Ignore cancelled popup errors (user closed the popup)
+      const code = authCode(err);
       if (
-        error.code === "auth/cancelled-popup-request" ||
-        error.code === "auth/popup-closed-by-user"
+        code === "auth/cancelled-popup-request" ||
+        code === "auth/popup-closed-by-user"
       ) {
+        logAuthFailure("google-cancelled", err);
         return null;
       }
+      logAuthFailure("google-sign-in", err);
       toast({
         title: "Error signing in with Google",
-        description: error.code
-          ? getFirebaseErrorMessage(error.code)
+        description: code
+          ? getFirebaseErrorMessage(code)
           : "An error occurred during sign in",
         variant: "error",
       });
-      throw err;
+      return null;
     }
   };
 
@@ -96,18 +109,20 @@ export const useAuth = () => {
     password: string,
   ): Promise<void> => {
     try {
-      await createAccountWithEmailAndPassword(email, password);
+      const result = await createAccountWithEmailAndPassword(email, password);
+      await setLoggedInState(result.user);
       toast({
         title: "Account Created",
         description: "Your account created, Logging you in...",
         variant: "success",
       });
     } catch (err: unknown) {
-      const error = err as { code?: string; message?: string };
+      const code = authCode(err);
+      logAuthFailure("sign-up", err);
       toast({
         title: "Error in creating account",
-        description: error.code
-          ? getFirebaseErrorMessage(error.code)
+        description: code
+          ? getFirebaseErrorMessage(code)
           : "There is an error in creating an account for you",
         variant: "error",
       });
@@ -116,42 +131,43 @@ export const useAuth = () => {
 
   const loginWithEmail = async (email: string, password: string) => {
     try {
-      await signin(email, password);
+      const result = await signin(email, password);
+      await setLoggedInState(result.user);
       toast({
         title: "Login credentials validated",
         description: "Logging you in...",
         variant: "success",
       });
     } catch (err: unknown) {
-      const error = err as { code?: string; message?: string };
+      const code = authCode(err);
+      logAuthFailure("sign-in", err);
       toast({
         title: "Error in signing in",
-        description: error.code
-          ? getFirebaseErrorMessage(error.code)
+        description: code
+          ? getFirebaseErrorMessage(code)
           : "Invalid email or password",
         variant: "error",
       });
     }
   };
 
-  /**
-   * Send password reset email
-   */
   const sendPasswordReset = async (email: string): Promise<boolean> => {
     try {
       await sendPasswordResetEmail(email);
       toast({
         title: "Password reset email sent",
-        description: "Check your inbox for the reset link",
+        description:
+          "If an account uses that email, a password reset link will arrive shortly.",
         variant: "success",
       });
       return true;
     } catch (err: unknown) {
-      const error = err as { code?: string; message?: string };
+      const code = authCode(err);
+      logAuthFailure("password-reset", err);
       toast({
         title: "Error sending reset email",
-        description: error.code
-          ? getFirebaseErrorMessage(error.code)
+        description: code
+          ? getFirebaseErrorMessage(code)
           : "Unable to send password reset email",
         variant: "error",
       });
@@ -159,9 +175,6 @@ export const useAuth = () => {
     }
   };
 
-  /**
-   * Send email link for passwordless sign-in
-   */
   const sendLoginLink = async (email: string): Promise<boolean> => {
     try {
       await sendSignInLinkToEmail(email);
@@ -172,11 +185,12 @@ export const useAuth = () => {
       });
       return true;
     } catch (err: unknown) {
-      const error = err as { code?: string; message?: string };
+      const code = authCode(err);
+      logAuthFailure("login-link", err);
       toast({
         title: "Error sending login link",
-        description: error.code
-          ? getFirebaseErrorMessage(error.code)
+        description: code
+          ? getFirebaseErrorMessage(code)
           : "Unable to send login link",
         variant: "error",
       });
@@ -184,20 +198,13 @@ export const useAuth = () => {
     }
   };
 
-  /**
-   * Complete email link sign-in
-   */
   const completeEmailLinkSignIn = async (url: string): Promise<boolean> => {
-    // Check if this is a valid email link
     if (!isSignInWithEmailLink(url)) {
       return false;
     }
 
-    // Get the email from localStorage
     const email = window.localStorage.getItem("emailForSignIn");
     if (!email) {
-      // If no email in storage, we can't complete sign-in
-      // The form should prompt for email
       return false;
     }
 
@@ -211,11 +218,12 @@ export const useAuth = () => {
       });
       return true;
     } catch (err: unknown) {
-      const error = err as { code?: string; message?: string };
+      const code = authCode(err);
+      logAuthFailure("email-link", err);
       toast({
         title: "Error signing in",
-        description: error.code
-          ? getFirebaseErrorMessage(error.code)
+        description: code
+          ? getFirebaseErrorMessage(code)
           : "Unable to complete sign-in",
         variant: "error",
       });
@@ -223,9 +231,6 @@ export const useAuth = () => {
     }
   };
 
-  /**
-   * Check if URL is an email sign-in link
-   */
   const checkIsEmailSignInLink = (url: string): boolean => {
     return isSignInWithEmailLink(url);
   };

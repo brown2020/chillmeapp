@@ -11,7 +11,7 @@ const getUserById = async (uid: string) => {
   try {
     await requireServerUser();
     const result = await adminAuth.getUser(uid);
-    return JSON.parse(JSON.stringify(result)) as UserRecord;
+    return structuredClone(result) as UserRecord;
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       throw new Error("You must be signed in to view user details.");

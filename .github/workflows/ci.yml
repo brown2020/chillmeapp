@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      NEXT_PUBLIC_COOKIE_NAME: chillmeAuthToken
+      NEXT_PUBLIC_FIREBASE_APIKEY: REDACTED_BY_HISTORY_PURGE
+      NEXT_PUBLIC_FIREBASE_AUTHDOMAIN: chilldotme.firebaseapp.com
+      NEXT_PUBLIC_FIREBASE_PROJECTID: chilldotme
+      NEXT_PUBLIC_FIREBASE_STORAGEBUCKET: chilldotme.appspot.com
+      NEXT_PUBLIC_FIREBASE_MESSAGINGSENDERID: 797844069108
+      NEXT_PUBLIC_FIREBASE_APPID: REDACTED_BY_HISTORY_PURGE
+      NEXT_PUBLIC_FIREBASE_MEASUREMENTID: REDACTED_BY_HISTORY_PURGE
+      NEXT_PUBLIC_LIVEKIT_URL: wss://chillmeapp-3ql6lsn7.livekit.cloud
+      NEXT_PUBLIC_STRIPE_PRODUCT_NAME: chillme_demo_credits
+      NEXT_PUBLIC_CREDITS_PER_IMAGE: "5"
+      LIVEKIT_URL: wss://chillmeapp-3ql6lsn7.livekit.cloud
+      LIVEKIT_API_KEY: ${{ secrets.LIVEKIT_API_KEY }}
+      LIVEKIT_API_SECRET: ${{ secrets.LIVEKIT_API_SECRET }}
+      FIREBASE_TYPE: ${{ secrets.FIREBASE_TYPE }}
+      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+      FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
+      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+      FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+      FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
+      FIREBASE_AUTH_URI: https://accounts.google.com/o/oauth2/auth
+      FIREBASE_TOKEN_URI: https://oauth2.googleapis.com/token
+      FIREBASE_AUTH_PROVIDER_X509_CERT_URL: https://www.googleapis.com/oauth2/v1/certs
+      FIREBASE_CLIENT_CERTS_URL: ${{ secrets.FIREBASE_CLIENT_CERTS_URL }}
+      FIREBASE_UNIVERSE_DOMAIN: googleapis.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run tslint
+      - run: npm test
+      - run: npm run build

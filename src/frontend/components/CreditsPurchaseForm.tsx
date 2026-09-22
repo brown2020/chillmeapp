@@ -48,24 +48,22 @@ function PaymentForm({
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      redirect: "if_required",
-    });
-
-    if (error) {
-      setErrorMessage(error.message ?? "Payment failed. Please try again.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (paymentIntent?.status !== "succeeded") {
-      setErrorMessage("Payment was not completed. Please try again.");
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        redirect: "if_required",
+      });
+
+      if (error) {
+        setErrorMessage(error.message ?? "Payment failed. Please try again.");
+        return;
+      }
+
+      if (paymentIntent?.status !== "succeeded") {
+        setErrorMessage("Payment was not completed. Please try again.");
+        return;
+      }
+
       const result = await completeCreditsPurchase(paymentIntent.id);
       onPurchaseComplete(result.credits);
 

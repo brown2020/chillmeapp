@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/frontend/hooks";
 import { Button, Input } from "@chill-ui";
 import { Loader2 } from "lucide-react";
@@ -12,7 +11,6 @@ type FormVals = {
 };
 
 export default function VerifyEmailPage() {
-  const router = useRouter();
   const { completeEmailLinkSignIn, checkIsEmailSignInLink } = useAuth();
   const [status, setStatus] = useState<
     "checking" | "needsEmail" | "success" | "error"
@@ -25,33 +23,40 @@ export default function VerifyEmailPage() {
   } = useForm<FormVals>();
 
   useEffect(() => {
+    let cancelled = false;
+    let redirectTimer: ReturnType<typeof setTimeout> | null = null;
+
     const verifyEmail = async () => {
       const url = window.location.href;
 
-      // Check if this is a valid sign-in link
       if (!checkIsEmailSignInLink(url)) {
-        setStatus("error");
-        setErrorMessage("This link is invalid or has expired.");
+        if (!cancelled) {
+          setStatus("error");
+          setErrorMessage("This link is invalid or has expired.");
+        }
         return;
       }
 
-      // Try to complete sign-in (will succeed if email is in localStorage)
       const success = await completeEmailLinkSignIn(url);
+      if (cancelled) return;
 
       if (success) {
         setStatus("success");
-        // Redirect to home after brief delay
-        setTimeout(() => {
-          router.push("/live");
+        redirectTimer = setTimeout(() => {
+          window.location.assign("/live");
         }, 1500);
       } else {
-        // Need to ask for email
         setStatus("needsEmail");
       }
     };
 
-    verifyEmail();
-  }, [checkIsEmailSignInLink, completeEmailLinkSignIn, router]);
+    void verifyEmail();
+
+    return () => {
+      cancelled = true;
+      if (redirectTimer) clearTimeout(redirectTimer);
+    };
+  }, [checkIsEmailSignInLink, completeEmailLinkSignIn]);
 
   const onSubmit = async (data: FormVals) => {
     // Store email and retry
@@ -62,7 +67,7 @@ export default function VerifyEmailPage() {
     if (success) {
       setStatus("success");
       setTimeout(() => {
-        router.push("/live");
+        window.location.assign("/live");
       }, 1500);
     } else {
       setStatus("error");
@@ -128,7 +133,7 @@ export default function VerifyEmailPage() {
           </div>
           <h3 className="text-xl font-semibold">Verification failed</h3>
           <p className="text-muted-foreground">{errorMessage}</p>
-          <Button onClick={() => router.push("/auth/signin")}>
+          <Button onClick={() => window.location.assign("/auth/signin")}>
             Back to login
           </Button>
         </div>

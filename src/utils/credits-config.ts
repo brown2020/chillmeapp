@@ -2,8 +2,16 @@ export const DEFAULT_CREDITS_PURCHASE_AMOUNT_CENTS = 500;
 
 type EnvRecord = Record<string, string | undefined>;
 
+const usdFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+});
+
 function readEnv(key: string, env?: EnvRecord): string | undefined {
-  return env?.[key] ?? process.env[key];
+  if (env) {
+    return env[key];
+  }
+  return process.env[key];
 }
 
 export function getCreditsPerPurchase(env?: EnvRecord): number {
@@ -30,8 +38,5 @@ export function isStripeConfigured(env?: EnvRecord): boolean {
 }
 
 export function formatUsdFromCents(cents: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(cents / 100);
+  return usdFormatter.format(cents / 100);
 }

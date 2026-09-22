@@ -1,6 +1,6 @@
 import { type NextRequest } from "next/server";
 import { WebhookReceiver } from "livekit-server-sdk";
-import { updateMeeting } from "@/backend/services/meeting";
+import { updateMeeting } from "@/backend/services/meeting-admin";
 import { uploadRecordingToStorage } from "@/backend/services/storage";
 import {
   extractEgressDownloadUrl,
@@ -11,6 +11,11 @@ const receiver = new WebhookReceiver(
   process.env.LIVEKIT_API_KEY!,
   process.env.LIVEKIT_API_SECRET!,
 );
+
+async function verifyLiveKitWebhookSignature(body: string, authHeader: string) {
+  // LiveKit HMAC signature verification (timing-safe inside SDK)
+  return receiver.receive(body, authHeader);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,7 +29,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const event = await receiver.receive(body, authHeader);
+    const event = await verifyLiveKitWebhookSignature(body, authHeader);
 
     switch (event.event) {
       case "room_finished": {

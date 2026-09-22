@@ -10,7 +10,7 @@ import {
 } from "livekit-server-sdk";
 import { v4 as uuidv4 } from "uuid";
 import { generateUniqueRoomCode } from "@/utils/roomCodeGenerator";
-import { getMeetingInfo } from "@/backend/services/meeting";
+import { getMeetingInfoInternal } from "@/backend/services/meeting-admin";
 import {
   requireServerUser,
   UnauthorizedError,
@@ -58,7 +58,7 @@ async function resolveParticipant(
   displayName?: string,
   roomPassword?: string,
 ): Promise<{ identity: string; name: string; isHost: boolean }> {
-  const roomInfo = await getMeetingInfo(roomName);
+  const roomInfo = await getMeetingInfoInternal(roomName);
   if (!roomInfo) {
     throw new Error("Meeting not found");
   }

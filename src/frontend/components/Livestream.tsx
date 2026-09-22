@@ -57,11 +57,11 @@ export default function Livestream() {
               gridTemplateColumns: `repeat(${calcColumns()}, minmax(0, 1fr))`,
             }}
           >
-            {meetingPeers.map((peer, index) => {
+            {meetingPeers.map((peer) => {
               if (peer) {
                 return (
                   <MeetingMemberStream
-                    key={peer.id || index}
+                    key={peer.id}
                     height={calcHeight()}
                     peer={peer}
                     totalPeers={peers.length}

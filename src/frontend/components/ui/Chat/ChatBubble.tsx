@@ -1,31 +1,15 @@
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { type VariantProps } from "class-variance-authority";
+import {
+  chatBubbleVariant,
+  chatBubbleMessageVariants,
+} from "./chat-bubble-variants";
 import { cn } from "@/utils/classUtils";
 import { Avatar, AvatarImage, AvatarFallback } from "../Avatar";
 import MessageLoading from "./MessageLoading";
 import { Button, ButtonProps } from "../Button";
 
 // ChatBubble
-const chatBubbleVariant = cva(
-  "flex gap-2 max-w-[60%] items-end relative group",
-  {
-    variants: {
-      variant: {
-        received: "self-start",
-        sent: "self-end flex-row-reverse",
-      },
-      layout: {
-        default: "",
-        ai: "max-w-full w-full items-center",
-      },
-    },
-    defaultVariants: {
-      variant: "received",
-      layout: "default",
-    },
-  },
-);
-
 interface ChatBubbleProps
   extends
     React.HTMLAttributes<HTMLDivElement>,
@@ -73,24 +57,6 @@ const ChatBubbleAvatar: React.FC<ChatBubbleAvatarProps> = ({
 );
 
 // ChatBubbleMessage
-const chatBubbleMessageVariants = cva("py-2 px-3", {
-  variants: {
-    variant: {
-      received:
-        "bg-secondary text-secondary-foreground rounded-r-lg rounded-tl-lg",
-      sent: "bg-primary text-primary-foreground rounded-l-lg rounded-tr-lg",
-    },
-    layout: {
-      default: "",
-      ai: "border-t w-full rounded-none bg-transparent",
-    },
-  },
-  defaultVariants: {
-    variant: "received",
-    layout: "default",
-  },
-});
-
 interface ChatBubbleMessageProps
   extends
     React.HTMLAttributes<HTMLDivElement>,
@@ -195,8 +161,6 @@ export {
   ChatBubbleAvatar,
   ChatBubbleMessage,
   ChatBubbleTimestamp,
-  chatBubbleVariant,
-  chatBubbleMessageVariants,
   ChatBubbleAction,
   ChatBubbleActionWrapper,
 };
