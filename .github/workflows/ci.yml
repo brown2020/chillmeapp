@@ -7,7 +7,7 @@ on:
     branches: [dev, main]
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -23,20 +23,6 @@ jobs:
       NEXT_PUBLIC_LIVEKIT_URL: wss://chillmeapp-3ql6lsn7.livekit.cloud
       NEXT_PUBLIC_STRIPE_PRODUCT_NAME: chillme_demo_credits
       NEXT_PUBLIC_CREDITS_PER_IMAGE: "5"
-      LIVEKIT_URL: wss://chillmeapp-3ql6lsn7.livekit.cloud
-      LIVEKIT_API_KEY: ${{ secrets.LIVEKIT_API_KEY }}
-      LIVEKIT_API_SECRET: ${{ secrets.LIVEKIT_API_SECRET }}
-      FIREBASE_TYPE: ${{ secrets.FIREBASE_TYPE }}
-      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-      FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
-      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-      FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
-      FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
-      FIREBASE_AUTH_URI: https://accounts.google.com/o/oauth2/auth
-      FIREBASE_TOKEN_URI: https://oauth2.googleapis.com/token
-      FIREBASE_AUTH_PROVIDER_X509_CERT_URL: https://www.googleapis.com/oauth2/v1/certs
-      FIREBASE_CLIENT_CERTS_URL: ${{ secrets.FIREBASE_CLIENT_CERTS_URL }}
-      FIREBASE_UNIVERSE_DOMAIN: googleapis.com
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

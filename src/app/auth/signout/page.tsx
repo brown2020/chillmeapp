@@ -9,9 +9,20 @@ const Signout = () => {
   useEffect(() => {
     let cancelled = false;
     const performLogout = async () => {
-      await setLoggedOutState();
-      if (!cancelled) {
-        window.location.assign("/auth/signin");
+      try {
+        await Promise.race([
+          setLoggedOutState(),
+          new Promise((resolve) => setTimeout(resolve, 5000)),
+        ]);
+      } catch (error) {
+        console.warn(
+          "[auth] sign-out:",
+          error instanceof Error ? error.message : "unknown",
+        );
+      } finally {
+        if (!cancelled) {
+          window.location.replace("/auth/signin");
+        }
       }
     };
     void performLogout();

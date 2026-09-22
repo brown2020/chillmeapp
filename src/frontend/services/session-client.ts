@@ -1,5 +1,19 @@
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit = {},
+  timeoutMs = 8000,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function syncSessionCookie(idToken: string): Promise<void> {
-  const response = await fetch("/api/auth/session", {
+  const response = await fetchWithTimeout("/api/auth/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ idToken }),
@@ -12,8 +26,15 @@ export async function syncSessionCookie(idToken: string): Promise<void> {
 }
 
 export async function clearSessionCookie(): Promise<void> {
-  await fetch("/api/auth/session", {
-    method: "DELETE",
-    credentials: "same-origin",
-  });
+  try {
+    await fetchWithTimeout("/api/auth/session", {
+      method: "DELETE",
+      credentials: "same-origin",
+    });
+  } catch (error) {
+    console.warn(
+      "[auth] session-clear:",
+      error instanceof Error ? error.name : "unknown",
+    );
+  }
 }
