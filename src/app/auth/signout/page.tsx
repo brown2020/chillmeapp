@@ -13,10 +13,8 @@ const Signout = () => {
 
     const performLogout = async () => {
       try {
-        await Promise.race([
-          setLoggedOutState(),
-          new Promise((resolve) => setTimeout(resolve, 5000)),
-        ]);
+        await setLoggedOutState();
+        await new Promise((resolve) => setTimeout(resolve, 300));
       } catch (error) {
         console.warn(
           "[auth] sign-out:",

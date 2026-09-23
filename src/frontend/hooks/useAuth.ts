@@ -44,15 +44,16 @@ export const useAuth = () => {
 
   const checkAuthState = () => {
     const unsubscribe = handleAuth((authUser) => {
-      void (async () => {
-        if (authUser?.uid) {
-          await setLoggedInState(authUser);
-          return;
-        }
+      if (authUser?.uid) {
+        setLoggedInState(authUser).catch((error) => {
+          logAuthFailure("set-logged-in-state", error);
+          clearAuthDetails();
+        });
+        return;
+      }
 
-        clearAuthDetails();
-        setIsAuthenticating(false);
-      })();
+      clearAuthDetails();
+      setIsAuthenticating(false);
     });
     return unsubscribe;
   };
@@ -60,7 +61,6 @@ export const useAuth = () => {
   const setLoggedOutState = async () => {
     await clearSessionCookie();
     await signOut();
-    clearAuthDetails();
   };
 
   const setLoggedInState = async (authUser: User) => {
