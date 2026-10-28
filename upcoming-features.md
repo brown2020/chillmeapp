@@ -1,5 +1,5 @@
 # upcoming-features.md
 
-This document has been consolidated into [`spec.md`](spec.md).
+This list now lives in [`roadmap.md`](roadmap.md).
 
-See **Section 3: Product roadmap** for current priorities and acceptance criteria.
+Shipped behavior is in [`spec.md`](spec.md).
