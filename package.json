@@ -74,6 +74,9 @@
     "sharp": "0.35.4",
     "gaxios": {
       "uuid": "11.1.1"
+    },
+    "jwks-rsa": {
+      "jose": "5.10.0"
     }
   },
   "lint-staged": {
