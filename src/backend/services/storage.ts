@@ -1,41 +1,64 @@
+import { Transform } from "node:stream";
 import axios from "axios";
-import stream from "stream";
 import { adminBucket } from "@/backend/lib/firebase";
-import { v4 } from "uuid";
+import { isSafeRecordingPath } from "@/utils/recording-paths";
+import { assertSafeDownloadUrl } from "@/utils/safe-remote-url";
+
+const MAX_RECORDING_BYTES = 1024 * 1024 * 1024;
+const DOWNLOAD_TIMEOUT_MS = 120_000;
 
 async function uploadRecordingToStorage(
   fileUrl: string,
-  destinationFolder: string,
+  storagePath: string,
 ): Promise<string> {
+  if (!isSafeRecordingPath(storagePath)) {
+    throw new Error("Invalid recording path");
+  }
+
+  await assertSafeDownloadUrl(fileUrl);
+
   const response = await axios({
     url: fileUrl,
     method: "GET",
     responseType: "stream",
+    maxRedirects: 0,
+    timeout: DOWNLOAD_TIMEOUT_MS,
+    maxContentLength: MAX_RECORDING_BYTES,
+    maxBodyLength: MAX_RECORDING_BYTES,
   });
 
-  const passThroughStream = new stream.PassThrough();
-  response.data.pipe(passThroughStream);
+  const declaredLength = Number(response.headers["content-length"]);
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_RECORDING_BYTES) {
+    response.data.destroy();
+    throw new Error("Recording exceeds size limit");
+  }
 
-  const filename = `${v4()}.mp4`;
-  const storagePath = `${destinationFolder}${filename}`;
   const file = adminBucket.file(storagePath);
-
-  const contentType = response.headers["content-type"];
+  let received = 0;
+  const limiter = new Transform({
+    transform(chunk, _encoding, callback) {
+      received += chunk.length;
+      if (received > MAX_RECORDING_BYTES) {
+        callback(new Error("Recording exceeds size limit"));
+        return;
+      }
+      callback(null, chunk);
+    },
+  });
 
   await new Promise<void>((resolve, reject) => {
     const uploadStream = file.createWriteStream({
       metadata: {
-        contentType:
-          typeof contentType === "string" ? contentType : "video/mp4",
-        contentDisposition: `attachment; filename="${filename}"`,
+        contentType: "video/mp4",
+        contentDisposition: `attachment; filename="${storagePath.split("/").pop()}"`,
       },
     });
 
-    passThroughStream.pipe(uploadStream);
-
+    response.data.pipe(limiter).pipe(uploadStream);
     uploadStream.on("finish", () => resolve());
     uploadStream.on("error", reject);
-    passThroughStream.on("error", reject);
+    limiter.on("error", reject);
+    response.data.on("error", reject);
   });
 
   return storagePath;

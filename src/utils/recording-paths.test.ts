@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildRecordingObjectPath,
   extractEgressDownloadUrl,
   getRecordingDestinationFolder,
+  isSafeRecordingPath,
+  roomIdFromRecordingPath,
 } from "./recording-paths";
 
 describe("recording-paths", () => {
@@ -34,5 +37,24 @@ describe("recording-paths", () => {
         filename: "recordings/room/file.mp4",
       }),
     ).toBeNull();
+    expect(
+      extractEgressDownloadUrl({
+        location: "http://example.com/recording.mp4",
+      }),
+    ).toBeNull();
+  });
+
+  it("builds a stable object path and rejects traversal", () => {
+    expect(buildRecordingObjectPath("abcd-efgh-ijkl-mnop", "EG_123")).toBe(
+      "recordings/abcd-efgh-ijkl-mnop/EG_123.mp4",
+    );
+    expect(buildRecordingObjectPath("../etc", "EG_123")).toBeNull();
+    expect(
+      isSafeRecordingPath("recordings/abcd-efgh-ijkl-mnop/EG_123.mp4"),
+    ).toBe(true);
+    expect(isSafeRecordingPath("recordings/../secret.mp4")).toBe(false);
+    expect(
+      roomIdFromRecordingPath("recordings/abcd-efgh-ijkl-mnop/EG_123.mp4"),
+    ).toBe("abcd-efgh-ijkl-mnop");
   });
 });

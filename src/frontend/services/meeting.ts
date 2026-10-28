@@ -1,22 +1,6 @@
-import { db, storage } from "@/frontend/lib/firebase";
-import { Meeting, MeetingSnapShot } from "@/types/entities";
-import {
-  addDoc,
-  getDocs,
-  query,
-  collection,
-  where,
-  orderBy,
-} from "firebase/firestore";
-import { getDownloadURL, ref as storageRef } from "firebase/storage";
-
-const saveMeeting = async (uid: string, payload: Meeting) => {
-  const result = await addDoc(collection(db, "meeting_sessions"), {
-    ...payload,
-    broadcaster: uid,
-  });
-  return result;
-};
+import { db } from "@/frontend/lib/firebase";
+import { MeetingSnapShot } from "@/types/entities";
+import { getDocs, query, collection, where, orderBy } from "firebase/firestore";
 
 const listUserMeetings = async (uid: string) => {
   const q = query(
@@ -27,17 +11,19 @@ const listUserMeetings = async (uid: string) => {
   const querySnapshot = await getDocs(q);
   const results = querySnapshot.docs
     .map((doc) => {
-      const data = doc.data() as MeetingSnapShot;
-      if (typeof data?.session_duration === "number") return data;
+      const raw = {
+        ...doc.data(),
+      } as MeetingSnapShot & {
+        password_hash?: string;
+        password_protected?: boolean;
+      };
+      if (typeof raw.session_duration !== "number") return;
+      delete raw.password_hash;
+      delete raw.password_protected;
+      return raw;
     })
     .filter(Boolean);
   return results as MeetingSnapShot[];
 };
 
-const fetchRecording = async (storagePath: string) => {
-  const pathReference = storageRef(storage, storagePath);
-  const file = await getDownloadURL(pathReference);
-  return file;
-};
-
-export { saveMeeting, listUserMeetings, fetchRecording };
+export { listUserMeetings };
