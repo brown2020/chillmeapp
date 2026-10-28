@@ -101,10 +101,13 @@ Names match `.env.example` and code (`NEXT_PUBLIC_FIREBASE_*` use the compacted 
 | `AUTH_SESSION_COOKIE_NAME` | Optional server session cookie name override | Optional |
 | `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key | Stripe Dashboard |
 | `STRIPE_SECRET_KEY` | Stripe secret key | Stripe Dashboard |
+| `STRIPE_WEBHOOK_SECRET` | Optional Stripe webhook signing secret. In-browser checkout still grants credits when this is unset. `POST /api/webhook/stripe` returns 503 and does not grant credits until it is set | Stripe Dashboard → Webhooks |
 | `NEXT_PUBLIC_STRIPE_PRODUCT_NAME` | Stripe product/price lookup name | Stripe product config |
 | `NEXT_PUBLIC_CREDITS_PER_IMAGE` | Credits packaging helper used by CI/config | You |
 
-Point LiveKit webhooks at `/api/webhook/livekit` on your deployed base URL.
+Point LiveKit webhooks at `/api/webhook/livekit` and, when using Stripe, payment webhooks at `/api/webhook/stripe` on your deployed base URL.
+
+Past meetings need the composite Firestore index in `firestore.indexes.json`. Deploy indexes with `firebase deploy --only firestore:indexes`. This repo does not deploy Firebase rules or indexes.
 
 ## Scripts
 

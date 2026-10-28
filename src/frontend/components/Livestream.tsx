@@ -74,7 +74,7 @@ export default function Livestream() {
         </div>
       </div>
       {showChatWidget && (
-        <div className="hidden lg:block lg:col-span-3">
+        <div className="col-span-12 lg:col-span-3">
           <MeetingChatWidget />
         </div>
       )}

@@ -10,10 +10,14 @@ const PastMeetings = () => {
   const authStore = useAuthStore();
   const [meetingsData, setMeetingsData] = useState<MeetingSnapShot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const userId = authStore.user?.uid;
-    if (!userId) return;
+    if (!userId) {
+      setIsLoading(false);
+      return;
+    }
 
     let isMounted = true;
 
@@ -22,6 +26,15 @@ const PastMeetings = () => {
         const data = await listUserMeetings(userId);
         if (isMounted) {
           setMeetingsData(data);
+          setError(null);
+        }
+      } catch (loadError) {
+        if (isMounted) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Unable to load meetings.",
+          );
         }
       } finally {
         if (isMounted) {
@@ -36,6 +49,16 @@ const PastMeetings = () => {
       isMounted = false;
     };
   }, [authStore.user?.uid]);
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <p role="alert" className="text-destructive">
+          {error}
+        </p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
