@@ -11,8 +11,64 @@ export const PUBLIC_ROUTES = [
 
 export const PUBLIC_API_ROUTE_PREFIXES = [
   "/api/webhook/livekit",
+  "/api/webhook/stripe",
   "/api/auth/session",
 ] as const;
+
+export function isSameOriginRequest(
+  originHeader: string | null,
+  expectedOrigin: string,
+): boolean {
+  if (!originHeader || !expectedOrigin) return false;
+  try {
+    return new URL(originHeader).origin === new URL(expectedOrigin).origin;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Accept only same-origin relative paths. Rejects protocol-relative URLs and
+ * backslash variants that the URL parser treats as `https://host`.
+ */
+export function safeInternalPath(
+  candidate: string | null,
+  fallback: string,
+  baseOrigin = "https://chill.me",
+): string {
+  if (!candidate) return fallback;
+  const trimmed = candidate.trim();
+  if (
+    !trimmed.startsWith("/") ||
+    trimmed.startsWith("//") ||
+    trimmed.includes("\\") ||
+    trimmed.includes("://") ||
+    trimmed.includes("\0")
+  ) {
+    return fallback;
+  }
+
+  let base: URL;
+  try {
+    base = new URL(baseOrigin);
+  } catch {
+    return fallback;
+  }
+
+  let resolved: URL;
+  try {
+    resolved = new URL(trimmed, base);
+  } catch {
+    return fallback;
+  }
+
+  if (resolved.origin !== base.origin) return fallback;
+  if (resolved.pathname.startsWith("//") || resolved.pathname.includes("\\")) {
+    return fallback;
+  }
+
+  return `${resolved.pathname}${resolved.search}${resolved.hash}`;
+}
 
 export function getSessionCookieName(): string {
   return (
@@ -65,8 +121,13 @@ export function isProtectedRoute(pathname: string): boolean {
 
 export function buildSignInUrl(requestUrl: string, callbackPath: string): URL {
   const signInUrl = new URL("/auth/signin", requestUrl);
-  if (callbackPath && callbackPath !== "/auth/signin") {
-    signInUrl.searchParams.set("callbackUrl", callbackPath);
+  const safeCallback = safeInternalPath(
+    callbackPath,
+    "/live",
+    signInUrl.origin,
+  );
+  if (safeCallback !== "/auth/signin") {
+    signInUrl.searchParams.set("callbackUrl", safeCallback);
   }
   return signInUrl;
 }

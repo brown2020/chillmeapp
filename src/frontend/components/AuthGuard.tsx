@@ -10,21 +10,10 @@ import {
   isGuestJoinRoute,
   isPublicRoute,
   normalizePathname,
+  safeInternalPath,
 } from "@/utils/auth-routes";
 
 const AUTH_TIMEOUT_MS = 5000;
-
-function safeInternalPath(candidate: string | null, fallback: string): string {
-  if (
-    candidate &&
-    candidate.startsWith("/") &&
-    !candidate.startsWith("//") &&
-    !candidate.includes("://")
-  ) {
-    return candidate;
-  }
-  return fallback;
-}
 
 const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
   children,
@@ -68,7 +57,11 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
     if (isAuthenticating) return;
 
     if (user?.uid && isAuth && routePath !== "/auth/signout") {
-      const next = safeInternalPath(searchParams.get("callbackUrl"), "/live");
+      const next = safeInternalPath(
+        searchParams.get("callbackUrl"),
+        "/live",
+        window.location.origin,
+      );
       window.location.replace(next);
       return;
     }

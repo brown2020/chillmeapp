@@ -33,6 +33,13 @@ export async function createSessionCookie(idToken: string): Promise<string> {
   });
 }
 
+export async function revokeSessionCookie(
+  sessionCookie: string,
+): Promise<void> {
+  const decoded = await adminAuth.verifySessionCookie(sessionCookie);
+  await adminAuth.revokeRefreshTokens(decoded.uid);
+}
+
 export async function verifySessionCookieValue(
   sessionCookie: string,
 ): Promise<{ uid: string } | null> {

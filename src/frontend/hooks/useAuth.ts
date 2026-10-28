@@ -32,13 +32,8 @@ function logAuthFailure(context: string, err: unknown) {
 }
 
 export const useAuth = () => {
-  const {
-    setAuthDetails,
-    isAuthenticating,
-    user,
-    setIsAuthenticating,
-    clearAuthDetails,
-  } = useAuthStore();
+  const { setAuthDetails, isAuthenticating, user, clearAuthDetails } =
+    useAuthStore();
   const isLogged = Boolean(user?.uid);
   const { toast } = useToast();
 
@@ -52,8 +47,10 @@ export const useAuth = () => {
         return;
       }
 
-      clearAuthDetails();
-      setIsAuthenticating(false);
+      void (async () => {
+        await clearSessionCookie();
+        clearAuthDetails();
+      })();
     });
     return unsubscribe;
   };
@@ -69,6 +66,14 @@ export const useAuth = () => {
       await syncSessionCookie(idToken);
     } catch (error) {
       logAuthFailure("session-sync", error);
+      await clearSessionCookie();
+      try {
+        await signOut();
+      } catch (signOutError) {
+        logAuthFailure("session-sync-sign-out", signOutError);
+      }
+      clearAuthDetails();
+      return;
     }
 
     setAuthDetails({
