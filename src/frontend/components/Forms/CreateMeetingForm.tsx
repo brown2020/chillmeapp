@@ -3,7 +3,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 // Note: useCallback is still used for handleSubmit and toggleMediaTrack
 import { createRoom } from "@/frontend/services/broadcasting";
-import { saveMeetingSession } from "@/backend/services/meeting";
 import { useRouter } from "next/navigation";
 import { Button, Switch, PasswordInput } from "@chill-ui";
 import { Mic, MicOff, Video, VideoOff } from "lucide-react";
@@ -105,14 +104,17 @@ const CreateMeetingForm: React.FC = () => {
       setError(undefined);
 
       const normalizedMeetingPassword = meetingPassword.trim();
-      if (passwordProtect && normalizedMeetingPassword.length < 4) {
-        setError("Meeting password must be at least 4 characters.");
+      if (passwordProtect && normalizedMeetingPassword.length < 8) {
+        setError("Meeting password must be at least 8 characters.");
         return;
       }
 
       setIsLoading(true);
 
-      const roomResponse = await createRoom(shouldRecord);
+      const roomResponse = await createRoom(
+        shouldRecord,
+        passwordProtect ? normalizedMeetingPassword : undefined,
+      );
       if (!roomResponse.room || roomResponse.error) {
         setError(`Problem creating room: ${roomResponse.error}`);
         setIsLoading(false);
@@ -123,24 +125,6 @@ const CreateMeetingForm: React.FC = () => {
 
       if (!roomId) {
         setError("Problem creating room: Room ID is undefined.");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        await saveMeetingSession({
-          id: roomResponse.room.id,
-          name: roomResponse.room.name,
-          created_at: roomResponse.room.created_at,
-          recordingEnabled: shouldRecord,
-          password: passwordProtect ? normalizedMeetingPassword : undefined,
-        });
-      } catch (saveError) {
-        const message =
-          saveError instanceof Error
-            ? saveError.message
-            : "Failed to save meeting details.";
-        setError(message);
         setIsLoading(false);
         return;
       }
@@ -235,7 +219,7 @@ const CreateMeetingForm: React.FC = () => {
             </label>
             <PasswordInput
               id="meeting-password"
-              placeholder="Meeting password (min. 4 characters)"
+              placeholder="Meeting password (min. 8 characters)"
               value={meetingPassword}
               onChange={(event) => setMeetingPassword(event.target.value)}
               autoComplete="new-password"

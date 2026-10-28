@@ -8,14 +8,24 @@ import {
   AccessToken,
   VideoGrant,
 } from "livekit-server-sdk";
+import { headers } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
 import { generateUniqueRoomCode } from "@/utils/roomCodeGenerator";
-import { getMeetingInfoInternal } from "@/backend/services/meeting-admin";
+import {
+  getMeetingInfoInternal,
+  saveMeetingSessionForHost,
+} from "@/backend/services/meeting-admin";
 import {
   requireServerUser,
   UnauthorizedError,
 } from "@/backend/services/server-auth";
-import { assertMeetingPasswordAccess } from "@/utils/meeting-password";
+import {
+  assertMeetingPasswordAccess,
+  MeetingPasswordError,
+  normalizeMeetingPassword,
+} from "@/utils/meeting-password";
+import { assertWithinRateLimit } from "@/utils/rate-limit";
+import { HOST_PARTICIPANT_ROLE } from "@/utils/meeting-host";
 
 const livekitHost = process.env.LIVEKIT_URL!;
 const apiKey = process.env.LIVEKIT_API_KEY!;
@@ -87,11 +97,41 @@ async function resolveParticipant(
   }
 }
 
+const JOIN_RATE_WINDOW_MS = 15 * 60 * 1000;
+
+async function assertJoinRateLimit(roomName: string): Promise<void> {
+  const headerStore = await headers();
+  const forwarded = headerStore.get("x-forwarded-for");
+  const ip =
+    forwarded?.split(",")[0]?.trim() ||
+    headerStore.get("x-real-ip") ||
+    "unknown";
+  assertWithinRateLimit(`meeting-join:${ip}`, 60, JOIN_RATE_WINDOW_MS);
+  assertWithinRateLimit(
+    `meeting-join:${ip}:${roomName}`,
+    20,
+    JOIN_RATE_WINDOW_MS,
+  );
+}
+
+async function deleteLiveKitRoom(roomName: string): Promise<void> {
+  try {
+    await roomService.deleteRoom(roomName);
+  } catch (deleteError) {
+    console.error("Failed to delete LiveKit room:", deleteError);
+  }
+}
+
 export async function createRoom(
   shouldRecord: boolean,
+  password?: string,
 ): Promise<CreateRoomResult> {
   try {
-    await requireServerUser();
+    const { uid } = await requireServerUser();
+
+    if (password?.trim()) {
+      normalizeMeetingPassword(password);
+    }
 
     const roomName = generateUniqueRoomCode();
 
@@ -99,7 +139,10 @@ export async function createRoom(
       name: roomName,
       emptyTimeout: 10 * 60, // 10 minutes
       maxParticipants: 20,
-      metadata: JSON.stringify({ recording: shouldRecord }),
+      metadata: JSON.stringify({
+        recording: shouldRecord,
+        hostIdentity: uid,
+      }),
     });
 
     if (shouldRecord) {
@@ -107,12 +150,29 @@ export async function createRoom(
         await startRoomRecording(room.name);
       } catch (recordingError) {
         console.error("Failed to start room recording:", recordingError);
-        await roomService.deleteRoom(room.name);
+        await deleteLiveKitRoom(room.name);
         return {
           error:
             "Could not start session recording. Check LiveKit egress configuration and try again.",
         };
       }
+    }
+
+    try {
+      await saveMeetingSessionForHost(uid, {
+        id: room.name,
+        name: room.name,
+        created_at: new Date().toISOString(),
+        recordingEnabled: shouldRecord,
+        password,
+      });
+    } catch (saveError) {
+      console.error("Failed to save meeting session:", saveError);
+      await deleteLiveKitRoom(room.name);
+      if (saveError instanceof MeetingPasswordError) {
+        return { error: saveError.message };
+      }
+      return { error: "Failed to save meeting details." };
     }
 
     return {
@@ -142,7 +202,9 @@ export async function getAccessToken(
   roomPassword?: string,
 ) {
   try {
-    if (!roomName) throw new Error("Missing roomName");
+    if (!roomName || roomName.length > 64) throw new Error("Missing roomName");
+
+    await assertJoinRateLimit(roomName);
 
     const participant = await resolveParticipant(
       roomName,
@@ -154,6 +216,9 @@ export async function getAccessToken(
       identity: participant.identity,
       name: participant.name,
       ttl: "2h",
+      attributes: {
+        role: participant.isHost ? HOST_PARTICIPANT_ROLE : "guest",
+      },
     });
 
     const grant: VideoGrant = {
@@ -178,7 +243,11 @@ export async function getAccessToken(
 
 export async function deleteRoom(roomName: string) {
   try {
-    await requireServerUser();
+    const { uid } = await requireServerUser();
+    const meeting = await getMeetingInfoInternal(roomName);
+    if (!meeting || meeting.broadcaster !== uid) {
+      throw new Error("Only the host can end this meeting.");
+    }
     await roomService.deleteRoom(roomName);
   } catch (err: unknown) {
     const error = err as Error;

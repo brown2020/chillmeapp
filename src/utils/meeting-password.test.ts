@@ -16,8 +16,12 @@ describe("meeting-password", () => {
     expect(verifyMeetingPassword("wrong-password", hash)).toBe(false);
   });
 
-  it("rejects passwords that are too short", () => {
+  it("rejects passwords shorter than 8 characters", () => {
     expect(() => normalizeMeetingPassword("abc")).toThrow(MeetingPasswordError);
+    expect(() => normalizeMeetingPassword("1234567")).toThrow(
+      MeetingPasswordError,
+    );
+    expect(normalizeMeetingPassword("12345678")).toBe("12345678");
   });
 
   it("detects password-protected meetings", () => {

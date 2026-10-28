@@ -7,11 +7,17 @@ import {
   useChat,
   useConnectionState,
 } from "@livekit/components-react";
-import { RoomEvent, ConnectionState, Track } from "livekit-client";
+import {
+  RoomEvent,
+  ConnectionState,
+  Track,
+  type RemoteParticipant,
+} from "livekit-client";
+import { isMeetingHostParticipant } from "@/utils/meeting-host";
 import { useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useMeetingStore from "../zustand/useMeetingStore";
-import { getAccessToken } from "@/frontend/services/broadcasting";
+import { deleteRoom, getAccessToken } from "@/frontend/services/broadcasting";
 import { toast } from "@frontend/hooks/useToast";
 
 /**
@@ -45,11 +51,7 @@ export const useMeeting = () => {
 
   const isConnected = connectionState === ConnectionState.Connected;
 
-  // Determine if current user is host based on permissions
-  // Check if user can publish and has elevated permissions
-  const isHost =
-    (localParticipant?.permissions as { roomAdmin?: boolean } | undefined)
-      ?.roomAdmin ?? false;
+  const isHost = isMeetingHostParticipant(localParticipant, room.metadata);
   const localPeerRole = { name: isHost ? "host" : "guest" };
 
   // Find the currently speaking participant
@@ -118,21 +120,21 @@ export const useMeeting = () => {
 
   // End meeting (for hosts - disconnects everyone)
   const endMeeting = useCallback(async () => {
-    const delay = (ms: number) =>
-      new Promise((resolve) => setTimeout(resolve, ms));
+    try {
+      await deleteRoom(room.name);
+    } catch (error) {
+      console.error("Error ending meeting:", error);
+    }
 
     try {
-      // Send a data message to notify all participants
       const encoder = new TextEncoder();
       const data = encoder.encode(JSON.stringify({ type: "meeting-ended" }));
       await room.localParticipant.publishData(data, {
         reliable: true,
       });
-      // Wait briefly to allow message to be sent before disconnecting
-      await delay(500);
-      await room.disconnect();
-      router.push("/");
     } catch {
+      // The room may already be closed by deleteRoom.
+    } finally {
       await room.disconnect();
       router.push("/");
     }
@@ -175,11 +177,17 @@ export const useMeeting = () => {
       });
     };
 
-    const handleDataReceived = (payload: Uint8Array) => {
+    const handleDataReceived = (
+      payload: Uint8Array,
+      participant?: RemoteParticipant,
+    ) => {
       try {
         const decoder = new TextDecoder();
-        const data = JSON.parse(decoder.decode(payload));
-        if (data.type === "meeting-ended") {
+        const data = JSON.parse(decoder.decode(payload)) as { type?: string };
+        if (
+          data.type === "meeting-ended" &&
+          isMeetingHostParticipant(participant, room.metadata)
+        ) {
           toast({
             title: "Meeting ended",
             description: "The host has ended the meeting",
