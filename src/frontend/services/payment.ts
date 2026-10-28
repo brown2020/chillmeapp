@@ -1,8 +1,8 @@
 "use server";
 
-import Stripe from "stripe";
 import { adminDb } from "@/backend/lib/firebase";
-import { applyCreditsPurchase } from "@/backend/services/user";
+import { fulfillCreditsPayment } from "@/backend/services/credits";
+import { getStripeClient } from "@/backend/services/stripe";
 import {
   requireServerUser,
   UnauthorizedError,
@@ -13,16 +13,7 @@ import {
   getCreditsPurchaseAmountCents,
   isStripeConfigured,
 } from "@/utils/credits-config";
-
-function getStripeClient(): Stripe | null {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-
-  if (!secretKey) {
-    return null;
-  }
-
-  return new Stripe(secretKey);
-}
+import { CreditsPaymentError } from "@/utils/credits-payment";
 
 export interface CreditsCheckoutState {
   configured: boolean;
@@ -60,7 +51,7 @@ export async function getCreditsCheckoutState(): Promise<CreditsCheckoutState> {
   }
 }
 
-export async function createPaymentIntent(amount?: number) {
+export async function createPaymentIntent() {
   try {
     const { uid } = await requireServerUser();
 
@@ -80,7 +71,7 @@ export async function createPaymentIntent(amount?: number) {
       throw new Error("Stripe product name is not defined");
     }
 
-    const amountCents = amount ?? getCreditsPurchaseAmountCents();
+    const amountCents = getCreditsPurchaseAmountCents();
     const creditsToAdd = getCreditsPerPurchase();
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -124,37 +115,11 @@ export async function completeCreditsPurchase(paymentIntentId: string) {
     }
 
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-    if (paymentIntent.status !== "succeeded") {
-      throw new Error("Payment was not successful");
-    }
-
-    if (paymentIntent.metadata.userId !== uid) {
-      throw new Error("Payment does not belong to this account");
-    }
-
-    const expectedAmount = getCreditsPurchaseAmountCents();
-
-    if (paymentIntent.amount !== expectedAmount) {
-      throw new Error("Payment amount does not match the credits package");
-    }
-
-    const creditsToAdd = Number(paymentIntent.metadata.creditsToAdd);
-    const expectedCredits = getCreditsPerPurchase();
-
-    if (!Number.isFinite(creditsToAdd) || creditsToAdd !== expectedCredits) {
-      throw new Error("Invalid credits amount on payment");
-    }
-
-    const result = await applyCreditsPurchase(
-      uid,
-      paymentIntentId,
-      creditsToAdd,
-    );
+    const result = await fulfillCreditsPayment(paymentIntent, uid);
 
     return {
       credits: result.credits,
-      creditsAdded: result.alreadyProcessed ? 0 : creditsToAdd,
+      creditsAdded: result.alreadyProcessed ? 0 : getCreditsPerPurchase(),
       alreadyProcessed: result.alreadyProcessed,
     };
   } catch (error) {
@@ -162,44 +127,10 @@ export async function completeCreditsPurchase(paymentIntentId: string) {
       throw new Error("You must be signed in to complete a purchase.");
     }
 
-    console.error("Error completing credits purchase:", error);
-    throw new Error(
-      error instanceof Error ? error.message : "Failed to complete purchase",
-    );
-  }
-}
-
-export async function validatePaymentIntent(paymentIntentId: string) {
-  try {
-    await requireServerUser();
-
-    const stripe = getStripeClient();
-
-    if (!stripe) {
-      throw new Error("Stripe is not configured for this environment.");
+    console.error("Error completing credits purchase");
+    if (error instanceof CreditsPaymentError) {
+      throw new Error(error.message);
     }
-
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-    if (paymentIntent.status === "succeeded") {
-      return {
-        id: paymentIntent.id,
-        amount: paymentIntent.amount,
-        created: paymentIntent.created,
-        status: paymentIntent.status,
-        client_secret: paymentIntent.client_secret,
-        currency: paymentIntent.currency,
-        description: paymentIntent.description,
-      };
-    }
-
-    throw new Error("Payment was not successful");
-  } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      throw new Error("You must be signed in to validate a payment.");
-    }
-
-    console.error("Error validating payment intent:", error);
-    throw new Error("Failed to validate payment intent");
+    throw new Error("Failed to complete purchase");
   }
 }

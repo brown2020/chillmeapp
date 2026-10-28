@@ -1,5 +1,3 @@
-"use server";
-
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/backend/lib/firebase";
 
@@ -9,8 +7,8 @@ interface ApplyCreditsPurchaseResult {
 }
 
 export async function applyCreditsPurchase(
-  uid: string,
   paymentIntentId: string,
+  uid: string,
   creditsToAdd: number,
 ): Promise<ApplyCreditsPurchaseResult> {
   if (!Number.isFinite(creditsToAdd) || creditsToAdd <= 0) {

@@ -17,7 +17,6 @@ import { useToast } from "@frontend/hooks";
 
 interface CreditsPurchaseFormProps {
   publishableKey: string;
-  amountCents: number;
   creditsPerPurchase: number;
   amountLabel: string;
   onPurchaseComplete: (credits: number) => void;
@@ -116,7 +115,6 @@ function PaymentForm({
 
 export default function CreditsPurchaseForm({
   publishableKey,
-  amountCents,
   creditsPerPurchase,
   amountLabel,
   onPurchaseComplete,
@@ -135,7 +133,7 @@ export default function CreditsPurchaseForm({
     setLoadError(null);
 
     try {
-      const secret = await createPaymentIntent(amountCents);
+      const secret = await createPaymentIntent();
       setClientSecret(secret);
     } catch (error) {
       setClientSecret(null);
@@ -147,7 +145,7 @@ export default function CreditsPurchaseForm({
     } finally {
       setIsLoadingIntent(false);
     }
-  }, [amountCents]);
+  }, []);
 
   useEffect(() => {
     void initializeCheckout();

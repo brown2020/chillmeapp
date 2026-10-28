@@ -135,7 +135,6 @@ export default function ProfileComponent() {
             checkoutState.amountCents ? (
             <CreditsPurchaseForm
               publishableKey={checkoutState.publishableKey}
-              amountCents={checkoutState.amountCents}
               creditsPerPurchase={checkoutState.creditsPerPurchase}
               amountLabel={checkoutState.amountLabel}
               onPurchaseComplete={handlePurchaseComplete}
