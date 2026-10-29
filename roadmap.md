@@ -4,8 +4,8 @@ Punchlist after the current `dev` tree. The shipped behavior is [`spec.md`](spec
 
 ## Needs a person, not a code change
 
-- **Firestore and Storage rules.** The live Firebase project `chilldotme` is still in test mode and open until Dec 16, 2026. This repo has no rules files. Replace test mode with rules that let a user read and write only their own `users` doc and only their own `meeting_sessions`, and that do not expose `password_hash`. Do that in the Firebase console or a reviewed rules deploy. Do not leave test mode in place past that date.
-- **Node runtime vs Firebase JS SDK 13.** The SDK declares Node `>=24.12.0`. CI and local validation use Node 22, and the production build currently passes there. Confirm the Vercel Node version before that engine requirement becomes a hard failure.
+- **Deploy Firestore and Storage rules.** `firestore.rules` and `storage.rules` are committed for project `chilldotme` and covered by emulator tests. They are not deployed from CI. The live project is still test mode and open until Dec 16, 2026. Review the rules, then deploy them before that date. A host can still read `password_hash` on their own meeting document because rules cannot hide a single field.
+- **Node runtime vs Firebase JS SDK 13.** The SDK declares Node `>=24.12.0`. CI uses Node 24. Confirm the Vercel Node version is 24 before that engine requirement becomes a hard failure.
 - **Stripe webhook secret.** Set `STRIPE_WEBHOOK_SECRET` on the host and point Stripe at `POST /api/webhook/stripe` if charges should be reconciled when the browser never calls `completeCreditsPurchase`. Checkout still works without it.
 - **LiveKit egress.** Recording stays incomplete until egress is enabled for the LiveKit project. The app already starts it when the host opts in.
 

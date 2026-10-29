@@ -43,7 +43,10 @@ chillmeapp/
 │   ├── backend/             # Server auth, meetings, storage, credits
 │   ├── types/, utils/
 ├── firestore.indexes.json   # Composite index for past meetings
-├── firebase.json            # Points at that index file only
+├── firestore.rules          # Locked-down Firestore rules (not deployed by CI)
+├── storage.rules            # Locked-down Storage rules (not deployed by CI)
+├── firebase.json            # Rules, indexes, and emulator ports
+├── .firebaserc              # Default project chilldotme
 ├── .env.example             # Env var names
 ├── spec.md                  # Product spec as built
 ├── roadmap.md               # Next steps and known gaps
@@ -54,7 +57,7 @@ chillmeapp/
 
 ### Prerequisites
 
-- Node.js 22 or newer
+- Node.js 24 or newer
 - npm
 - A Firebase project with Auth, Firestore, and Storage
 - A LiveKit Cloud or self-hosted project
@@ -115,7 +118,7 @@ Names match `.env.example`. Do not commit values.
 
 Point LiveKit webhooks at `/api/webhook/livekit`. Point Stripe webhooks at `/api/webhook/stripe` when using `STRIPE_WEBHOOK_SECRET`.
 
-Past meetings use the composite index in `firestore.indexes.json` (`meeting_sessions`: `broadcaster` ascending, `created_at` descending). This repo does not deploy Firebase rules or indexes.
+Past meetings use the composite index in `firestore.indexes.json` (`meeting_sessions`: `broadcaster` ascending, `created_at` descending). `firestore.rules` and `storage.rules` default-deny and are covered by `npm run test:rules`. This repo does not deploy Firebase rules or indexes.
 
 ## Scripts
 
@@ -127,7 +130,8 @@ Past meetings use the composite index in `firestore.indexes.json` (`meeting_sess
 | `npm run lint` | ESLint |
 | `npm run eslint:fix` | ESLint with `--fix` |
 | `npm run tslint` | Typecheck with `tsc` |
-| `npm test` | Vitest |
+| `npm test` | Vitest unit tests |
+| `npm run test:rules` | Firestore and Storage rules against the emulators |
 | `npm run tunnel` | Serveo SSH tunnel for local webhooks |
 | `npm run prepare` | Install Husky hooks |
 
@@ -135,7 +139,7 @@ Past meetings use the composite index in `firestore.indexes.json` (`meeting_sess
 
 Vitest covers auth redirects, meeting passwords, host checks, join rate limits, room codes, recording paths, remote download URL checks, credit grants, and terms HTML.
 
-GitHub Actions (`.github/workflows/ci.yml`) runs on `dev`, `main`, and pull requests: `npm ci --ignore-scripts`, typecheck, test, then production build. Client `NEXT_PUBLIC_*` values are injected only for the build step. CI uses Node 22.
+GitHub Actions (`.github/workflows/ci.yml`) runs on `dev`, `main`, and pull requests: `npm ci --ignore-scripts`, typecheck, unit tests, rules emulator tests, then production build. Client `NEXT_PUBLIC_*` values are injected only for the build step. CI uses Node 24.
 
 ## Deployment
 

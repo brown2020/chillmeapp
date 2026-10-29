@@ -87,7 +87,7 @@ Firestore collections used by the app:
 - `users/{uid}` — credit balance.
 - `users/{uid}/payment_events/{paymentIntentId}` — idempotent credit grants.
 
-Firebase Storage holds recording objects. The repo does not contain Firestore or Storage rules. Client list queries still depend on those rules to limit who can read a meeting.
+Firebase Storage holds recording objects. `firestore.rules` and `storage.rules` are in the repo and are not deployed by CI. A signed-in user can read and, when the fields validate, write only their own `meeting_sessions` row. Profile documents and payment events are readable by the owner and writable only by the Admin SDK. A client can read `recordings/{roomId}/{file}.mp4` only when that meeting's host is them. Admin SDK writes and signed playback URLs bypass these rules.
 
 ## Operational notes
 

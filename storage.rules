@@ -1,0 +1,34 @@
+rules_version = '2';
+
+// Prototype rules for review before deploy.
+// Recording objects live at recordings/{roomId}/{file}.mp4 and are written
+// by the Admin SDK. A signed-in user may read one only when
+// meeting_sessions/{roomId}.broadcaster is their uid. Client uploads are
+// denied. Signed URLs from the Admin SDK do not use these rules.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function ownsRoom(roomId) {
+      return firestore.exists(/databases/(default)/documents/meeting_sessions/$(roomId))
+        && firestore.get(/databases/(default)/documents/meeting_sessions/$(roomId)).data.broadcaster
+          == request.auth.uid;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    match /recordings/{roomId}/{fileName} {
+      allow read: if isSignedIn()
+        && roomId.matches('^[a-z0-9-]{1,64}$')
+        && fileName.matches('^[A-Za-z0-9_-]{1,128}\\.mp4$')
+        && ownsRoom(roomId);
+
+      allow write: if false;
+    }
+  }
+}

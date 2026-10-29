@@ -16,11 +16,16 @@ jobs:
         with:
           node-version: "24"
           cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
       # Install without lifecycle scripts and without CI secrets in scope
       # (react-doctor build-pipeline-secret-boundary).
       - run: npm ci --ignore-scripts
       - run: npm run tslint
       - run: npm test
+      - run: npm run test:rules
       # Expose client config only for the production build step.
       - name: Production build
         env:

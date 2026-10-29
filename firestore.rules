@@ -1,0 +1,143 @@
+rules_version = '2';
+
+// Prototype rules for review before deploy. They match the client SDK
+// behavior in this repo: a signed-in host may read their own
+// meeting_sessions, and may write only a validated copy of that same
+// document. Profile credits and payment_events are Admin SDK only.
+//
+// meeting_sessions/{meetingId}
+//   id: string, equal to the document id, immutable
+//   name: string, 1-64
+//   broadcaster: string, auth uid, immutable
+//   created_at: ISO-8601 string, immutable
+//   recording_info: optional map
+//     enabled, is_recording_ready: bool
+//     recording_storage_path: optional recordings/{meetingId}/{file}.mp4
+//   password_protected: optional bool
+//   password_hash: optional scrypt salt/hash string
+//   session_duration: optional int seconds, 0 through 14 days
+//
+// users/{uid}
+//   Read by the owner only. Client writes are denied so credits cannot
+//   be changed outside the Admin SDK.
+//
+// users/{uid}/payment_events/{paymentId}
+//   Read by the owner only. Client writes are denied so a browser cannot
+//   mark a PaymentIntent processed or forge a grant.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidMeeting(meetingId) {
+      let data = request.resource.data;
+      return meetingId.matches('^[a-z0-9-]{1,64}$')
+        && data.keys().hasOnly([
+          'id',
+          'name',
+          'broadcaster',
+          'created_at',
+          'recording_info',
+          'password_protected',
+          'password_hash',
+          'session_duration'
+        ])
+        && data.keys().hasAll(['id', 'name', 'broadcaster', 'created_at'])
+        && data.id == meetingId
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 64
+        && data.broadcaster == request.auth.uid
+        && data.broadcaster.size() > 0
+        && data.broadcaster.size() <= 128
+        && data.created_at is string
+        && data.created_at.matches('^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?Z$')
+        && validRecording(meetingId)
+        && validPasswordFields()
+        && validDuration();
+    }
+
+    function validRecording(meetingId) {
+      return !('recording_info' in request.resource.data)
+        || (
+          request.resource.data.recording_info is map
+          && request.resource.data.recording_info.keys().hasOnly([
+            'enabled',
+            'is_recording_ready',
+            'recording_storage_path'
+          ])
+          && request.resource.data.recording_info.keys().hasAll([
+            'enabled',
+            'is_recording_ready'
+          ])
+          && request.resource.data.recording_info.enabled is bool
+          && request.resource.data.recording_info.is_recording_ready is bool
+          && validRecordingPath(meetingId)
+        );
+    }
+
+    function validRecordingPath(meetingId) {
+      return !('recording_storage_path' in request.resource.data.recording_info)
+        || (
+          request.resource.data.recording_info.recording_storage_path is string
+          && request.resource.data.recording_info.recording_storage_path.matches(
+            '^recordings/' + meetingId + '/[A-Za-z0-9_-]{1,128}\\.mp4$'
+          )
+        );
+    }
+
+    function validPasswordFields() {
+      let data = request.resource.data;
+      return (!('password_protected' in data) || data.password_protected is bool)
+        && (
+          !('password_hash' in data)
+          || (
+            data.password_hash is string
+            && data.password_hash.matches('^scrypt:[0-9a-f]{32}:[0-9a-f]{128}$')
+          )
+        );
+    }
+
+    function validDuration() {
+      return !('session_duration' in request.resource.data)
+        || (
+          request.resource.data.session_duration is int
+          && request.resource.data.session_duration >= 0
+          && request.resource.data.session_duration <= 1209600
+        );
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /meeting_sessions/{meetingId} {
+      allow read: if isSignedIn()
+        && resource.data.broadcaster == request.auth.uid;
+
+      allow create: if isSignedIn() && isValidMeeting(meetingId);
+
+      allow update: if isSignedIn()
+        && resource.data.broadcaster == request.auth.uid
+        && request.resource.data.broadcaster == resource.data.broadcaster
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.created_at == resource.data.created_at
+        && isValidMeeting(meetingId);
+
+      allow delete: if isSignedIn()
+        && resource.data.broadcaster == request.auth.uid;
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create, update, delete: if false;
+
+      match /payment_events/{paymentId} {
+        allow read: if isSignedIn() && request.auth.uid == userId;
+        allow create, update, delete: if false;
+      }
+    }
+  }
+}
