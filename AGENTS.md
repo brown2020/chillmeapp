@@ -96,7 +96,7 @@ LiveKit Cloud
 | In-meeting chat | Working | `MeetingChatWidget.tsx`, LiveKit `useChat` |
 | Copy meeting URL | Working | `MeetingControls.tsx` |
 | Past meetings list | Working (completed sessions only) | `PastMeetings.tsx`, `listUserMeetings` filters `session_duration` |
-| Recording toggle UI | Partial | Toggle sets room metadata only; egress not started; `recording_info` not saved on create |
+| Recording toggle UI | Hidden unless egress storage is configured | `CreateMeetingForm.tsx`, `egress-config.ts`, `POST /api/recording` |
 | Recording playback | Partial | Webhook + `MeetingCard` + `/recording`; depends on egress + Firebase Storage path |
 | Stripe credits | Working | `ProfileComponent.tsx`, `CreditsPurchaseForm.tsx`, `payment.ts` |
 | Profile | Minimal | Name, email, uid only |
