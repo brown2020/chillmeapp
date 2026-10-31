@@ -7,7 +7,7 @@ Real-time video meetings. Sign in, create a LiveKit room, share the link, chat, 
 - **Create a meeting** at `/live` with camera preview, optional recording, and an optional password (at least 8 characters).
 - **Join** at `/live/[roomId]`. Guests enter a display name. Signed-in users join with their account. Protected rooms ask for the password first.
 - **In-call controls** for camera, microphone, chat, copy link, guest leave, and host end. Ending the meeting deletes the LiveKit room.
-- **Recording** when the host opts in. LiveKit egress is uploaded to Firebase Storage. The host watches it at `/recording` with a short-lived signed URL.
+- **Recording** when the host opts in and LiveKit egress storage is configured. Otherwise the create-meeting form explains that recording is not enabled, and the meeting still starts. LiveKit egress is uploaded to Firebase Storage. The host watches it at `/recording` with a short-lived signed URL.
 - **Past meetings** at `/past-meetings` for completed sessions (those with a stored duration).
 - **Auth** with email/password, Google, password reset, and email-link sign-in. The server session cookie is httpOnly.
 - **Profile credits** at `/profile`. Stripe checkout is optional. A fixed credit package is charged server-side.
@@ -90,6 +90,10 @@ Names match `.env.example`. Do not commit values.
 | `LIVEKIT_API_SECRET` | LiveKit server API secret |
 | `LIVEKIT_URL` | LiveKit WebSocket URL used on the server |
 | `NEXT_PUBLIC_LIVEKIT_URL` | LiveKit URL used in the browser |
+| `LIVEKIT_EGRESS_ENABLED` | Optional. `false` hides recording. `true` allows it only with a storage destination below. Unset defers to that destination. |
+| `LIVEKIT_EGRESS_S3_ACCESS_KEY`, `LIVEKIT_EGRESS_S3_SECRET`, `LIVEKIT_EGRESS_S3_REGION`, `LIVEKIT_EGRESS_S3_BUCKET` | Optional S3 output for LiveKit egress. `LIVEKIT_EGRESS_S3_ENDPOINT` is optional. |
+| `LIVEKIT_EGRESS_GCP_CREDENTIALS`, `LIVEKIT_EGRESS_GCP_BUCKET` | Optional GCP output for LiveKit egress. |
+| `LIVEKIT_EGRESS_AZURE_ACCOUNT_NAME`, `LIVEKIT_EGRESS_AZURE_ACCOUNT_KEY`, `LIVEKIT_EGRESS_AZURE_CONTAINER` | Optional Azure output for LiveKit egress. |
 | `FIREBASE_TYPE` | Service-account credential type |
 | `FIREBASE_PROJECT_ID` | Admin SDK project id |
 | `FIREBASE_PRIVATE_KEY_ID` | Service-account private key id |

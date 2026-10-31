@@ -13,6 +13,7 @@ export const PUBLIC_API_ROUTE_PREFIXES = [
   "/api/webhook/livekit",
   "/api/webhook/stripe",
   "/api/auth/session",
+  "/api/recording",
 ] as const;
 
 export function isSameOriginRequest(

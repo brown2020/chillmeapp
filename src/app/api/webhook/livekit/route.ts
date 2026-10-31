@@ -5,6 +5,7 @@ import {
   updateMeeting,
 } from "@/backend/services/meeting-admin";
 import { uploadRecordingToStorage } from "@/backend/services/storage";
+import { isLiveKitEgressEnabled } from "@/utils/egress-config";
 import {
   buildRecordingObjectPath,
   extractEgressDownloadUrl,
@@ -68,6 +69,11 @@ export async function POST(request: NextRequest) {
       }
 
       case "egress_ended": {
+        // Acknowledge so LiveKit does not retry. Nothing was recorded.
+        if (!isLiveKitEgressEnabled()) {
+          break;
+        }
+
         const egress = event.egressInfo;
         if (!egress?.roomName) {
           break;

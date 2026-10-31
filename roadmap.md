@@ -7,7 +7,7 @@ Punchlist after the current `dev` tree. The shipped behavior is [`spec.md`](spec
 - **Deploy Firestore and Storage rules.** `firestore.rules` and `storage.rules` are committed for project `chilldotme` and covered by emulator tests. They are not deployed from CI. The live project is still test mode and open until Dec 16, 2026. Review the rules, then deploy them before that date. A host can still read `password_hash` on their own meeting document because rules cannot hide a single field.
 - **Node runtime vs Firebase JS SDK 13.** The SDK declares Node `>=24.12.0`. CI uses Node 24. Confirm the Vercel Node version is 24 before that engine requirement becomes a hard failure.
 - **Stripe webhook secret.** Set `STRIPE_WEBHOOK_SECRET` on the host and point Stripe at `POST /api/webhook/stripe` if charges should be reconciled when the browser never calls `completeCreditsPurchase`. Checkout still works without it.
-- **LiveKit egress.** Recording stays incomplete until egress is enabled for the LiveKit project. The app already starts it when the host opts in.
+- **LiveKit egress.** The recording control stays hidden until a storage destination is configured (`LIVEKIT_EGRESS_S3_*`, `LIVEKIT_EGRESS_GCP_*`, or `LIVEKIT_EGRESS_AZURE_*`). `LIVEKIT_EGRESS_ENABLED=false` forces it off. Meetings still start without it.
 
 ## Do not upgrade yet
 

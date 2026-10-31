@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 // Note: useCallback is still used for handleSubmit and toggleMediaTrack
 import { createRoom } from "@/frontend/services/broadcasting";
+import { RECORDING_DISABLED_MESSAGE } from "@/utils/egress-config";
 import { useRouter } from "next/navigation";
 import { Button, Switch, PasswordInput } from "@chill-ui";
 import { Mic, MicOff, Video, VideoOff } from "lucide-react";
@@ -11,7 +12,13 @@ import clsx from "clsx";
 
 type MediaType = "audio" | "video";
 
-const CreateMeetingForm: React.FC = () => {
+type CreateMeetingFormProps = {
+  recordingAvailable: boolean;
+};
+
+const CreateMeetingForm: React.FC<CreateMeetingFormProps> = ({
+  recordingAvailable,
+}) => {
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [shouldRecord, setShouldRecord] = useState<boolean>(false);
@@ -112,7 +119,7 @@ const CreateMeetingForm: React.FC = () => {
       setIsLoading(true);
 
       const roomResponse = await createRoom(
-        shouldRecord,
+        recordingAvailable && shouldRecord,
         passwordProtect ? normalizedMeetingPassword : undefined,
       );
       if (!roomResponse.room || roomResponse.error) {
@@ -131,7 +138,14 @@ const CreateMeetingForm: React.FC = () => {
 
       router.push(`/live/${roomId}`);
     },
-    [router, shouldRecord, isLoading, passwordProtect, meetingPassword],
+    [
+      router,
+      recordingAvailable,
+      shouldRecord,
+      isLoading,
+      passwordProtect,
+      meetingPassword,
+    ],
   );
 
   return (
@@ -194,14 +208,20 @@ const CreateMeetingForm: React.FC = () => {
         onSubmit={handleSubmit}
         className="w-full flex gap-y-3 flex-col mt-4 max-w-4xl"
       >
-        <div className="flex justify-between">
-          <label htmlFor="record-session"> Record Session</label>
-          <Switch
-            id="record-session"
-            checked={shouldRecord}
-            onCheckedChange={(checked) => setShouldRecord(checked)}
-          />
-        </div>
+        {recordingAvailable ? (
+          <div className="flex justify-between">
+            <label htmlFor="record-session">Record Session</label>
+            <Switch
+              id="record-session"
+              checked={shouldRecord}
+              onCheckedChange={(checked) => setShouldRecord(checked)}
+            />
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground" role="status">
+            {RECORDING_DISABLED_MESSAGE}
+          </p>
+        )}
 
         <div className="flex justify-between">
           <label htmlFor="password-protect">Password protect meeting</label>

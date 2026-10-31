@@ -8,7 +8,7 @@ Chill.me is a low-friction video meeting app. A host signs in, starts a room, an
 
 ## Stack
 
-Next.js 16 App Router, React 19, TypeScript 6, Tailwind CSS 4, Zustand, LiveKit, Firebase Auth / Firestore / Storage, firebase-admin 14, Stripe, video.js 8. npm is the package manager. CI runs on Node 22.
+Next.js 16 App Router, React 19, TypeScript 6, Tailwind CSS 4, Zustand, LiveKit, Firebase Auth / Firestore / Storage, firebase-admin 14, Stripe, video.js 8. npm is the package manager. CI runs on Node 24.
 
 There is no Next.js middleware file. `src/proxy.ts` checks the Firebase session cookie on protected routes and API routes.
 
@@ -42,7 +42,7 @@ Creating a meeting:
 
 1. The host is signed in.
 2. Optional password is at least 8 characters. It is stored as a scrypt hash.
-3. The server creates a LiveKit room (maximum 20 participants) and, when requested, starts room-composite egress.
+3. The server creates a LiveKit room (maximum 20 participants). When recording is available and the host requests it, the server starts room-composite egress. When recording is unavailable, the room is still created.
 4. The server creates `meeting_sessions/{roomId}`. The room id is four lowercase letter groups, such as `abc-def-ghi-jkl`.
 5. If egress or the Firestore write fails, the LiveKit room is deleted and the host sees an error.
 
@@ -64,7 +64,10 @@ When LiveKit reports `room_finished`, the webhook stores `session_duration`. Unk
 
 ## Recordings
 
-- Egress must be enabled in the LiveKit project.
+- Recording is available when a complete LiveKit egress storage destination is set (`LIVEKIT_EGRESS_S3_*`, `LIVEKIT_EGRESS_GCP_*`, or `LIVEKIT_EGRESS_AZURE_*`), unless `LIVEKIT_EGRESS_ENABLED=false`. `LIVEKIT_EGRESS_ENABLED=true` opts in and still needs that destination, because LiveKit rejects egress that has no file output.
+- `GET /api/recording` returns `{ enabled: true | false }`. When recording is unavailable, `POST /api/recording` returns JSON `501` with `Recording isn't enabled in this demo`. A bad request returns JSON `400`. Neither response throws.
+- The create-meeting form hides the recording switch and shows that note when recording is unavailable. Sign-in, rooms, and audio/video keep working. A recording request on an unconfigured server is ignored instead of failing the meeting.
+- Egress must be enabled in the LiveKit project before a host can record.
 - The webhook accepts only https download URLs, rejects private and metadata addresses, does not follow redirects, and caps size and time.
 - The file is stored at `recordings/{roomId}/{egressId}.mp4`.
 - Playback is a server action. The caller must be the meeting host, and the requested path must match the path saved on that meeting. The signed URL lasts four hours and is not put in the query string.

@@ -46,6 +46,7 @@ describe("auth-routes", () => {
     expect(isPublicApiRoute("/api/webhook/livekit")).toBe(true);
     expect(isPublicApiRoute("/api/webhook/stripe")).toBe(true);
     expect(isPublicApiRoute("/api/auth/session")).toBe(true);
+    expect(isPublicApiRoute("/api/recording")).toBe(true);
     expect(isPublicApiRoute("/api/other")).toBe(false);
   });
 

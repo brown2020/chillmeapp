@@ -1,11 +1,14 @@
 "use server";
 
 import {
+  AccessToken,
+  AzureBlobUpload,
   EgressClient,
   EncodedFileOutput,
   EncodedFileType,
+  GCPUpload,
   RoomServiceClient,
-  AccessToken,
+  S3Upload,
   VideoGrant,
 } from "livekit-server-sdk";
 import { headers } from "next/headers";
@@ -26,13 +29,16 @@ import {
 } from "@/utils/meeting-password";
 import { assertWithinRateLimit } from "@/utils/rate-limit";
 import { HOST_PARTICIPANT_ROLE } from "@/utils/meeting-host";
+import {
+  getEgressStorageOutput,
+  isLiveKitEgressEnabled,
+} from "@/utils/egress-config";
 
 const livekitHost = process.env.LIVEKIT_URL!;
 const apiKey = process.env.LIVEKIT_API_KEY!;
 const apiSecret = process.env.LIVEKIT_API_SECRET!;
 
 const roomService = new RoomServiceClient(livekitHost, apiKey, apiSecret);
-const egressClient = new EgressClient(livekitHost, apiKey, apiSecret);
 
 export interface CreateRoomResult {
   room?: {
@@ -52,12 +58,63 @@ function normalizeDisplayName(displayName?: string): string {
   return trimmed;
 }
 
-async function startRoomRecording(roomName: string): Promise<void> {
-  const fileOutput = {
-    fileType: EncodedFileType.MP4,
-    filepath: `recordings/${roomName}/${Date.now()}.mp4`,
-  } as EncodedFileOutput;
+function buildEncodedFileOutput(roomName: string): EncodedFileOutput | null {
+  const storage = getEgressStorageOutput();
+  if (!storage) return null;
 
+  const filepath = `recordings/${roomName}/${Date.now()}.mp4`;
+  if (storage.provider === "s3") {
+    return new EncodedFileOutput({
+      fileType: EncodedFileType.MP4,
+      filepath,
+      output: {
+        case: "s3",
+        value: new S3Upload({
+          accessKey: storage.accessKey,
+          secret: storage.secret,
+          region: storage.region,
+          bucket: storage.bucket,
+          endpoint: storage.endpoint,
+        }),
+      },
+    });
+  }
+
+  if (storage.provider === "gcp") {
+    return new EncodedFileOutput({
+      fileType: EncodedFileType.MP4,
+      filepath,
+      output: {
+        case: "gcp",
+        value: new GCPUpload({
+          credentials: storage.credentials,
+          bucket: storage.bucket,
+        }),
+      },
+    });
+  }
+
+  return new EncodedFileOutput({
+    fileType: EncodedFileType.MP4,
+    filepath,
+    output: {
+      case: "azure",
+      value: new AzureBlobUpload({
+        accountName: storage.accountName,
+        accountKey: storage.accountKey,
+        containerName: storage.containerName,
+      }),
+    },
+  });
+}
+
+async function startRoomRecording(roomName: string): Promise<void> {
+  const fileOutput = buildEncodedFileOutput(roomName);
+  if (!fileOutput) {
+    throw new Error("Recording storage is not configured");
+  }
+
+  const egressClient = new EgressClient(livekitHost, apiKey, apiSecret);
   await egressClient.startRoomCompositeEgress(roomName, fileOutput, {
     layout: "grid",
   });
@@ -134,18 +191,21 @@ export async function createRoom(
     }
 
     const roomName = generateUniqueRoomCode();
+    // Ignore a recording request when egress has no storage output. Calling
+    // LiveKit without `output` returns 400 and used to fail the whole meeting.
+    const recordSession = shouldRecord && isLiveKitEgressEnabled();
 
     const room = await roomService.createRoom({
       name: roomName,
       emptyTimeout: 10 * 60, // 10 minutes
       maxParticipants: 20,
       metadata: JSON.stringify({
-        recording: shouldRecord,
+        recording: recordSession,
         hostIdentity: uid,
       }),
     });
 
-    if (shouldRecord) {
+    if (recordSession) {
       try {
         await startRoomRecording(room.name);
       } catch (recordingError) {
@@ -163,7 +223,7 @@ export async function createRoom(
         id: room.name,
         name: room.name,
         created_at: new Date().toISOString(),
-        recordingEnabled: shouldRecord,
+        recordingEnabled: recordSession,
         password,
       });
     } catch (saveError) {
