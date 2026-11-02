@@ -11,8 +11,8 @@ Punchlist after the current `dev` tree. The shipped behavior is [`spec.md`](spec
 
 ## Do not upgrade yet
 
-- **TypeScript 7.** `typescript-eslint` still requires the TypeScript 6 compiler API. TypeScript 7 has no JavaScript API, so ESLint cannot load it. Stay on TypeScript 6.
-- **video.js 10.** The `video.js` 10 package is a different player and does not accept `videojs()`. Playback stays on video.js 8 until someone rewrites `VideoPlayer`.
+- **TypeScript 7.** Latest is 7.0.2. `@typescript-eslint` 8.72.1 still requires `typescript >=4.8.4 <6.1.0`. TypeScript 7 has no JavaScript API, so ESLint cannot load it. Stay on TypeScript 6.0.3.
+- **video.js 10.** Latest is 10.2.0, and there is no 9.x release. The `video.js` 10 package is a different player and does not accept `videojs()`. Playback stays on video.js 8.24.2 until someone rewrites `VideoPlayer`.
 
 ## Product
 
@@ -33,3 +33,4 @@ Punchlist after the current `dev` tree. The shipped behavior is [`spec.md`](spec
 - Past meetings only include rows that already have `session_duration`.
 - In-call chat is on screen at small widths. It is not a separate touch drawer, and control hit targets have not been measured.
 - There is no browser or end-to-end test runner. Unit tests cover the security-sensitive helpers and room ids.
+- `npm audit` still reports moderate issues in `firebase-tools` and the ESLint `minimatch` / `glob` tree. Clearing them means downgrading `firebase-tools` to 3.18.2 or ESLint to 4, which removes the current toolchain. The security overrides (`sharp` 0.35.5, `@grpc/grpc-js` 1.14.6, `gaxios` `uuid` 11.1.1, `jwks-rsa` `jose` 5.10.0) stay in place.
