@@ -12,7 +12,7 @@ Punchlist after the current `dev` tree. The shipped behavior is [`spec.md`](spec
 ## Do not upgrade yet
 
 - **TypeScript 7.** Latest is 7.0.2. `@typescript-eslint` 8.72.1 still requires `typescript >=4.8.4 <6.1.0`. TypeScript 7 has no JavaScript API, so ESLint cannot load it. Stay on TypeScript 6.0.3.
-- **video.js 10.** Latest is 10.2.0, and there is no 9.x release. The `video.js` 10 package is a different player and does not accept `videojs()`. Playback stays on video.js 8.24.2 until someone rewrites `VideoPlayer`.
+- **video.js 10.** Latest is 10.3.0, and there is no 9.x release. The `video.js` 10 package throws on the Video.js 8 `videojs()` API. Playback stays on video.js 8.24.2 until someone rewrites `VideoPlayer`.
 
 ## Product
 
