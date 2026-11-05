@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { ThemeProvider } from "@/frontend/providers/ThemeProvider";
 import Layout from "@/frontend/layout";
 import AuthGuard from "@/frontend/components/AuthGuard";
+import { AnalyticsRouteListener } from "@/frontend/components/AnalyticsRouteListener";
 import "../frontend/styles/globals.css";
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Suspense fallback={null}>
+            <AnalyticsRouteListener />
             <AuthGuard>
               <Layout>{children}</Layout>
             </AuthGuard>
