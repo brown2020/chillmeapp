@@ -50,7 +50,11 @@ export async function startFirebaseAnalytics(
   const supported = await sdk.isSupported();
   if (!supported) return null;
 
-  sdk.initializeAnalytics(firebaseApp, manualPageViews);
+  try {
+    sdk.initializeAnalytics(firebaseApp, manualPageViews);
+  } catch {
+    // Already created on a previous attempt. getAnalytics returns that instance.
+  }
   return sdk.getAnalytics(firebaseApp);
 }
 
@@ -73,10 +77,69 @@ function ensureAnalytics(): Promise<Analytics | null> {
       isSupported,
       initializeAnalytics,
       getAnalytics,
-    }).catch(() => null);
+    }).then(
+      (analytics) => analytics,
+      () => {
+        analyticsPromise = null;
+        return null;
+      },
+    );
   }
 
   return analyticsPromise;
+}
+
+type PageViewEvent = {
+  page_path: string;
+  page_location: string;
+  page_title: string;
+};
+
+const pendingViews: PageViewEvent[] = [];
+let lastSentKey: string | null = null;
+let flushing = false;
+
+function pageViewKey(view: PageViewEvent): string {
+  return `${view.page_path}\0${view.page_location}`;
+}
+
+function enqueuePageView(view: PageViewEvent) {
+  const key = pageViewKey(view);
+  const tail = pendingViews[pendingViews.length - 1];
+  if (tail && pageViewKey(tail) === key) return;
+  if (pendingViews.length === 0 && lastSentKey === key) return;
+  pendingViews.push(view);
+}
+
+async function flushPageViews(): Promise<void> {
+  if (flushing) return;
+  flushing = true;
+  let ready = false;
+  try {
+    let analytics = await ensureAnalytics();
+    if (!analytics && analyticsPromise === null) {
+      analytics = await ensureAnalytics();
+    }
+    if (!analytics) return;
+    ready = true;
+    while (pendingViews.length > 0) {
+      const view = pendingViews.shift();
+      if (!view) break;
+      const key = pageViewKey(view);
+      if (key === lastSentKey) continue;
+      lastSentKey = key;
+      try {
+        logEvent(analytics, "page_view", view);
+      } catch {
+        // A thrown log must not reject the route effect or retry the same view.
+      }
+    }
+  } finally {
+    flushing = false;
+    if (ready && pendingViews.length > 0) {
+      void flushPageViews().catch(() => undefined);
+    }
+  }
 }
 
 export function trackPageView(pathname: string, search: string): () => void {
@@ -84,21 +147,14 @@ export function trackPageView(pathname: string, search: string): () => void {
     return () => undefined;
   }
 
-  const pageView = {
+  enqueuePageView({
     page_path: analyticsPagePath(pathname, search),
     page_location: window.location.href,
     page_title: document.title,
-  };
-  let cancelled = false;
+  });
+  void flushPageViews().catch(() => undefined);
 
-  void ensureAnalytics()
-    .then((analytics) => {
-      if (cancelled || !analytics) return;
-      logEvent(analytics, "page_view", pageView);
-    })
-    .catch(() => undefined);
-
-  return () => {
-    cancelled = true;
-  };
+  // Cleanup must not drop this view. Firebase injects the tag during
+  // initializeAnalytics, before logEvent, so cancelling here skips the collect.
+  return () => undefined;
 }
