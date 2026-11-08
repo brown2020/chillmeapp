@@ -42,9 +42,7 @@ const AuthGuard: React.FC<{ children: React.ReactNode | null }> = ({
         clearTimeout(timeoutRef.current);
       }
     };
-    // Mount-once: checkAuthState closes over stable store setters.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [checkAuthState, setIsAuthenticating]);
 
   useEffect(() => {
     if (!isAuthenticating && timeoutRef.current) {

@@ -26,9 +26,7 @@ const Signout = () => {
     };
 
     void performLogout();
-    // Run once — setLoggedOutState identity changes each render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setLoggedOutState]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center">

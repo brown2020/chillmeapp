@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { auth } from "@/frontend/lib/firebase";
 import { signInWithPopup, GoogleAuthProvider, User } from "firebase/auth";
 import { useAuthStore } from "@frontend/zustand/useAuthStore";
@@ -37,7 +38,32 @@ export const useAuth = () => {
   const isLogged = Boolean(user?.uid);
   const { toast } = useToast();
 
-  const checkAuthState = () => {
+  const setLoggedInState = useCallback(
+    async (authUser: User) => {
+      try {
+        const idToken = await authUser.getIdToken();
+        await syncSessionCookie(idToken);
+      } catch (error) {
+        logAuthFailure("session-sync", error);
+        await clearSessionCookie();
+        try {
+          await signOut();
+        } catch (signOutError) {
+          logAuthFailure("session-sync-sign-out", signOutError);
+        }
+        clearAuthDetails();
+        return;
+      }
+
+      setAuthDetails({
+        user: authUser,
+        isAuthenticating: false,
+      });
+    },
+    [clearAuthDetails, setAuthDetails],
+  );
+
+  const checkAuthState = useCallback(() => {
     const unsubscribe = handleAuth((authUser) => {
       if (authUser?.uid) {
         setLoggedInState(authUser).catch((error) => {
@@ -53,34 +79,12 @@ export const useAuth = () => {
       })();
     });
     return unsubscribe;
-  };
+  }, [clearAuthDetails, setLoggedInState]);
 
-  const setLoggedOutState = async () => {
+  const setLoggedOutState = useCallback(async () => {
     await clearSessionCookie();
     await signOut();
-  };
-
-  const setLoggedInState = async (authUser: User) => {
-    try {
-      const idToken = await authUser.getIdToken();
-      await syncSessionCookie(idToken);
-    } catch (error) {
-      logAuthFailure("session-sync", error);
-      await clearSessionCookie();
-      try {
-        await signOut();
-      } catch (signOutError) {
-        logAuthFailure("session-sync-sign-out", signOutError);
-      }
-      clearAuthDetails();
-      return;
-    }
-
-    setAuthDetails({
-      user: authUser,
-      isAuthenticating: false,
-    });
-  };
+  }, []);
 
   const signinWithGoogle = async () => {
     try {
