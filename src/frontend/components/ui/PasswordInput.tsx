@@ -8,11 +8,29 @@ export interface PasswordInputProps extends Omit<
 > {
   error?: boolean;
   errorMessage?: string;
+  hint?: string;
 }
 
 const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ className, error, errorMessage, ...props }, ref) => {
+  (
+    {
+      className,
+      error,
+      errorMessage,
+      hint,
+      "aria-describedby": ariaDescribedBy,
+      ...props
+    },
+    ref,
+  ) => {
     const [showPassword, setShowPassword] = React.useState(false);
+    const hintId = React.useId();
+    const showError = Boolean(error && errorMessage);
+    const showHint = Boolean(hint) && !showError;
+    const describedBy =
+      [ariaDescribedBy, showHint ? hintId : undefined]
+        .filter(Boolean)
+        .join(" ") || undefined;
 
     const togglePasswordVisibility = () => {
       setShowPassword((prev) => !prev);
@@ -29,6 +47,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
               error && "border-red-700",
             )}
             ref={ref}
+            aria-describedby={describedBy}
             {...props}
           />
           <button
@@ -44,7 +63,12 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
             )}
           </button>
         </div>
-        {error && errorMessage && (
+        {showHint && (
+          <p id={hintId} className="mt-1.5 text-xs text-muted-foreground">
+            {hint}
+          </p>
+        )}
+        {showError && (
           <span className="text-red-500 text-sm">{errorMessage}</span>
         )}
       </div>

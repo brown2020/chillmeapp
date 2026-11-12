@@ -6,6 +6,10 @@ import { useAuth } from "@/frontend/hooks";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import AuthShell from "./AuthShell";
+import {
+  ACCOUNT_PASSWORD_REQUIREMENTS,
+  isValidAccountPassword,
+} from "@/utils/password-policy";
 
 type FormVals = {
   email: string;
@@ -61,13 +65,11 @@ const SignupForm = () => {
               aria-invalid={Boolean(errors.password)}
               {...register("password", {
                 required: "Password is required",
-                pattern: {
-                  value:
-                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                  message:
-                    "Use at least 8 characters with uppercase, lowercase, a number, and a special character",
-                },
+                validate: (value) =>
+                  isValidAccountPassword(value) ||
+                  ACCOUNT_PASSWORD_REQUIREMENTS,
               })}
+              hint={ACCOUNT_PASSWORD_REQUIREMENTS}
               errorMessage={errors.password?.message}
               error={Boolean(errors.password)}
             />
