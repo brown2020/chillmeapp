@@ -78,7 +78,7 @@ LiveKit Cloud
 **Server/client split (actual, not idealized):**
 
 - `"use server"` lives in `src/frontend/services/broadcasting.ts`, `payment.ts`, `user.ts` and `src/backend/services/*`.
-- Client Firestore writes: `src/frontend/services/meeting.ts` (`saveMeeting`, `listUserMeetings`).
+- Meeting rows are written and read with the Admin SDK: `saveMeetingSessionForHost` on create, `getPastMeetings` (`src/frontend/services/meeting.ts`, a server action) for history. No client component reads `meeting_sessions` directly.
 - Server Firestore writes: `src/backend/services/meeting.ts` (webhook-driven updates).
 - There is **no** Next.js middleware; route protection is client-side only via `AuthGuard`.
 
@@ -95,7 +95,7 @@ LiveKit Cloud
 | Host end / guest leave | Working | `useMeeting.ts` (data message + disconnect) |
 | In-meeting chat | Working | `MeetingChatWidget.tsx`, LiveKit `useChat` |
 | Copy meeting URL | Working | `MeetingControls.tsx` |
-| Past meetings list | Working (completed sessions only) | `PastMeetings.tsx`, `listUserMeetings` filters `session_duration` |
+| Past meetings list | Working (completed sessions only) | `PastMeetings.tsx`, `getPastMeetings` → `listHostPastMeetings` filters `session_duration` |
 | Recording toggle UI | Hidden unless egress storage is configured | `CreateMeetingForm.tsx`, `egress-config.ts`, `POST /api/recording` |
 | Recording playback | Partial | Webhook + `MeetingCard` + `/recording`; depends on egress + Firebase Storage path |
 | Stripe credits | Working | `ProfileComponent.tsx`, `CreditsPurchaseForm.tsx`, `payment.ts` |

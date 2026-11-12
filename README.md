@@ -122,7 +122,7 @@ Names match `.env.example`. Do not commit values.
 
 Point LiveKit webhooks at `/api/webhook/livekit`. Point Stripe webhooks at `/api/webhook/stripe` when using `STRIPE_WEBHOOK_SECRET`.
 
-Past meetings use the composite index in `firestore.indexes.json` (`meeting_sessions`: `broadcaster` ascending, `created_at` descending). `firestore.rules` and `storage.rules` default-deny and are covered by `npm run test:rules`. This repo does not deploy Firebase rules or indexes.
+Past meetings load through the `getPastMeetings` server action (Admin SDK, uid from the session cookie), so they need neither client read rules nor the composite index in `firestore.indexes.json`. `firestore.rules` and `storage.rules` default-deny and are covered by `npm run test:rules`. This repo does not deploy Firebase rules or indexes.
 
 ## Scripts
 

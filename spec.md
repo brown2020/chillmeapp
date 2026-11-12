@@ -75,9 +75,9 @@ When LiveKit reports `room_finished`, the webhook stores `session_duration`. Unk
 
 ## History and credits
 
-- `/past-meetings` lists the signed-in user's meetings that have a numeric `session_duration`, newest first. The query needs the composite index in `firestore.indexes.json`.
-- Password fields are removed from the list returned to the browser.
-- A failed history query shows an error instead of an empty list.
+- `/past-meetings` lists the signed-in user's meetings that have a numeric `session_duration`, newest first. The `getPastMeetings` server action takes the uid from the verified session cookie and reads with the Admin SDK, so it does not depend on the deployed client rules or a composite index.
+- Password fields never leave the server.
+- A user with no completed meetings sees an empty state with a link to `/live`. An expired session shows a sign-in prompt; offline or server failures show a message with a retry button.
 - Profile shows name, email, uid, and the credit balance.
 - A credit purchase uses a server-chosen amount. Fulfillment checks payment status, amount, credit count, and the signed-in user, then applies credits once per PaymentIntent.
 - The browser checkout path and the Stripe webhook share that fulfillment. Without `STRIPE_WEBHOOK_SECRET`, the webhook does not grant credits.
