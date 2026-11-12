@@ -29,6 +29,10 @@ interface MeetingSnapShot {
   };
 }
 
+type PastMeetingsResult =
+  | { status: "ok"; meetings: MeetingSnapShot[] }
+  | { status: "error"; reason: "unauthenticated" | "unavailable" };
+
 /**
  * LiveKit webhook event for room finished
  */
@@ -63,6 +67,7 @@ interface LiveKitEgressWebhook {
 export type {
   Meeting,
   MeetingSnapShot,
+  PastMeetingsResult,
   LiveKitRoomWebhook,
   LiveKitEgressWebhook,
 };

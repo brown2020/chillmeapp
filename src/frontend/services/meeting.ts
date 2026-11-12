@@ -1,29 +1,31 @@
-import { db } from "@/frontend/lib/firebase";
-import { MeetingSnapShot } from "@/types/entities";
-import { getDocs, query, collection, where, orderBy } from "firebase/firestore";
+"use server";
 
-const listUserMeetings = async (uid: string) => {
-  const q = query(
-    collection(db, "meeting_sessions"),
-    where("broadcaster", "==", uid),
-    orderBy("created_at", "desc"),
-  );
-  const querySnapshot = await getDocs(q);
-  const results = querySnapshot.docs
-    .map((doc) => {
-      const raw = {
-        ...doc.data(),
-      } as MeetingSnapShot & {
-        password_hash?: string;
-        password_protected?: boolean;
-      };
-      if (typeof raw.session_duration !== "number") return;
-      delete raw.password_hash;
-      delete raw.password_protected;
-      return raw;
-    })
-    .filter(Boolean);
-  return results as MeetingSnapShot[];
-};
+import { adminDb } from "@/backend/lib/firebase";
+import { listHostPastMeetings } from "@/backend/services/past-meetings";
+import {
+  requireServerUser,
+  UnauthorizedError,
+} from "@/backend/services/server-auth";
+import type { PastMeetingsResult } from "@/types/entities";
 
-export { listUserMeetings };
+/**
+ * Lists the signed-in host's completed meetings. The uid comes from the
+ * verified session cookie, never from the caller, so one user cannot list
+ * another user's meetings.
+ */
+export async function getPastMeetings(): Promise<PastMeetingsResult> {
+  try {
+    const { uid } = await requireServerUser();
+    const meetings = await listHostPastMeetings(adminDb, uid);
+    return { status: "ok", meetings };
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return { status: "error", reason: "unauthenticated" };
+    }
+    console.error(
+      "Failed to list past meetings:",
+      error instanceof Error ? error.message : error,
+    );
+    return { status: "error", reason: "unavailable" };
+  }
+}
